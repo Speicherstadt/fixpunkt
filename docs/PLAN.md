@@ -20,7 +20,8 @@ Das Vorbild besteht aus zwei Teilen:
 2. **Cloud** – Upload, automatische Verarbeitung in wenigen Minuten, dann im Browser:
    messen, Volumen/Massen ermitteln, mit Planung vergleichen, dokumentieren, exportieren.
 
-**Erster Nutzer:** Kumpel aus dem Bau – Gräben, Leitungen, Haufwerke, kleine Flächen.
+**Erster Nutzer:** Kumpel aus dem Bau. **Erster Anwendungsfall: Aushub von Baugruben berechnen** (per Drohne).
+Später: Leitungsgräben, Haufwerke, kleine Flächen (per iPhone + RTK-Rover).
 
 ---
 
@@ -64,91 +65,119 @@ Abgeleitet aus dem, was SDX-Cloud/PocketScan anbieten:
 ## 3. Hardware & Kosten
 
 **Realistische Einschätzung, Stand 11.11.2026.** Neuware, gute Qualität, aber nur das, was wir wirklich brauchen.
-Wichtig ist die Trennung: Was brauchen **wir zum Entwickeln** – und was braucht die **Firma des Kumpels für den Einsatz** (und hat sie teils schon)?
-Preise: Apple inkl. MwSt., Emlid und netcup netto.
 
-### 3.1 Was wir zum Entwickeln brauchen
+**Korrektur:** Die Firma des Kumpels hat **keine Drohne** und nach jetzigem Stand auch **niemanden mit Drohnenführerschein**.
+Gleichzeitig ist der erste Anwendungsfall klar: **Aushub von Baugruben berechnen.** Baugruben sind breit und offen – dafür ist die Drohne das richtige Werkzeug.
+Deshalb gilt jetzt: **Drohne zuerst.** iPhone + RTK-Rover (Sodex-Prinzip) kommt erst später für schmale Leitungsgräben.
+
+Preise: Apple und DJI inkl. MwSt., Emlid und netcup netto.
+
+### 3.1 Was man wofür braucht
+
+| Gerät | Was es macht | Wann wir es brauchen |
+|---|---|---|
+| **Drohne mit RTK** | Fliegt die Baugrube automatisch ab, macht hunderte Fotos mit cm-genauer Position. Daraus rechnet die Cloud ein 3D-Modell. Zwei Flüge (vorher/nachher) → Differenz = **Aushub in m³**. | **Sofort** – Hauptwerkzeug für Baugruben, Haufwerke, Flächen |
+| **RTK-Rover** (z. B. Emlid Reach RX2) | Liefert die Position eines Punkts auf 1–2 cm. (a) Am iPhone: verortet den LiDAR-Scan. (b) Auf dem Lotstab: misst Einzelpunkte und Passpunkte ein. | **Später** – für schmale Leitungsgräben (iPhone-Scan) oder als Kontrolle der Drohnengenauigkeit. Mit einer RTK-Drohne nicht nötig. |
+| **iPhone Pro (LiDAR)** | Scannt aus nächster Nähe, auch in schmalen Gräben mit Verbau | **Später** – zusammen mit dem Rover |
+
+### 3.2 Drohne – Empfehlung DJI Matrice 4E
+
+| | |
+|---|---|
+| **Modell** | **DJI Matrice 4E (EU-Version, Klasse C2)** |
+| **Preis** | ca. **4.500–4.900 €** inkl. Fernsteuerung DJI RC Plus 2 |
+| **Warum** | **RTK eingebaut** → mit SAPOS cm-genau, **keine Passpunkte, kein Rover** nötig. 4/3-Zoll-Kamera mit **mechanischem Verschluss**. Mapping-Missionen in **DJI Pilot 2**: Baugrube auf der Karte einzeichnen, Drohne fliegt das Raster selbst ab (inkl. Schrägaufnahmen für Böschungen). Eine Baugrube: ca. 5–15 Minuten. |
+| **Warum nicht günstiger** | Eine Kameradrohne ohne RTK (z. B. DJI Mavic 4 Pro, ~2.000 €) bräuchte bei jedem Flug 5–10 eingemessene Passpunkte → zusätzlich Rover (~2.000 €) und jedes Mal 15–30 Minuten mehr Arbeit. Kaum billiger, deutlich umständlicher. |
+
+**Einmalige Kosten Drohne (Firma des Kumpels):**
+
+| Posten | ca. |
+|---|---|
+| DJI Matrice 4E inkl. RC Plus 2 | 4.500–4.900 € |
+| 2 Ersatzakkus | ~400 € |
+| DJI Care Enterprise (optional, Bruchschutz) | ~400–600 € |
+| Kompetenznachweis **A1/A3** (Online-Test beim LBA) + **A2** (Zusatzprüfung, wegen Klasse C2 und Flügen in bebautem Gebiet) | ~50–300 € |
+| Betreiberregistrierung (e-ID beim LBA) | ~20–50 € |
+| **Summe einmalig** | **ca. 5.400–6.300 €** |
+| Drohnen-Haftpflicht gewerblich (Pflicht) | ~100–300 €/Jahr |
+
+**Führerschein:** Ein Mitarbeiter der Firma (z. B. der Kumpel selbst) macht A1/A3 online und danach A2. Aufwand: ein paar Abende Lernen plus Prüfung.
+**Betreiber** (Registrierung, Versicherung, Haftung) ist, wer die Drohne kauft und fliegt – empfohlen: die Firma, nicht wir.
+
+### 3.3 Was wir zum Entwickeln brauchen
 
 | Gerät | Empfehlung | Preis (ca.) | Notiz |
 |---|---|---|---|
-| **Mac** | **Mac mini M5 Pro, 24 GB, 512 GB** (Basis-M5-Pro) | **1.999 €** | Xcode läuft damit flüssig. Mehr RAM braucht es nicht, weil die Photogrammetrie auf dem Server läuft. **Entfällt, wenn die iOS-Entwicklerin schon einen aktuellen Mac (Apple Silicon) hat.** |
-| **iPhone mit LiDAR** | **iPhone 18 Pro, 256 GB** | **1.449 €** | Ein Testgerät reicht. **Entfällt, wenn schon ein iPhone Pro ab 12 Pro vorhanden ist** (alle Pro-Modelle haben LiDAR). |
-| **RTK-Rover** | **Emlid Reach RX2** | **1.999 € netto** | Brauchen wir zum Entwickeln und Testen. Geht danach an den Kumpel oder er kauft einen eigenen. |
-| Halterung Phone + Rover | Selbst gedruckt (Bambu P2S) | ~5 € Filament | Statt Emlid Scanning Handle (199 €) |
-| Passpunkte (GCP-Marken) | 10–20 Zielmarken / Vermessungsnägel | ~50 € | Für das Testfeld und den Genauigkeitsnachweis |
-| Lotstab | Einfacher Vermessungs-Lotstab mit Handyhalter | ~50–300 € | Nur zum Einmessen der Passpunkte; Emlid Survey Pole 299 € netto |
-| Apple Developer Program | – | **99 $/Jahr** | Pflicht für TestFlight |
-| Korrekturdaten | SAPOS HEPS | **0 €** | In Baden-Württemberg kostenlos |
+| **Server** | netcup (s. 3.4) | ab 49 €/Monat | Reicht für die komplette Drohnen-Pipeline |
+| **Testdaten** | Öffentliche Datensätze von OpenDroneMap | 0 € | Bis der erste eigene Flug da ist |
+| Mac | Mac mini M5 Pro, 24 GB, 512 GB | 1.999 € | **Erst für die iOS-App (später).** Entfällt, wenn die iOS-Entwicklerin schon einen aktuellen Mac hat. |
+| iPhone mit LiDAR | iPhone 18 Pro, 256 GB | 1.449 € | **Erst für die iOS-App (später).** Entfällt, wenn ein iPhone Pro ab 12 Pro vorhanden ist. |
+| RTK-Rover | Emlid Reach RX2 | 1.999 € netto | **Vorerst nicht.** Erst für den iPhone-Scan oder zur Genauigkeitskontrolle. |
+| Halterung Phone + Rover | Selbst gedruckt (Bambu P2S) | ~5 € Filament | Statt Emlid Scanning Handle (229 $ netto) |
+| Apple Developer Program | – | 99 $/Jahr | Erst für TestFlight (später) |
+| Korrekturdaten | SAPOS HEPS | 0 € | In Baden-Württemberg kostenlos – auch die Drohne nutzt das |
 
-**Einmalig für uns: ca. 2.100–5.600 €** – je nachdem, ob Mac und iPhone schon da sind.
-(Alles neu: 1.999 + 1.449 + ~1.999 + ~100–350 ≈ 5.550–5.800 €. Mac und iPhone vorhanden: nur Rover + Kleinkram ≈ 2.100–2.350 €.)
+**Einmalig für uns in der ersten Phase: ca. 0 €** – nur Serverkosten.
+Kommt später die iPhone-Variante dazu: Rover + Kleinkram ≈ 2.100–2.350 €, ggf. Mac und iPhone (alles neu ≈ 5.550–5.800 €).
 
-### 3.2 Drohne – liegt bei der Firma des Kumpels
+#### Zum Vergleich: Was Sodex beim PocketScan verbaut
 
-Laut Kumpel hat seine Firma **schon Drohnen** und **einen Mitarbeiter mit Drohnenführerschein**. Dann gilt:
+Laut [Datenblatt](https://makineo.de/fileadmin/Home/Produkte/Baudokumentation/SDX-POCKETSCAN/2026/WEB_Makineo_SDX-PocketScan_Datenblatt.pdf) **kein Emlid**, sondern ein flaches Modul (95 × 64 × 12,5 mm, 115 g, „gl“-Logo), magnetisch hinten am iPhone, Antenne am Schwanenhals.
+1408 Kanäle und die Signalliste (inkl. Galileo E6, BDS B3I, NavIC) deuten auf einen **Unicore-UM980/UM981-Chip** hin.
+Genauigkeit identisch zum Reach RX2 (H 7 mm + 1 ppm, V 14 mm + 1 ppm), BLE 5.3, RTCM3, IP67, 10 h Akku.
+→ Für die Entwicklung bleibt der Reach RX2 die sichere Wahl (gute iOS-/NMEA-Anbindung, NTRIP eingebaut). Eine leichtere Unicore-Lösung im Sodex-Stil ist später möglich, weil die App Standard-NMEA liest.
+Makineo bietet eine **14-tägige Teststellung** an – gut für einen direkten Vergleich.
 
-- **Wir brauchen keinen eigenen Drohnenführerschein.** Der Führerschein (A1/A3 bzw. A2) gehört zum Piloten, die Registrierung (e-ID) und die Versicherung zum Betreiber – das ist dann die Firma.
-- **Wir kaufen keine Drohne.** Fixpunkt verarbeitet nur die Fotos, die deren Pilot fliegt.
-- **Haftung und Versicherung** für die Flüge liegen beim Betreiber, nicht bei uns.
-
-Zu klären: **Welche Drohne hat die Firma?**
-
-| Fall | Was es bedeutet |
-|---|---|
-| Drohne mit RTK (z. B. Matrice 4E, Mavic 3 Enterprise RTK) | Ideal: cm-genau ohne viele Passpunkte |
-| Gute Drohne ohne RTK (z. B. Mavic 3 / Air 3) | Funktioniert auch – dann mit 5–10 eingemessenen Passpunkten pro Baustelle (Rover haben wir ja) |
-| Nur Consumer-Mini | Für Doku okay, für Massenermittlung eher grenzwertig |
-
-Falls die Firma später eine Mapping-Drohne kauft: **DJI Matrice 4E (EU) ca. 4.900 €** + 2 Ersatzakkus à ~199 € – das ist dann deren Anschaffung, nicht unsere.
-
-### 3.3 Server – netcup, stufenweise
+### 3.4 Server – netcup, stufenweise
 
 | Phase | Tarif | Preis netto | Warum |
 |---|---|---|---|
-| **Entwicklung** (ca. erste 3 Monate) | **netcup RS 2000 G12.5** – 8 dedizierte vCores, 16 GB RAM, 256 GB NVMe | **40,70 €/Monat** | Reicht für Web, API, Datenbank, Handscans und Test-Drohnenflüge mit einigen hundert Fotos |
-| **Echtbetrieb** (Kumpel fliegt regelmäßig) | **netcup RS 4000 G12.5** – 12 vCores, **32 GB RAM**, 512 GB NVMe | **77,83 €/Monat** | Typische Baustellenflüge (einige hundert bis gut tausend Fotos) laufen flüssig |
+| **Entwicklung** (ca. erste 3 Monate) | **netcup RS 2000 G12.5** – 8 dedizierte vCores, 16 GB RAM, 256 GB NVMe | **40,70 €/Monat** | Reicht für Web, API, Datenbank und Test-Drohnenflüge mit einigen hundert Fotos |
+| **Echtbetrieb** (Kumpel fliegt regelmäßig) | **netcup RS 4000 G12.5** – 12 vCores, **32 GB RAM**, 512 GB NVMe | **77,83 €/Monat** | Typische Baugrubenflüge (einige hundert bis gut tausend Fotos) laufen flüssig |
 | Speicher (Archiv) | netcup Storage Space B (500 GB) → später C (1 TB) | 8 → 15 €/Monat | Rohdaten und alte Projekte |
 | Upgrade nur bei Bedarf | netcup RS 8000 G12.5 – 64 GB RAM | 148,42 €/Monat | Erst bei regelmäßig sehr großen Flügen oder mehreren Kunden |
 | Domain | Subdomain von teufel-it.de | 0 € | z. B. `fixpunkt.teufel-it.de` |
 
 netcup lässt sich innerhalb der Produktlinie hochstufen – wir müssen also nicht im Voraus für Reserven zahlen.
 
-### 3.4 Laufende Kosten
+### 3.5 Laufende Kosten
 
 | | Entwicklung | Echtbetrieb |
 |---|---|---|
 | netcup Server | 40,70 € | 77,83 € |
 | netcup Speicher | 8,00 € | 15,00 € |
 | **Monatlich** | **~49 €** | **~93 €** |
-| Apple Developer (jährlich) | 99 $ | 99 $ |
-| **Pro Jahr gesamt** | **~680 €** | **~1.210 €** |
+| Apple Developer (jährlich, erst mit iOS-App) | – | 99 $ |
+| **Pro Jahr gesamt** | **~590 €** | **~1.120–1.210 €** |
 
-Nicht bei uns (Firma des Kumpels): Drohnen-Haftpflicht, Führerscheine, Mobilfunkdaten fürs Baustellen-iPhone.
+Nicht bei uns (Firma des Kumpels): Drohnen-Haftpflicht, Führerscheine, ggf. Mobilfunk für SAPOS an der Fernsteuerung.
 
-### 3.5 Gesamtbild
+### 3.6 Gesamtbild
 
 | | Wir (Entwicklung) | Firma des Kumpels (Einsatz) |
 |---|---|---|
-| Einmalig | ca. 2.100–5.600 € (Mac, iPhone, Rover, Kleinkram) | iPhone Pro + eigener Rover (~3.450 €), falls sie unseren nicht übernehmen; Drohne vorhanden |
-| Laufend | ca. 49–93 €/Monat Server + 99 $/Jahr Apple | Versicherung, Führerscheine (vorhanden), Mobilfunk |
+| Einmalig, Phase 1 (Drohne) | **~0 €** | **ca. 5.400–6.300 €** (Matrice 4E, Akkus, Führerscheine, Registrierung) |
+| Einmalig, später (iPhone + Rover) | ca. 2.100–5.600 € (Rover, ggf. Mac/iPhone) | ggf. iPhone Pro + eigener Rover (~3.450 €) |
+| Laufend | ca. 49–93 €/Monat Server (+ 99 $/Jahr Apple, sobald iOS-App) | Versicherung ~100–300 €/Jahr, Mobilfunk |
 
 Zum Vergleich: Allein das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € netto, Sodex/Makineo verlangen für Hardware + Cloud deutlich mehr (Angebot auf Anfrage).
 
-### 3.6 Wo kaufen / beantragen
+### 3.7 Wo kaufen / beantragen
 
 | Was | Link | Notiz |
 |---|---|---|
-| Mac mini | [Apple Store – Mac mini kaufen](https://www.apple.com/de/shop/buy-mac/mac-mini) | M5 Pro konfigurieren |
-| iPhone 18 Pro / Pro Max | [Apple Store – iPhone kaufen](https://www.apple.com/de/shop/buy-iphone) | Pro-Modell (LiDAR) |
-| Apple Developer Program | [developer.apple.com/programs](https://developer.apple.com/programs/) | 99 $/Jahr |
-| Emlid Reach RX2, Scanning Handle, Lotstab | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) | Preise netto |
-| DJI Matrice 4E (nur falls die Firma eine kauft) | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) | EU-Version (C2) nehmen |
-| DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Alternative mit Beratung, Schulung, Service |
-| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | RS 2000 (Entwicklung) → RS 4000 (Betrieb) |
-| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Tarif B (500 GB) → C (1 TB) |
-| SAPOS-Korrekturdaten | [Zentrale Stelle SAPOS – Gebühren & Registrierung](https://zentrale-stelle-sapos.de/en/fees-registration/) | in BW kostenlos, Registrierung nötig |
+| **DJI Matrice 4E** | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) | EU-Version (C2) nehmen |
+| DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Mit Beratung, Schulung, Service – für den Erstkauf empfehlenswert |
+| Kompetenznachweis A1/A3, A2 | [LBA-Portal uas-betrieb.bund.de](https://uas-betrieb.bund.de) | A1/A3 online, A2 mit Zusatzprüfung |
 | LBA-Betreiberregistrierung | [uas-betrieb.bund.de – Registrierung als Betreiber](https://uas-betrieb.bund.de/homepage/en/applications-administrative-services/registration-as-an-operator) | e-ID für die Drohne |
 | Geozonen prüfen | [dipul.de](https://www.dipul.de) | vor jedem Flug |
+| SAPOS-Korrekturdaten | [Zentrale Stelle SAPOS – Gebühren & Registrierung](https://zentrale-stelle-sapos.de/en/fees-registration/) | in BW kostenlos, Registrierung nötig |
+| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | RS 2000 (Entwicklung) → RS 4000 (Betrieb) |
+| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Tarif B (500 GB) → C (1 TB) |
+| *Später:* Emlid Reach RX2, Scanning Handle, Lotstab | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) | Preise netto |
+| *Später:* Mac mini | [Apple Store – Mac mini kaufen](https://www.apple.com/de/shop/buy-mac/mac-mini) | M5 Pro konfigurieren |
+| *Später:* iPhone 18 Pro / Pro Max | [Apple Store – iPhone kaufen](https://www.apple.com/de/shop/buy-iphone) | Pro-Modell (LiDAR) |
+| *Später:* Apple Developer Program | [developer.apple.com/programs](https://developer.apple.com/programs/) | 99 $/Jahr |
 
 ---
 
@@ -156,7 +185,7 @@ Zum Vergleich: Allein das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € 
 
 - **Keine Zertifizierung nötig** für das Erfassen, Messen und Massenermitteln als Dienstleistung oder Software.
 - **Amtliche Vermessung** (Kataster, Grenzen, Gebäudeeinmessung) dürfen nur ÖbVI/Vermessungsämter. Fixpunkt nie als „amtliche Vermessung“ bezeichnen.
-- **Drohne:** Registrierung, Kompetenznachweis und Versicherung liegen beim Betreiber – also der Firma des Kumpels, die bereits einen Piloten mit Führerschein hat (s. 3.2). Über Wohngrundstücken Zustimmung des Eigentümers (§21h LuftVO). Geozonen auf [dipul.de](https://www.dipul.de) prüfen (z. B. Baden Airpark).
+- **Drohne:** Registrierung, Kompetenznachweis und Versicherung liegen beim Betreiber. Die Firma des Kumpels hat bisher **weder Drohne noch Führerschein** – empfohlen: Die Firma kauft die Drohne und ist Betreiber, ein Mitarbeiter macht A1/A3 + A2 (s. 3.2). Haftpflichtversicherung ist Pflicht. Über Wohngrundstücken Zustimmung des Eigentümers (§21h LuftVO). Geozonen auf [dipul.de](https://www.dipul.de) prüfen (z. B. Baden Airpark).
 - **Datenschutz:** Unbeteiligte Personen und Nachbargrundstücke vermeiden bzw. unkenntlich machen.
 - **Eigene Hardware verkaufen** → CE, Funkanlagenrichtlinie, ElektroG/WEEE, Batterierecht. Daher: unsere Software auf gekaufter Hardware.
 
@@ -165,7 +194,7 @@ Zum Vergleich: Allein das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € 
 ## 5. Architektur
 
 ```
- iOS-App (Swift)                 Drohne (Firma des Kumpels)
+ iOS-App (Swift, später)         Drohne (Matrice 4E, Firma des Kumpels)
  LiDAR + ARKit-Posen             Fotos mit RTK-Position (EXIF/XMP)
  RTK über Bluetooth (Reach RX2)  Flugplan (Pilot 2 → später WPML/KMZ, Cloud API)
           │                               │
@@ -228,44 +257,45 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 
 ## 6. Phasen
 
+**Reihenfolge: Drohne zuerst** (Baugruben), iPhone + Rover danach.
+
 ### Phase 0 – Setup (1–2 Wochen)
-- [ ] Repo-Struktur: `apps/ios`, `apps/web`, `crates/processing`, `infra`, `docs`
-- [ ] Klären: Hat die iOS-Entwicklerin schon einen Mac / ein iPhone Pro? Sonst Mac mini M5 Pro + iPhone 18 Pro kaufen
-- [ ] Apple Developer Account
-- [ ] Reach RX2 bestellen, Halterung drucken
+- [ ] Repo-Struktur: `apps/web`, `crates/processing`, `infra`, `docs` (`apps/ios` erst ab Phase 4)
+- [ ] netcup RS 2000 aufsetzen, NodeODM testen
 - [ ] SAPOS-Zugang (BW) beantragen
-- [ ] Testfeld anlegen (Hof/Garten) mit 5–10 eingemessenen Passpunkten
-- [ ] Mit der Firma des Kumpels klären: Welche Drohne (RTK?), wer fliegt, Testflug-Termin
+- [ ] **Mit der Firma klären:** Matrice 4E kaufen? Wer macht A1/A3 + A2? Betreiberregistrierung, Versicherung
+- [ ] Erste Baugrube als Pilotprojekt aussuchen (Termin vor dem Aushub!)
 
 ### Phase 1 – Backend + Viewer (3–4 Wochen)
 - [ ] Datenmodell: Mandant, Baustelle, Aufnahme, Rohdaten, Ergebnis, Passpunkt, Messung
-- [ ] Upload + Job-Queue
+- [ ] Upload großer Fotomengen (resumable) + Job-Queue
 - [ ] Rust-Worker: LAS/LAZ einlesen, transformieren, Browser-Kacheln erzeugen
 - [ ] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung
-- [ ] Mit öffentlichen Testdatensätzen arbeiten, bis eigene Daten da sind
+- [ ] Mit öffentlichen OpenDroneMap-Datensätzen arbeiten, bis eigene Flüge da sind
 
-### Phase 2 – Drohne + Massenermittlung (2–3 Wochen)
-- [ ] NodeODM anbinden
+### Phase 2 – Drohne + Aushubberechnung (2–3 Wochen)
+- [ ] NodeODM anbinden (Fotos mit RTK-Position aus EXIF/XMP)
 - [ ] Orthofoto, DGM, Punktwolke im Viewer
+- [ ] **Aushub: Differenz zweier Flüge (Urgelände ↔ Baugrube)**, Ergebnis in m³ + Höhendifferenz-Karte
 - [ ] Volumen Haufwerk gegen Basisfläche
-- [ ] Aushubmasse: Differenz zweier Aufnahmen
-- [ ] Erster echter Flug beim Kumpel
+- [ ] Erster echter Flug: Baugrube vor und nach dem Aushub
 
-### Phase 3 – iOS-App (4–6 Wochen, parallel ab Phase 1)
+### Phase 3 – Genauigkeit Drohne (laufend)
+- [ ] Ergebnisse gegen Lieferscheine / LKW-Ladungen bzw. Aufmaß plausibilisieren
+- [ ] Optional: 2–3 Kontrollpunkte einmessen (Rover leihen oder kaufen) für einen Genauigkeitsnachweis
+- [ ] Höhenbezug DHHN2016 über GCG2016 prüfen
+
+### Phase 4 – iOS-App mit Rover (4–6 Wochen, erst wenn Leitungsgräben gewünscht)
+- [ ] Mac, iPhone Pro, Reach RX2, Apple Developer Account beschaffen (s. 3.3)
 - [ ] BLE-Verbindung Reach RX2, NMEA-Parser, RTK-Status
 - [ ] NTRIP-Client (SAPOS)
 - [ ] ARKit-LiDAR-Scan mit synchroner Pose-/RTK-Aufzeichnung
 - [ ] Hebelarm-Kalibrierung (Antenne ↔ Kamera)
 - [ ] GCP-Modus mit Lotstab
 - [ ] Upload, Offline-Puffer
-- [ ] TestFlight an den Kumpel
-
-### Phase 4 – Genauigkeit (laufend, größtes technisches Risiko)
-- [ ] Helmert/Umeyama über die Gesamttrajektorie
-- [ ] Abschnittsweiser Ausgleich gegen ARKit-Drift bei langen Gräben
-- [ ] Passpunkte einbeziehen
-- [ ] Genauigkeitsbericht pro Aufnahme (Residuen an Kontrollpunkten)
+- [ ] Helmert/Umeyama über die Gesamttrajektorie, abschnittsweiser Ausgleich gegen ARKit-Drift
 - [ ] Ziel: ≤ 2–3 cm bei Gräben bis 30–50 m
+- [ ] TestFlight an den Kumpel
 
 ### Phase 5 – Ausbau
 - [ ] Zwangspunkte / Leitungsdokumentation
@@ -274,9 +304,10 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 - [ ] Exporte DXF, LandXML, CSV, GeoTIFF
 - [ ] Flugplanung in Fixpunkt (WPML), danach DJI Cloud API
 - [ ] Android-PWA (Photogrammetrie + Web Bluetooth)
+- [ ] Optional: leichter Unicore-Empfänger im Sodex-Stil statt Reach RX2
 - [ ] Optional: eigener Handscanner (Livox Mid-360 + FAST-LIO2)
 
-**Realistisch:** Erste nutzbare Version für den Kumpel in **ca. 3 Monaten** nebenher.
+**Realistisch:** Erste nutzbare Aushubberechnung per Drohne in **ca. 2 Monaten** nebenher – vorausgesetzt, die Firma hat bis dahin Drohne und Führerschein.
 
 ---
 
@@ -289,6 +320,7 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 | Messen, Volumen, Export | 8/10 |
 | iOS-App (mit iOS-Entwicklerin im Team) | 9/10 |
 | Georeferenzierung / Drift bei langen Scans | 6/10 |
+| **Aushub Baugrube per RTK-Drohne (erstes Ziel)** | **8/10** |
 | **Gesamt: Kumpel nutzt es für Doku & Massen** | **9/10** |
 | Grabenaufmaß nachweisbar 1–2 cm | 7/10 |
 | Als Produkt an fremde Firmen verkaufen | 5/10 |
@@ -299,6 +331,8 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 
 | Risiko | Gegenmaßnahme |
 |---|---|
+| Firma kauft keine Drohne / niemand macht den Führerschein | Früh klären (Phase 0); notfalls selbst Betreiber werden oder Drohnendienstleister beauftragen |
+| Baugrube wird verfüllt, bevor geflogen wurde | Flugtermine in den Bauablauf einplanen (vor Aushub, nach Aushub) |
 | ARKit-Drift bei langen Gräben | Abschnittsweiser Ausgleich, Passpunkte, Scanlänge begrenzen |
 | Kein RTK-Fix (Abschattung, Funkloch) | Fix-Status erzwingen, Offline-Puffer, Post-Processing (RTKLIB) |
 | Hebelarm Antenne ↔ Kamera ungenau | Starre Halterung, Kalibrierroutine im Testfeld |
@@ -310,11 +344,13 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 
 ## 9. Offene Fragen
 
-- [ ] Welche Drohne hat der Kumpel bereits – RTK? mechanischer Verschluss?
-- [ ] Welche Use-Cases zuerst: Haufwerke, Gräben/Leitungen oder Flächen?
-- [ ] Welche Ausgabeformate braucht der Bauleiter / das Büro konkret (DXF? LandXML? REB?)
+- [ ] **Kauft die Firma die Matrice 4E** (ca. 5.400–6.300 € inkl. Akkus, Führerschein, Registrierung)? Oder wollen wir selbst Betreiber sein und als Dienstleister fliegen?
+- [ ] **Wer macht den Führerschein** (A1/A3 + A2)?
+- [ ] Hat die Firma einen GNSS-Rover (Leica/Trimble, z. B. für Absteckung oder Maschinensteuerung)? Dann Kontrollpunkte ohne Neukauf.
+- [ ] Typische Baugrubengröße? Wie lange bleibt sie offen (Flug vor dem Verfüllen)?
+- [ ] Welche Ausgabeformate braucht der Bauleiter / das Büro konkret (m³-Bericht als PDF? DXF? LandXML? REB?)
 - [ ] Open Source oder privat? Geschäftsmodell, falls Produkt
-- [ ] iPhone 18 Pro oder Pro Max?
+- [ ] Später: iPhone 18 Pro oder Pro Max?
 
 ---
 
