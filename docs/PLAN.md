@@ -104,6 +104,48 @@ Preise: Apple und DJI inkl. MwSt., Emlid und netcup netto.
 **Führerschein:** Ein Mitarbeiter der Firma (z. B. der Kumpel selbst) macht A1/A3 online und danach A2. Aufwand: ein paar Abende Lernen plus Prüfung.
 **Betreiber** (Registrierung, Versicherung, Haftung) ist, wer die Drohne kauft und fliegt – empfohlen: die Firma, nicht wir.
 
+### 3.2a Alternative: Leica BLK2GO (Handlaserscanner)
+
+Vom Kumpel ins Spiel gebracht. **Kein Rover, sondern ein Laserscanner:** Man läuft damit um die Baugrube, er erzeugt per SLAM eine sehr dichte Punktwolke.
+Er sieht die **Form**, weiß aber **nicht, wo auf der Erde** er ist (kein GNSS).
+
+**Begriffe:**
+- **Rover** (z. B. Emlid Reach RX2, auch das blaue Sodex-Modul) = genaues GNSS → **Lage** eines Punkts in Landeskoordinaten, 1–2 cm.
+- **Scanner / Kamera** (iPhone-LiDAR, Drohnenkamera, BLK2GO) = **Form** der Umgebung als 3D-Modell.
+- Jede Variante braucht beides: Die Drohne Matrice 4E hat RTK eingebaut, iPhone und BLK2GO brauchen einen Rover dazu.
+
+**Preis (Recherche Nov. 2026, nicht direkt im Shop geprüft – verbindliches Angebot über Makineo/Leica-Partner einholen):**
+
+| | Preis |
+|---|---|
+| BLK2GO, Leica-Shop EU | Liste ca. 27.990 € netto, Aktion ca. 19.995 € netto |
+| BLK2GO, Leica-Shop USA | 37.500 $ |
+| BLK2GO PULSE (neueres Modell, mit iPhone gekoppelt), Leica-Shop EU | Liste ca. 14.995 € netto, Aktion ca. 7.999 € netto (passt nicht zum US-Preis von 42.800 $ – prüfen!) |
+| Sehr billige Händlerangebote (5–10 Tsd. $) | vermutlich gebraucht oder unseriös |
+
+**Vergleich für Aushub von Baugruben:**
+
+| | **Leica BLK2GO** | **Drohne Matrice 4E** | **iPhone + Reach RX2** |
+|---|---|---|---|
+| Genauigkeit | **am besten** (ca. 1–2 cm, sehr dicht) | gut (ca. 2–5 cm) | ordentlich (Ziel 2–3 cm) |
+| Führerschein / Versicherung / Wetter | **nicht nötig** | A1/A3 + A2, Haftpflicht, Flugwetter | nicht nötig |
+| Landeskoordinaten | nur mit Passpunkten → **Rover nötig** | **direkt** (RTK eingebaut) | **direkt** (Rover am iPhone) |
+| Große Baugrube | Rand ablaufen, 10–20 min | **am schnellsten**, 5–15 min | mühsam |
+| Schmale Gräben, Verbau, unter Bäumen | **sehr gut** | schlecht | gut |
+| Kosten einmalig | **ca. 20.000–28.000 € netto + ~2.000 € Rover** (+ ggf. Software-Abo) | ca. 5.400–6.300 € inkl. Führerschein | ca. 3.500 € |
+| Auswertung | Leica-Software (Cyclone) oder Fixpunkt (E57/LAS-Import) | Fixpunkt | Fixpunkt (App muss erst gebaut werden) |
+
+**Genauigkeit in m³ (Beispiel 20 × 15 × 3 m ≈ 900 m³):** Drohne ± ca. 9 m³ (~1 %), BLK2GO ± ca. 3 m³ (~0,3 %). Für Aushubabrechnung reicht beides.
+
+**Ablauf mit BLK2GO:** 3–4 Zielmarken an festen Stellen am Grubenrand (z. B. Nägel im Bordstein), einmal mit dem Rover auf dem Lotstab einmessen → jeder Scan (vorher/nachher) wird darauf ausgerichtet → Differenz = Aushub.
+
+**Einschätzung:**
+- Firma kommt **günstig** an einen BLK2GO (Aktion, Miete, Teststellung, gebraucht vom Händler) → **nehmen**: kein Führerschein, sehr genau, auch für Gräben.
+- Muss **zum vollen Preis** neu gekauft werden und es geht hauptsächlich um Baugruben → **Drohne** hat das bessere Preis-Leistungs-Verhältnis.
+- **Am besten vor dem Kauf beides auf einer echten Baugrube testen** (Makineo-Teststellung, Vorführflug beim DJI-Fachhändler).
+
+**Für Fixpunkt:** E57/LAS-Import und Ausrichtung auf Passpunkte bzw. Vorscan einbauen – passt ins bestehende Konzept („Punkte egal woher“).
+
 ### 3.3 Was wir zum Entwickeln brauchen
 
 | Gerät | Empfehlung | Preis (ca.) | Notiz |
@@ -263,13 +305,13 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 - [ ] Repo-Struktur: `apps/web`, `crates/processing`, `infra`, `docs` (`apps/ios` erst ab Phase 4)
 - [ ] netcup RS 2000 aufsetzen, NodeODM testen
 - [ ] SAPOS-Zugang (BW) beantragen
-- [ ] **Mit der Firma klären:** Matrice 4E kaufen? Wer macht A1/A3 + A2? Betreiberregistrierung, Versicherung
+- [ ] **Mit der Firma klären:** Drohne (Matrice 4E) oder BLK2GO (+ Rover)? Matrice 4E kaufen? Wer macht A1/A3 + A2? Betreiberregistrierung, Versicherung
 - [ ] Erste Baugrube als Pilotprojekt aussuchen (Termin vor dem Aushub!)
 
 ### Phase 1 – Backend + Viewer (3–4 Wochen)
 - [ ] Datenmodell: Mandant, Baustelle, Aufnahme, Rohdaten, Ergebnis, Passpunkt, Messung
 - [ ] Upload großer Fotomengen (resumable) + Job-Queue
-- [ ] Rust-Worker: LAS/LAZ einlesen, transformieren, Browser-Kacheln erzeugen
+- [ ] Rust-Worker: LAS/LAZ (und E57 vom BLK2GO) einlesen, transformieren, Browser-Kacheln erzeugen
 - [ ] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung
 - [ ] Mit öffentlichen OpenDroneMap-Datensätzen arbeiten, bis eigene Flüge da sind
 
@@ -346,6 +388,7 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 
 - [ ] **Kauft die Firma die Matrice 4E** (ca. 5.400–6.300 € inkl. Akkus, Führerschein, Registrierung)? Oder wollen wir selbst Betreiber sein und als Dienstleister fliegen?
 - [ ] **Wer macht den Führerschein** (A1/A3 + A2)?
+- [ ] **Drohne oder Leica BLK2GO?** Bekommt die Firma einen BLK2GO günstig (Makineo, Aktion, Miete)? Teststellung/Vorführung beider Varianten auf einer echten Baugrube
 - [ ] Hat die Firma einen GNSS-Rover (Leica/Trimble, z. B. für Absteckung oder Maschinensteuerung)? Dann Kontrollpunkte ohne Neukauf.
 - [ ] Typische Baugrubengröße? Wie lange bleibt sie offen (Flug vor dem Verfüllen)?
 - [ ] Welche Ausgabeformate braucht der Bauleiter / das Büro konkret (m³-Bericht als PDF? DXF? LandXML? REB?)
