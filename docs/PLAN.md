@@ -110,15 +110,19 @@ Zum Vergleich: Das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € netto �
 
 Die Fixpunkt-Cloud läuft von Anfang an bei **netcup** (deutsches Rechenzentrum, DSGVO).
 
-| Posten | Tarif | Preis netto | Notiz |
+**Stufenweise:** Klein anfangen. Die Rechenlast steckt fast nur in der Drohnen-Photogrammetrie (ODM).
+Die läuft am Anfang auf dem **Mac mini (64 GB)** als Worker – der netcup-Server muss dann nur Web, API, Datenbank und die leichte Handscan-Verarbeitung stemmen.
+
+| Stufe | Tarif | Preis netto | Wann |
 |---|---|---|---|
-| **Server** | **netcup RS 2000 G12.5** – 8 dedizierte vCores (AMD EPYC), 16 GB RAM, 256 GB NVMe | **40,70 €/Monat** (12 Monate Laufzeit) | Web, API, Postgres, Rust-Worker, ODM für kleine bis mittlere Flüge |
-| Upgrade später | netcup RS 4000 G12.5 – 12 vCores, 32 GB RAM, 512 GB NVMe | 77,83 €/Monat | Sobald viele/große Drohnenflüge kommen |
-| **Speicher** | **netcup Storage Space C – 1 TB** | **15,00 €/Monat** (+0,02 €/GB darüber) | Rohdaten, Fotos, Punktwolken |
-| Kleiner Einstieg | Storage Space B – 500 GB | 8,00 €/Monat | Reicht für die ersten Monate |
+| **Start** | **netcup RS 1000 G12.5** – 4 dedizierte vCores (AMD EPYC), 8 GB RAM, 128 GB NVMe | **21,73 €/Monat** (12 Monate Laufzeit) | Web, API, Postgres, Handscans; ODM-Jobs laufen auf dem Mac mini |
+| Noch kleiner | netcup VPS (geteilte Kerne) | ca. 5–10 €/Monat | Reicht für reines Web/API, wird bei Punktwolken zäh |
+| Ausbau | netcup RS 2000 G12.5 – 8 vCores, 16 GB, 256 GB | 40,70 €/Monat | Wenn ODM auf den Server soll (kleine/mittlere Flüge) |
+| Viel Drohne | netcup RS 4000 G12.5 – 12 vCores, 32 GB, 512 GB | 77,83 €/Monat | Viele Flüge mit tausenden Bildern |
+| **Speicher** | **netcup Storage Space B – 500 GB** | **8,00 €/Monat** | Start; später Tarif C (1 TB) für 15 €/Monat |
 | Domain | Subdomain von teufel-it.de (Cloudflare) | 0 € | z. B. `fixpunkt.teufel-it.de` |
 
-24 Monate Laufzeit sind bei netcup nochmals günstiger. ODM läuft auf CPU – eine GPU brauchen wir erst bei sehr vielen Flügen.
+Faustregel ODM: Ein paar hundert Fotos brauchen ~16 GB RAM, tausende Fotos 32–64 GB. 24 Monate Laufzeit sind bei netcup nochmals günstiger.
 
 ### 3.6 Einmalige Anschaffung
 
@@ -132,24 +136,26 @@ Schätzung, gemischt brutto (Apple, DJI) und netto (Emlid). Vorhandene Drohne de
 
 ### 3.7 Laufende Kosten
 
-**Monatlich**
+**Monatlich (Start)**
 
 | Posten | Kosten netto |
 |---|---|
-| netcup RS 2000 G12.5 | 40,70 € |
-| netcup Storage Space C (1 TB) | 15,00 € |
-| Mobile Daten fürs iPhone auf der Baustelle (falls nicht vorhanden) | Schätzung 10–20 € |
-| **Summe monatlich** | **~56–76 €** |
+| netcup RS 1000 G12.5 | 21,73 € |
+| netcup Storage Space B (500 GB) | 8,00 € |
+| **Summe monatlich** | **~30 €** |
+
+Mobilfunkdaten fürs iPhone auf der Baustelle, falls nicht schon vorhanden: zusätzlich.
 
 **Jährlich**
 
 | Posten | Kosten |
 |---|---|
+| netcup (12 × ~30 €) | ~357 € |
 | Apple Developer Program | 99 $ |
-| Drohnen-Haftpflicht (gewerblich) | Schätzung 100–400 € |
+| Drohnen-Haftpflicht (gewerblich) | Schätzung 100–400 € – Angebote einholen |
 | DJI Care Enterprise Plus (Verlängerung ab Jahr 2, optional) | laut Händler |
 | AppleCare+ für Mac/iPhone (optional) | laut Apple |
-| **Summe jährlich (ohne Optionen)** | **~200–500 €** |
+| **Summe pro Jahr (ohne Optionen)** | **~550–850 €** |
 
 **Alle 5 Jahre**
 
@@ -158,8 +164,7 @@ Schätzung, gemischt brutto (Apple, DJI) und netto (Emlid). Vorhandene Drohne de
 | EU-Kompetenznachweis A1/A3 erneuern | ~25 € |
 | A2-Fernpilotenzeugnis erneuern | Schätzung |
 
-**Gesamt laufend: ca. 900–1.400 € pro Jahr** (netcup + Apple + Versicherung, ohne Optionen).
-Später mit RS 4000 statt RS 2000: rund +450 € pro Jahr.
+Ausbau später: RS 2000 + 1 TB Speicher ≈ 56 €/Monat, RS 4000 + 1 TB ≈ 93 €/Monat.
 
 ### 3.8 Wo kaufen / beantragen
 
