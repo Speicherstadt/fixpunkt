@@ -170,6 +170,27 @@ Genauigkeit identisch zum Reach RX2 (H 7 mm + 1 ppm, V 14 mm + 1 ppm), BLE 5.3, 
 → Für die Entwicklung bleibt der Reach RX2 die sichere Wahl (gute iOS-/NMEA-Anbindung, NTRIP eingebaut). Eine leichtere Unicore-Lösung im Sodex-Stil ist später möglich, weil die App Standard-NMEA liest.
 Makineo bietet eine **14-tägige Teststellung** an – gut für einen direkten Vergleich.
 
+### 3.3a Kleinere Rover als Alternative zum Reach RX2 (Option für Phase 4)
+
+Der Reach RX2 ist zuverlässig, aber am iPhone klobig (ca. 250 g Puck, s. Bilder im [Emlid Scanning Kit](https://emlid.com/pix4d-emlid-scanning-kit/)).
+Kleinere Geräte gibt es – ein klar besserer Ersatz ist aber nicht dabei.
+
+| Gerät | Gewicht | Preis (ca.) | Anbindung ans iPhone | Einschätzung |
+|---|---|---|---|---|
+| [Emlid Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) (Referenz) | ca. 250 g | ~2.000 € netto | Bluetooth, NTRIP eingebaut | Zuverlässig, gut dokumentiert, klobig |
+| [mapry R2](https://mapryshop.com/products/r1-1) | **188 g** | ~660 $ | USB-C-Kabel, Strom vom iPhone | Klein, günstig, 3 Frequenzen, für iPhone-LiDAR gebaut. **Risiko:** Per Kabel kommt eine eigene App auf iOS nur mit MFi-Zertifizierung an die Daten – vorher klären. |
+| [DATAGNSS NANO RTK Pro](https://www.datagnss.com/products/nano-rtk-receiver) | sehr klein, separate Antenne | günstig (Preis prüfen) | Bluetooth LE, Standard-NMEA | Passt technisch zu unserer App, eher Bastlerqualität, Antenne selbst befestigen |
+| [Pix4D viDoc](https://www.adorama.com/p4d324001.html) | 242 g | auf Anfrage | Hülle für ein bestimmtes iPhone-Modell | Teilweise eingestellt, an alte iPhones gebunden – **nicht empfehlenswert** |
+| [SparkFun RTK Torch](https://www.sparkfun.com/sparkfun-rtk-torch.html) (Unicore UM980) | 428 g | ~2.150 $ | Bluetooth LE | **Schwerer** als der RX2 – keine Lösung |
+| Sodex-Modul (blau, Unicore) | 115 g + Antenne | nicht einzeln erhältlich | BLE 5.3 | Nur im [Sodex-/Makineo-Paket](https://makineo.de/produkte/baudokumentation-3d/pocket-scan) |
+
+**Empfehlung:**
+1. Für die Entwicklung beim **Reach RX2** bleiben – Standard-NMEA über Bluetooth, NTRIP eingebaut, Support.
+2. Wird „klein“ wichtig: zusätzlich einen **DATAGNSS NANO RTK Pro** zum Testen kaufen (die App liest Standard-NMEA, ist also nicht an Emlid gebunden). **mapry R2** nur, wenn geklärt ist, dass eine eigene App über USB-C an die Daten kommt.
+3. Aktuell nicht dringend: Zuerst kommt Drohne bzw. BLK2GO. Dort sitzt der Rover nur auf dem Lotstab – Größe egal.
+
+Angaben zu mapry und DATAGNSS aus Händlerseiten, vor dem Kauf Datenblatt beim Hersteller prüfen.
+
 ### 3.4 Server – netcup, stufenweise
 
 | Phase | Tarif | Preis netto | Warum |
@@ -206,8 +227,36 @@ Zum Vergleich: Allein das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € 
 
 ### 3.7 Wo kaufen / beantragen
 
+**Jetzt (Drohne bzw. BLK2GO):**
+
 | Was | Link | Notiz |
 |---|---|---|
+| **DJI Matrice 4E** (Empfehlung) | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) · [Test bei drohnen.de](https://www.drohnen.de/56774/dji-matrice-4t-4e-test/) | EU-Version (C2) nehmen |
+| DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Mit Beratung, Schulung, Service – für den Erstkauf empfehlenswert |
+| DJI Mavic 4 Pro (nur zum Vergleich, ohne RTK) | [Preise bei drohnen.de](https://www.drohnen.de/60004/dji-mavic-4-pro-preise/) | Bräuchte Passpunkte + Rover |
+| **Leica BLK2GO** (Alternative) | [Leica-Shop EU](https://cpec.leica-geosystems.com/producto/blk2go-laser-scanner/) · [Leica-Shop](https://shop.leica-geosystems.com/reality-capture/blk2go/buy) | Verbindliches Angebot über Makineo |
+| Leica BLK2GO PULSE | [Leica-Shop EU](https://cpec.leica-geosystems.com/producto/blk2go-pulse-laser-scanner/) · [Leica-Shop](https://shop.leica-geosystems.com/reality-capture/blk2go-pulse/buy) | Preis EU vs. USA widersprüchlich – prüfen |
+| Makineo (Leica-Partner, Sodex-Vertrieb) | [Makineo – Pocket Scan / Teststellung](https://makineo.de/produkte/baudokumentation-3d/pocket-scan) | 14 Tage Teststellung, Angebot BLK2GO anfragen |
+| Kompetenznachweis A1/A3, A2 | [LBA-Portal uas-betrieb.bund.de](https://uas-betrieb.bund.de) | A1/A3 online, A2 mit Zusatzprüfung |
+| LBA-Betreiberregistrierung | [uas-betrieb.bund.de – Registrierung als Betreiber](https://uas-betrieb.bund.de/homepage/en/applications-administrative-services/registration-as-an-operator) | e-ID für die Drohne |
+| Geozonen prüfen | [dipul.de](https://www.dipul.de) | vor jedem Flug |
+| SAPOS-Korrekturdaten | [Zentrale Stelle SAPOS – Gebühren & Registrierung](https://zentrale-stelle-sapos.de/en/fees-registration/) | in BW kostenlos, Registrierung nötig |
+| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | RS 2000 (Entwicklung) → RS 4000 (Betrieb) |
+| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Tarif B (500 GB) → C (1 TB) |
+
+**Später (iPhone-App mit Rover, Phase 4):**
+
+| Was | Link | Notiz |
+|---|---|---|
+| Emlid Reach RX2 | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) · [Datenblatt](https://cdn.emlid.com/rx2-landing/Reach+RX2+datasheet.pdf) | Preise netto; Lotstab ebenfalls dort |
+| Emlid Scanning Handle | [Emlid Store – Scanning Handle](https://store.emlid.com/products/pix4d-emlid-scanning-handle) | 229 $ netto – oder selbst drucken |
+| Pix4D & Emlid Scanning Kit (zum Ansehen) | [Emlid – Scanning Kit](https://emlid.com/pix4d-emlid-scanning-kit/) | Fotos, wie RX2 + iPhone zusammen aussehen |
+| Kleinere Rover (Test) | [mapry R2](https://mapryshop.com/products/r1-1) · [DATAGNSS NANO RTK Pro](https://www.datagnss.com/products/nano-rtk-receiver) | s. 3.3a |
+| Mac mini | [Apple Store – Mac mini kaufen](https://www.apple.com/de/shop/buy-mac/mac-mini) | M5 Pro konfigurieren |
+| iPhone 18 Pro / Pro Max | [Apple Store – iPhone kaufen](https://www.apple.com/de/shop/buy-iphone) | Pro-Modell (LiDAR) |
+| Apple Developer Program | [developer.apple.com/programs](https://developer.apple.com/programs/) | 99 $/Jahr |
+
+---|---|---|
 | **DJI Matrice 4E** | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) | EU-Version (C2) nehmen |
 | DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Mit Beratung, Schulung, Service – für den Erstkauf empfehlenswert |
 | Kompetenznachweis A1/A3, A2 | [LBA-Portal uas-betrieb.bund.de](https://uas-betrieb.bund.de) | A1/A3 online, A2 mit Zusatzprüfung |
@@ -328,7 +377,7 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 - [ ] Höhenbezug DHHN2016 über GCG2016 prüfen
 
 ### Phase 4 – iOS-App mit Rover (4–6 Wochen, erst wenn Leitungsgräben gewünscht)
-- [ ] Mac, iPhone Pro, Reach RX2, Apple Developer Account beschaffen (s. 3.3)
+- [ ] Mac, iPhone Pro, Reach RX2, Apple Developer Account beschaffen (s. 3.3); ggf. kleineren Rover testen (s. 3.3a)
 - [ ] BLE-Verbindung Reach RX2, NMEA-Parser, RTK-Status
 - [ ] NTRIP-Client (SAPOS)
 - [ ] ARKit-LiDAR-Scan mit synchroner Pose-/RTK-Aufzeichnung
