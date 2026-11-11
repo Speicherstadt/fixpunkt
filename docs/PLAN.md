@@ -173,23 +173,24 @@ Makineo bietet eine **14-tägige Teststellung** an – gut für einen direkten V
 ### 3.3a Kleinere Rover als Alternative zum Reach RX2 (Option für Phase 4)
 
 Der Reach RX2 ist zuverlässig, aber am iPhone klobig (ca. 250 g Puck, s. Bilder im [Emlid Scanning Kit](https://emlid.com/pix4d-emlid-scanning-kit/)).
-Kleinere Geräte gibt es – ein klar besserer Ersatz ist aber nicht dabei.
+**Kriterium: in Deutschland / der EU kaufbar** (Gewährleistung, keine Zollabwicklung, CE).
 
-| Gerät | Gewicht | Preis (ca.) | Anbindung ans iPhone | Einschätzung |
-|---|---|---|---|---|
-| [Emlid Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) (Referenz) | ca. 250 g | ~2.000 € netto | Bluetooth, NTRIP eingebaut | Zuverlässig, gut dokumentiert, klobig |
-| [mapry R2](https://mapryshop.com/products/r1-1) | **188 g** | ~660 $ | USB-C-Kabel, Strom vom iPhone | Klein, günstig, 3 Frequenzen, für iPhone-LiDAR gebaut. **Risiko:** Per Kabel kommt eine eigene App auf iOS nur mit MFi-Zertifizierung an die Daten – vorher klären. |
-| [DATAGNSS NANO RTK Pro](https://www.datagnss.com/products/nano-rtk-receiver) | sehr klein, separate Antenne | günstig (Preis prüfen) | Bluetooth LE, Standard-NMEA | Passt technisch zu unserer App, eher Bastlerqualität, Antenne selbst befestigen |
-| [Pix4D viDoc](https://www.adorama.com/p4d324001.html) | 242 g | auf Anfrage | Hülle für ein bestimmtes iPhone-Modell | Teilweise eingestellt, an alte iPhones gebunden – **nicht empfehlenswert** |
-| [SparkFun RTK Torch](https://www.sparkfun.com/sparkfun-rtk-torch.html) (Unicore UM980) | 428 g | ~2.150 $ | Bluetooth LE | **Schwerer** als der RX2 – keine Lösung |
-| Sodex-Modul (blau, Unicore) | 115 g + Antenne | nicht einzeln erhältlich | BLE 5.3 | Nur im [Sodex-/Makineo-Paket](https://makineo.de/produkte/baudokumentation-3d/pocket-scan) |
+| Gerät | Gewicht | Preis (ca.) | In DE/EU kaufbar? | Anbindung ans iPhone | Einschätzung |
+|---|---|---|---|---|---|
+| [Emlid Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) (Referenz) | ca. 250 g | ~2.000 € netto | ✅ Emlid EU-Store | Bluetooth, NTRIP eingebaut | Zuverlässig, gut dokumentiert, klobig |
+| [ArduSimple RTK Portable 2](https://www.ardusimple.com/news/new-product-rtk-portable-2/) / [RTK Smart Antenna](https://www.ardusimple.com/product/rtk-smart-antenna/) | leicht, kompakt | ab ~270–300 € | ✅ Hersteller in Spanien, [Shop](https://www.ardusimple.com/shop) | Bluetooth LE ([Anleitung iPhone](https://www.ardusimple.com/how-to-connectrtk-receiver-to-ios-device-iphone-ipad-or-ipod-via-bluetooth/)) | **Beste EU-Option für „klein + günstig“.** u-blox ZED-F9P (2 Frequenzen), eher Bastler-/Integratorqualität, IP53. Vor dem Kauf genaue Variante mit BLE klären. |
+| [SparkFun RTK Torch](https://www.sparkfun.com/sparkfun-rtk-torch.html) | 428 g | ~2.150 $ | ⚠️ SparkFun über [exp-tech.de](https://exp-tech.de/en/products/sparkfun-rtk-express) (Torch dort nicht bestätigt) | Bluetooth LE | **Schwerer** als der RX2 – keine Lösung |
+| [mapry R2](https://mapryshop.com/products/r1-1) | 188 g | ~660 $ | ❌ kein EU-Händler gefunden (Japan) | USB-C-Kabel | Ausgeschlossen |
+| [DATAGNSS NANO RTK Pro](https://www.datagnss.com/products/nano-rtk-receiver) | sehr klein | sehr günstig | ❌ nur Direktimport China | Bluetooth LE | Ausgeschlossen |
+| [Pix4D viDoc](https://www.adorama.com/p4d324001.html) | 242 g | auf Anfrage | ❌ nur US-Händler, teils eingestellt | Hülle pro iPhone-Modell | Ausgeschlossen |
+| Sodex-Modul (blau, Unicore) | 115 g + Antenne | nicht einzeln erhältlich | nur im Paket über [Makineo](https://makineo.de/produkte/baudokumentation-3d/pocket-scan) | BLE 5.3 | Nicht einzeln kaufbar |
 
 **Empfehlung:**
-1. Für die Entwicklung beim **Reach RX2** bleiben – Standard-NMEA über Bluetooth, NTRIP eingebaut, Support.
-2. Wird „klein“ wichtig: zusätzlich einen **DATAGNSS NANO RTK Pro** zum Testen kaufen (die App liest Standard-NMEA, ist also nicht an Emlid gebunden). **mapry R2** nur, wenn geklärt ist, dass eine eigene App über USB-C an die Daten kommt.
+1. Für die Entwicklung beim **Emlid Reach RX2** bleiben – EU-Shop, Standard-NMEA über Bluetooth, NTRIP eingebaut, Support.
+2. Wird „klein“ wichtig: zusätzlich einen **ArduSimple**-Empfänger mit Bluetooth LE (~300 €) testen. Die App liest Standard-NMEA, ist also nicht an Emlid gebunden.
 3. Aktuell nicht dringend: Zuerst kommt Drohne bzw. BLK2GO. Dort sitzt der Rover nur auf dem Lotstab – Größe egal.
 
-Angaben zu mapry und DATAGNSS aus Händlerseiten, vor dem Kauf Datenblatt beim Hersteller prüfen.
+Preise und Varianten aus Händler-/Herstellerseiten, vor dem Kauf prüfen.
 
 ### 3.4 Server – netcup, stufenweise
 
@@ -251,7 +252,7 @@ Zum Vergleich: Allein das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € 
 | Emlid Reach RX2 | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) · [Datenblatt](https://cdn.emlid.com/rx2-landing/Reach+RX2+datasheet.pdf) | Preise netto; Lotstab ebenfalls dort |
 | Emlid Scanning Handle | [Emlid Store – Scanning Handle](https://store.emlid.com/products/pix4d-emlid-scanning-handle) | 229 $ netto – oder selbst drucken |
 | Pix4D & Emlid Scanning Kit (zum Ansehen) | [Emlid – Scanning Kit](https://emlid.com/pix4d-emlid-scanning-kit/) | Fotos, wie RX2 + iPhone zusammen aussehen |
-| Kleinere Rover (Test) | [mapry R2](https://mapryshop.com/products/r1-1) · [DATAGNSS NANO RTK Pro](https://www.datagnss.com/products/nano-rtk-receiver) | s. 3.3a |
+| Kleinerer Rover (Test, EU) | [ArduSimple Shop](https://www.ardusimple.com/shop) · [RTK Portable 2](https://www.ardusimple.com/news/new-product-rtk-portable-2/) | s. 3.3a, Variante mit Bluetooth LE |
 | Mac mini | [Apple Store – Mac mini kaufen](https://www.apple.com/de/shop/buy-mac/mac-mini) | M5 Pro konfigurieren |
 | iPhone 18 Pro / Pro Max | [Apple Store – iPhone kaufen](https://www.apple.com/de/shop/buy-iphone) | Pro-Modell (LiDAR) |
 | Apple Developer Program | [developer.apple.com/programs](https://developer.apple.com/programs/) | 99 $/Jahr |
