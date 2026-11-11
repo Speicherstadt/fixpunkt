@@ -176,8 +176,8 @@ Ausbau später: RS 2000 + 1 TB Speicher ≈ 56 €/Monat, RS 4000 + 1 TB ≈ 93 
 | Emlid Reach RX2, Scanning Handle, Lotstab | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) | Preise netto |
 | DJI Matrice 4E | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) | EU-Version (C2) nehmen |
 | DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Alternative mit Beratung, Schulung, Service |
-| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | RS 2000 G12.5 |
-| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Tarif C (1 TB) |
+| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | Start: RS 1000 G12.5 |
+| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Start: Tarif B (500 GB) |
 | SAPOS-Korrekturdaten | [Zentrale Stelle SAPOS – Gebühren & Registrierung](https://zentrale-stelle-sapos.de/en/fees-registration/) | in BW kostenlos, Registrierung nötig |
 | LBA-Betreiberregistrierung | [uas-betrieb.bund.de – Registrierung als Betreiber](https://uas-betrieb.bund.de/homepage/en/applications-administrative-services/registration-as-an-operator) | e-ID für die Drohne |
 | Geozonen prüfen | [dipul.de](https://www.dipul.de) | vor jedem Flug |
