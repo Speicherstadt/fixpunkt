@@ -18,7 +18,7 @@ Vorbild: [SDX-PocketScan / SDX-Cloud](https://makineo.de/produkte/baudokumentati
 
 | Bereich | Technik |
 |---|---|
-| `apps/ios` | Swift, SwiftUI, ARKit (LiDAR), CoreBluetooth, NTRIP-Client |
+| `apps/ios` | Swift, SwiftUI, ARKit (LiDAR), CoreBluetooth + External Accessory (MFi), NTRIP-Client |
 | `apps/web` | TanStack Start (TypeScript), Potree / CesiumJS |
 | `crates/processing` | Rust-Worker: `las`/`laz`, `nalgebra`, `proj`, `rayon` (+ PDAL-/PotreeConverter-CLI) |
 | `infra` | Postgres, S3-kompatibler Storage, NodeODM, Podman/Docker |

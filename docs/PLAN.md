@@ -167,7 +167,7 @@ Kommt später die iPhone-Variante dazu: Rover + Kleinkram ≈ 2.100–2.350 €,
 Laut [Datenblatt](https://makineo.de/fileadmin/Home/Produkte/Baudokumentation/SDX-POCKETSCAN/2026/WEB_Makineo_SDX-PocketScan_Datenblatt.pdf) **kein Emlid**, sondern ein flaches Modul (95 × 64 × 12,5 mm, 115 g, „gl“-Logo), magnetisch hinten am iPhone, Antenne am Schwanenhals.
 1408 Kanäle und die Signalliste (inkl. Galileo E6, BDS B3I, NavIC) deuten auf einen **Unicore-UM980/UM981-Chip** hin.
 Genauigkeit identisch zum Reach RX2 (H 7 mm + 1 ppm, V 14 mm + 1 ppm), BLE 5.3, RTCM3, IP67, 10 h Akku.
-→ Für die Entwicklung bleibt der Reach RX2 die sichere Wahl (gute iOS-/NMEA-Anbindung, NTRIP eingebaut). Eine leichtere Unicore-Lösung im Sodex-Stil ist später möglich, weil die App Standard-NMEA liest.
+→ Für die Entwicklung bleibt der Reach RX2 die sichere Wahl (MFi-zertifiziert, NMEA-Protokoll offiziell dokumentiert). Eine leichtere Unicore-Lösung im Sodex-Stil ist später möglich, weil die App Standard-NMEA liest.
 Makineo bietet eine **14-tägige Teststellung** an – gut für einen direkten Vergleich.
 
 ### 3.3a Kleinere Rover als Alternative zum Reach RX2 (Option für Phase 4)
@@ -177,7 +177,7 @@ Der Reach RX2 ist zuverlässig, aber am iPhone klobig (ca. 250 g Puck, s. Bilder
 
 | Gerät | Gewicht | Preis (ca.) | In DE/EU kaufbar? | Anbindung ans iPhone | Einschätzung |
 |---|---|---|---|---|---|
-| [Emlid Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) (Referenz) | ca. 250 g | ~2.000 € netto | ✅ Emlid EU-Store | Bluetooth, NTRIP eingebaut | Zuverlässig, gut dokumentiert, klobig |
+| [Emlid Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) (Referenz) | ca. 250 g | ~2.000 € netto | ✅ Emlid EU-Store | Bluetooth Classic + MFi (`com.emlid.nmea`) | Zuverlässig, gut dokumentiert, klobig |
 | [ArduSimple RTK Portable 2](https://www.ardusimple.com/news/new-product-rtk-portable-2/) / [RTK Smart Antenna](https://www.ardusimple.com/product/rtk-smart-antenna/) | leicht, kompakt | ab ~270–300 € | ✅ Hersteller in Spanien, [Shop](https://www.ardusimple.com/shop) | Bluetooth LE ([Anleitung iPhone](https://www.ardusimple.com/how-to-connectrtk-receiver-to-ios-device-iphone-ipad-or-ipod-via-bluetooth/)) | **Beste EU-Option für „klein + günstig“.** u-blox ZED-F9P (2 Frequenzen), eher Bastler-/Integratorqualität, IP53. Vor dem Kauf genaue Variante mit BLE klären. |
 | [SparkFun RTK Torch](https://www.sparkfun.com/sparkfun-rtk-torch.html) | 428 g | ~2.150 $ | ⚠️ SparkFun über [exp-tech.de](https://exp-tech.de/en/products/sparkfun-rtk-express) (Torch dort nicht bestätigt) | Bluetooth LE | **Schwerer** als der RX2 – keine Lösung |
 | [mapry R2](https://mapryshop.com/products/r1-1) | 188 g | ~660 $ | ❌ kein EU-Händler gefunden (Japan) | USB-C-Kabel | Ausgeschlossen |
@@ -186,7 +186,7 @@ Der Reach RX2 ist zuverlässig, aber am iPhone klobig (ca. 250 g Puck, s. Bilder
 | Sodex-Modul (blau, Unicore) | 115 g + Antenne | nicht einzeln erhältlich | nur im Paket über [Makineo](https://makineo.de/produkte/baudokumentation-3d/pocket-scan) | BLE 5.3 | Nicht einzeln kaufbar |
 
 **Empfehlung:**
-1. Für die Entwicklung beim **Emlid Reach RX2** bleiben – EU-Shop, Standard-NMEA über Bluetooth, NTRIP eingebaut, Support.
+1. Für die Entwicklung beim **Emlid Reach RX2** bleiben – EU-Shop, MFi-zertifiziert, NMEA-Anbindung offiziell dokumentiert, Support.
 2. Wird „klein“ wichtig: zusätzlich einen **ArduSimple**-Empfänger mit Bluetooth LE (~300 €) testen. Die App liest Standard-NMEA, ist also nicht an Emlid gebunden.
 3. Aktuell nicht dringend: Zuerst kommt Drohne bzw. BLK2GO. Dort sitzt der Rover nur auf dem Lotstab – Größe egal.
 
@@ -310,13 +310,47 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 ### 5.1 iOS-App (Swift) – Verantwortung: iOS-Entwicklerin
 - SwiftUI-Oberfläche: Baustelle wählen → RTK-Status (Fix/Float/kein Fix) → Scannen → Hochladen
 - ARKit: `sceneDepth`, Scene Reconstruction (`ARMeshAnchor`), Kamerapose pro Frame
-- CoreBluetooth: NMEA (GGA, RMC) vom Rover lesen
-- NTRIP-Client: SAPOS-Korrekturen holen und an den Rover weiterreichen (oder Rover nutzt eigene Verbindung)
+- Rover-Anbindung über zwei austauschbare „Treiber“ (s. 5.1a): **External Accessory / MFi** (Emlid) und **CoreBluetooth / BLE** (ArduSimple, SparkFun u. a.) → NMEA (GGA, GST, RMC) lesen
+- NTRIP-Client: SAPOS-Korrekturen (RTCM3) übers iPhone-Internet holen und per Bluetooth an den Rover schicken – der Rover hat **kein eigenes Internet**
 - Synchrone Aufzeichnung: ARKit-Pose + RTK-Position + Zeitstempel
 - Passpunkt-Modus: GCP mit Lotstab einmessen
 - Offline-Puffer bei Funkloch, Upload im Hintergrund
 - Optional: Object Capture (`PhotogrammetrySession`) für texturierte Meshes
 - Reine Logik (NMEA, NTRIP, Datenformat) als Swift-Package – auch unter Linux testbar
+
+### 5.1a Wie der Rover mit der App spricht
+
+Keine Web-API nötig – der Rover funkt über **Bluetooth** Textzeilen im Standardformat **NMEA**, mehrmals pro Sekunde
+(z. B. `$GNGGA,…,4,…` – die `4` heißt RTK-Fix). Das sprechen praktisch alle GNSS-Empfänger.
+
+```
+SAPOS-Server ──Internet──▶ iPhone (NTRIP-Client) ──Bluetooth──▶ Rover   Korrekturdaten (RTCM3)
+Rover ──Bluetooth──▶ iPhone (unsere App)                                Position (NMEA)
+```
+
+**Das iPhone-Problem:** Apple erlaubt nur zwei Wege zu Bluetooth-Geräten:
+
+| Weg | Apple-Framework | Was es heißt |
+|---|---|---|
+| **Bluetooth LE** | CoreBluetooth | Keine Erlaubnis nötig. Jeder Rover, der NMEA über BLE sendet (ArduSimple-BLE-Varianten, SparkFun) |
+| **Bluetooth Classic mit MFi** („Made for iPhone“) | External Accessory, Protokoll des Herstellers (Emlid: `com.emlid.nmea`) | Funktioniert, NMEA lesen und RTCM senden. Für den **App Store** muss vermutlich der Hersteller unsere App bei Apple freigeben → früh mit Emlid klären. Entwickeln/Testen geht sofort. |
+| Bluetooth Classic **ohne** MFi | – | **Geht auf dem iPhone nicht** (viele billige Rover sind nur für Android) |
+
+Emlid bietet zusätzlich „Rover als Ortungsquelle“ (iOS ersetzt das interne GPS, Core Location liefert die Rover-Position).
+Für uns **nicht ausreichend**: iOS kann die Werte verfälschen, kein RTK-Status → wir lesen NMEA direkt.
+Quelle: [Emlid – How to integrate with Reach RX2](https://docs.emlid.com/reachrx2/api-integration/api-integration-intro/)
+
+**Funktioniert es mit jedem Rover?** Nein. Voraussetzung: **NMEA über Bluetooth LE** *oder* **MFi + veröffentlichtes Protokoll**.
+
+| Rover | Mit unserer App? |
+|---|---|
+| Emlid Reach RX2 | ✅ MFi (`com.emlid.nmea`), offiziell dokumentiert – App-Store-Freigabe mit Emlid klären |
+| ArduSimple (Variante mit BLE) | ✅ Bluetooth LE – **nicht** die Variante mit nur klassischem Bluetooth kaufen |
+| SparkFun (BLE) | ✅ Bluetooth LE |
+| Billig-Rover nur mit klassischem Bluetooth | ❌ |
+| Leica, Trimble, Sodex-Modul | ⚠️ nur mit Hersteller-SDK/Protokoll, meist nicht frei |
+
+**Umsetzung:** Zwei kleine Treiber (MFi und BLE) hinter einer gemeinsamen Schnittstelle. NMEA-Parser, NTRIP-Client und Scan-Logik bleiben gleich → nicht an einen Hersteller gebunden.
 
 ### 5.2 Web / API (TypeScript) – Verantwortung: Tristan
 - TanStack Start, Postgres (Drizzle o. ä.), S3-kompatibler Storage
@@ -379,7 +413,8 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 
 ### Phase 4 – iOS-App mit Rover (4–6 Wochen, erst wenn Leitungsgräben gewünscht)
 - [ ] Mac, iPhone Pro, Reach RX2, Apple Developer Account beschaffen (s. 3.3); ggf. kleineren Rover testen (s. 3.3a)
-- [ ] BLE-Verbindung Reach RX2, NMEA-Parser, RTK-Status
+- [ ] Rover-Treiber: MFi/External Accessory (Reach RX2, `com.emlid.nmea`) und BLE (CoreBluetooth); NMEA-Parser, RTK-Status
+- [ ] Bei Emlid klären: Freigabe unserer App für MFi im App Store
 - [ ] NTRIP-Client (SAPOS)
 - [ ] ARKit-LiDAR-Scan mit synchroner Pose-/RTK-Aufzeichnung
 - [ ] Hebelarm-Kalibrierung (Antenne ↔ Kamera)
