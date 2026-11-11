@@ -123,6 +123,24 @@ Zum Vergleich: Das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € netto �
 
 Vorhandenes (iPhone, Drohne des Kumpels, Heimserver) senkt die Summen entsprechend.
 
+### 3.7 Wo kaufen / beantragen
+
+| Was | Link | Notiz |
+|---|---|---|
+| Mac mini (neu) | [apple.com/de/mac-mini](https://www.apple.com/de/mac-mini/) | |
+| Mac mini (generalüberholt) | [Apple Refurbished Mac](https://www.apple.com/de/shop/refurbished/mac) | günstiger, mit Apple-Garantie |
+| Apple Developer Program | [developer.apple.com/programs](https://developer.apple.com/programs/) | 99 $/Jahr |
+| iPhone Pro (neu) | [Apple Store – iPhone kaufen](https://www.apple.com/de/shop/buy-iphone) | Pro-Modell wählen (LiDAR) |
+| iPhone Pro (generalüberholt) | [Apple Refurbished iPhone](https://www.apple.com/de/shop/refurbished/iphone) | Verfügbarkeit schwankt |
+| Emlid Reach RX2, Scanning Handle, Lotstab | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) | Preise netto |
+| Budget-Rover ArduSimple (UM980) | [ArduSimple simpleRTK3B Budget](https://www.ardusimple.com/product/simplertk3b-budget) | Antenne + BLE-Modul extra |
+| DJI Matrice 4E | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) | EU-Version (C2) nehmen |
+| DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Beratung, Schulung, Service |
+| SAPOS-Korrekturdaten | [Zentrale Stelle SAPOS – Gebühren & Registrierung](https://zentrale-stelle-sapos.de/en/fees-registration/) | in BW kostenlos, Registrierung nötig |
+| LBA-Betreiberregistrierung | [uas-betrieb.bund.de – Registrierung als Betreiber](https://uas-betrieb.bund.de/homepage/en/applications-administrative-services/registration-as-an-operator) | e-ID für die Drohne |
+| Geozonen prüfen | [dipul.de](https://www.dipul.de) | vor jedem Flug |
+| Server | [Hetzner Dedicated Server](https://www.hetzner.com/dedicated-rootserver) | oder vorhandener Heimserver |
+
 ---
 
 ## 4. Rechtliches (Kurzfassung)
