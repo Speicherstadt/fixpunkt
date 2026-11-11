@@ -110,17 +110,16 @@ Zum Vergleich: Das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € netto �
 
 Die Fixpunkt-Cloud läuft von Anfang an bei **netcup** (deutsches Rechenzentrum, DSGVO).
 
-**Stufenweise:** Klein anfangen. Die Rechenlast steckt fast nur in der Drohnen-Photogrammetrie (ODM).
-Die läuft am Anfang auf dem **Mac mini (64 GB)** als Worker – der netcup-Server muss dann nur Web, API, Datenbank und die leichte Handscan-Verarbeitung stemmen.
+**Keine Kompromisse bei der Leistung.** Die Drohne liefert pro Flug hunderte bis tausende Fotos – die Photogrammetrie (ODM) braucht dafür viel RAM und Kerne.
+Deshalb läuft die komplette Verarbeitung direkt auf einem starken netcup-Server, der Mac mini bleibt reine Entwicklungsmaschine.
 
-| Stufe | Tarif | Preis netto | Wann |
+| | Tarif | Preis netto | Wofür |
 |---|---|---|---|
-| **Start** | **netcup RS 1000 G12.5** – 4 dedizierte vCores (AMD EPYC), 8 GB RAM, 128 GB NVMe | **21,73 €/Monat** (12 Monate Laufzeit) | Web, API, Postgres, Handscans; ODM-Jobs laufen auf dem Mac mini |
-| Noch kleiner | netcup VPS (geteilte Kerne) | ca. 5–10 €/Monat | Reicht für reines Web/API, wird bei Punktwolken zäh |
-| Ausbau | netcup RS 2000 G12.5 – 8 vCores, 16 GB, 256 GB | 40,70 €/Monat | Wenn ODM auf den Server soll (kleine/mittlere Flüge) |
-| Viel Drohne | netcup RS 4000 G12.5 – 12 vCores, 32 GB, 512 GB | 77,83 €/Monat | Viele Flüge mit tausenden Bildern |
-| **Speicher** | **netcup Storage Space B – 500 GB** | **8,00 €/Monat** | Start; später Tarif C (1 TB) für 15 €/Monat |
+| **Server (empfohlen)** | **netcup RS 8000 G12.5** – 16 dedizierte vCores (AMD EPYC 9645), **64 GB RAM**, **1 TB NVMe** | **148,42 €/Monat** (12 Monate Laufzeit) | Web, API, Postgres, Rust-Worker **und** ODM für Flüge mit tausenden Fotos, ohne lange Wartezeiten |
+| Speicher (Archiv) | **netcup Storage Space C – 1 TB** | **15,00 €/Monat** (+0,02 €/GB darüber) | Rohdaten und alte Projekte; die NVMe bleibt für aktive Jobs frei |
 | Domain | Subdomain von teufel-it.de (Cloudflare) | 0 € | z. B. `fixpunkt.teufel-it.de` |
+| Noch mehr Leistung | netcup RS 12000 / RS 16000 G12.5 (96 / 128 GB RAM) | 216,89 / 289,46 €/Monat | Nur auf Anfrage; erst wenn mehrere große Flüge parallel laufen |
+| Kleinere Alternative | netcup RS 4000 G12.5 – 12 vCores, 32 GB, 512 GB | 77,83 €/Monat | Reicht für Flüge mit einigen hundert Fotos |
 
 Faustregel ODM: Ein paar hundert Fotos brauchen ~16 GB RAM, tausende Fotos 32–64 GB. 24 Monate Laufzeit sind bei netcup nochmals günstiger.
 
@@ -136,13 +135,13 @@ Schätzung, gemischt brutto (Apple, DJI) und netto (Emlid). Vorhandene Drohne de
 
 ### 3.7 Laufende Kosten
 
-**Monatlich (Start)**
+**Monatlich**
 
 | Posten | Kosten netto |
 |---|---|
-| netcup RS 1000 G12.5 | 21,73 € |
-| netcup Storage Space B (500 GB) | 8,00 € |
-| **Summe monatlich** | **~30 €** |
+| netcup RS 8000 G12.5 | 148,42 € |
+| netcup Storage Space C (1 TB) | 15,00 € |
+| **Summe monatlich** | **~163 €** |
 
 Mobilfunkdaten fürs iPhone auf der Baustelle, falls nicht schon vorhanden: zusätzlich.
 
@@ -150,12 +149,12 @@ Mobilfunkdaten fürs iPhone auf der Baustelle, falls nicht schon vorhanden: zus�
 
 | Posten | Kosten |
 |---|---|
-| netcup (12 × ~30 €) | ~357 € |
+| netcup (12 × ~163 €) | ~1.961 € |
 | Apple Developer Program | 99 $ |
 | Drohnen-Haftpflicht (gewerblich) | Schätzung 100–400 € – Angebote einholen |
 | DJI Care Enterprise Plus (Verlängerung ab Jahr 2, optional) | laut Händler |
 | AppleCare+ für Mac/iPhone (optional) | laut Apple |
-| **Summe pro Jahr (ohne Optionen)** | **~550–850 €** |
+| **Summe pro Jahr (ohne Optionen)** | **~2.150–2.450 €** |
 
 **Alle 5 Jahre**
 
@@ -163,8 +162,6 @@ Mobilfunkdaten fürs iPhone auf der Baustelle, falls nicht schon vorhanden: zus�
 |---|---|
 | EU-Kompetenznachweis A1/A3 erneuern | ~25 € |
 | A2-Fernpilotenzeugnis erneuern | Schätzung |
-
-Ausbau später: RS 2000 + 1 TB Speicher ≈ 56 €/Monat, RS 4000 + 1 TB ≈ 93 €/Monat.
 
 ### 3.8 Wo kaufen / beantragen
 
@@ -176,8 +173,8 @@ Ausbau später: RS 2000 + 1 TB Speicher ≈ 56 €/Monat, RS 4000 + 1 TB ≈ 93 
 | Emlid Reach RX2, Scanning Handle, Lotstab | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) | Preise netto |
 | DJI Matrice 4E | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) | EU-Version (C2) nehmen |
 | DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Alternative mit Beratung, Schulung, Service |
-| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | Start: RS 1000 G12.5 |
-| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Start: Tarif B (500 GB) |
+| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | RS 8000 G12.5 |
+| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Tarif C (1 TB) |
 | SAPOS-Korrekturdaten | [Zentrale Stelle SAPOS – Gebühren & Registrierung](https://zentrale-stelle-sapos.de/en/fees-registration/) | in BW kostenlos, Registrierung nötig |
 | LBA-Betreiberregistrierung | [uas-betrieb.bund.de – Registrierung als Betreiber](https://uas-betrieb.bund.de/homepage/en/applications-administrative-services/registration-as-an-operator) | e-ID für die Drohne |
 | Geozonen prüfen | [dipul.de](https://www.dipul.de) | vor jedem Flug |
