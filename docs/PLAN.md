@@ -63,25 +63,28 @@ Abgeleitet aus dem, was SDX-Cloud/PocketScan anbieten:
 
 ## 3. Hardware & Kosten
 
+**Grundsatz:** Nur Neuware, Apple-Geräte direkt bei Apple, in guter Ausstattung – kein Warten auf Builds, kein Gebastel.
+Preise: Apple inkl. MwSt., Emlid und netcup netto (Teufel-IT ist vorsteuerabzugsberechtigt).
+
 ### 3.1 Entwicklung
 
 | Gerät | Empfehlung | Preis (ca.) | Wofür |
 |---|---|---|---|
-| **Mac mini** | Mac mini M6, 16 GB (aktuelles Einstiegsmodell). Alternativ gebraucht M1/M2/M4 | **1.049 €** neu / 400–700 € gebraucht | Xcode: iOS-App bauen, signieren, aufs iPhone bringen. Entwickelt wird weiter unter Linux. |
+| **Mac mini** | **Mac mini M5 Pro, 18-Core CPU / 20-Core GPU, 64 GB, 1 TB SSD** | Einstieg M5 Pro ab 1.999 €; diese Ausstattung **ca. 3.000–3.700 €** (genau im Apple-Konfigurator) | Schnelle Xcode-Builds, Simulator, ARKit-Debugging; 64 GB reichen auch, um Punktwolken und ODM lokal zu testen |
+| Alternative Mac mini | M5 Pro 15-Core / 16-Core GPU, 24 GB, 512 GB | ab 1.999 € | Reicht für die iOS-App allein auch flüssig |
 | Apple Developer Program | – | **99 $/Jahr** | TestFlight, Verteilung an Kumpel |
-| GitHub Actions macOS-Runner | optional | nutzungsabhängig | CI-Builds ohne Mac am Schreibtisch |
 
 ### 3.2 Handscan (PocketScan-Variante)
 
 | Gerät | Empfehlung | Preis (ca.) | Notiz |
 |---|---|---|---|
-| **iPhone mit LiDAR** | **iPhone 18 Pro** (neu) – oder gebrauchtes iPhone 15/16/17 Pro | **1.449 €** neu (256 GB) / 500–900 € gebraucht | LiDAR haben alle Pro-Modelle ab 12 Pro. Kein Plus/Standard-Modell! |
-| **RTK-Rover** | **Emlid Reach RX2** (Bluetooth, Neigungskompensation, 1 Jahr Korrekturdaten inklusive) | **1.999 €** netto | Bewährt, Bluetooth-NMEA, funktioniert mit jeder NTRIP-Quelle |
-| Halterung Phone + Rover | Emlid Scanning Handle **oder** selbst gedruckt (Bambu P2S) | 199 € / ~5 € | Muss starr sein, Antennen-Offset bekannt |
-| Lotstab mit Handyhalter | Emlid Survey Pole | 299 € | Passpunkte einmessen |
+| **iPhone mit LiDAR** | **iPhone 18 Pro Max, 512 GB** | ab 1.599 € (256 GB), 512 GB mit Aufpreis | Großes Display und Akku für die Baustelle, LiDAR, viel Speicher für Scans |
+| Alternative | iPhone 18 Pro | ab 1.449 € (256 GB) | Kompakter, gleicher LiDAR |
+| **RTK-Rover** | **Emlid Reach RX2** (Bluetooth, Neigungskompensation, Multiband) | **1.999 €** netto | Bewährt, funktioniert mit jeder NTRIP-Quelle (SAPOS) |
+| Halterung Phone + Rover | Emlid Scanning Handle | 199 € netto | Starr, bekannter Antennen-Offset |
+| Lotstab mit Handyhalter | Emlid Survey Pole | 299 € netto | Passpunkte einmessen |
 | Passpunkte (GCP-Marken) | 10–20 Zielmarken / Vermessungsnägel | ~50 € | Genauigkeitsnachweis |
 | Korrekturdaten | **SAPOS HEPS** (NTRIP) | **0 €** | In Baden-Württemberg kostenlos |
-| **Budget-Alternative Rover** | ArduSimple-Board mit UM980 oder ZED-F9P + Multiband-Antenne + Gehäuse (selbst gedruckt) + BLE-Modul | ~300–600 € (Schätzung) | Mehr Bastelaufwand, kein Support |
 
 Zum Vergleich: Das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € netto – das ist praktisch das Produkt, das wir nachbauen.
 
@@ -89,9 +92,8 @@ Zum Vergleich: Das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € netto �
 
 | Gerät | Empfehlung | Preis (ca.) | Notiz |
 |---|---|---|---|
-| **Drohne** | **DJI Matrice 4E** – RTK eingebaut, mechanischer Verschluss, 20-MP-Weitwinkel + Tele, EU-Klasse **C2** | **~4.900 €** | Standard für Baustellen-Mapping |
+| **Drohne** | **DJI Matrice 4E (EU)** – RTK eingebaut, mechanischer Verschluss, 20-MP-Weitwinkel + Tele, EU-Klasse **C2** | **~4.900 €** | Standard für Baustellen-Mapping; inkl. 1 Jahr DJI Care Enterprise Plus |
 | Ersatzakkus | 2× Matrice 4 Intelligent Flight Battery | 2× ~199 € | Ein Akku reicht nicht für einen Arbeitstag |
-| Alternative | Gebrauchte **Mavic 3 Enterprise (M3E)** + RTK-Modul | gebraucht günstiger | Vorgänger, für Baustellen weiterhin gut |
 | Prüfen | Vorhandene Drohne des Kumpels | – | Reicht sie (RTK? mechanischer Verschluss?) |
 
 ### 3.4 Drohnen-Betrieb (rechtlich nötig)
@@ -101,45 +103,79 @@ Zum Vergleich: Das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € netto �
 | LBA-Betreiberregistrierung | 20 € (natürliche Person) / 50 € (juristische Person) |
 | EU-Kompetenznachweis A1/A3 (Online-Test) | ~25 € |
 | EU-Fernpilotenzeugnis A2 (für C2 nahe an Personen) | Kurs + Prüfung, Schätzung 150–300 € |
-| Drohnen-Haftpflicht (gewerblich) | Schätzung 100–400 €/Jahr |
+| Drohnen-Haftpflicht (gewerblich) | Schätzung 100–400 €/Jahr – Angebote einholen |
 | Kennzeichen mit e-ID | wenige € |
 
-### 3.5 Betrieb / Server
+### 3.5 Cloud / Hosting – netcup
 
-| Posten | Preis (ca.) | Notiz |
-|---|---|---|
-| Server (Hetzner Dedicated oder vorhandener Heimserver) | Schätzung 40–100 €/Monat | Für Web, Postgres, Rust-Worker |
-| GPU für ODM (optional) | nach Bedarf | ODM läuft auch auf CPU, nur langsamer |
-| S3-Storage | wenige €/Monat pro 100 GB | Rohdaten sind groß (Drohnenflug: mehrere GB) |
+Die Fixpunkt-Cloud läuft von Anfang an bei **netcup** (deutsches Rechenzentrum, DSGVO).
 
-### 3.6 Zusammenfassung
+| Posten | Tarif | Preis netto | Notiz |
+|---|---|---|---|
+| **Server** | **netcup RS 2000 G12.5** – 8 dedizierte vCores (AMD EPYC), 16 GB RAM, 256 GB NVMe | **40,70 €/Monat** (12 Monate Laufzeit) | Web, API, Postgres, Rust-Worker, ODM für kleine bis mittlere Flüge |
+| Upgrade später | netcup RS 4000 G12.5 – 12 vCores, 32 GB RAM, 512 GB NVMe | 77,83 €/Monat | Sobald viele/große Drohnenflüge kommen |
+| **Speicher** | **netcup Storage Space C – 1 TB** | **15,00 €/Monat** (+0,02 €/GB darüber) | Rohdaten, Fotos, Punktwolken |
+| Kleiner Einstieg | Storage Space B – 500 GB | 8,00 €/Monat | Reicht für die ersten Monate |
+| Domain | Subdomain von teufel-it.de (Cloudflare) | 0 € | z. B. `fixpunkt.teufel-it.de` |
+
+24 Monate Laufzeit sind bei netcup nochmals günstiger. ODM läuft auf CPU – eine GPU brauchen wir erst bei sehr vielen Flügen.
+
+### 3.6 Einmalige Anschaffung
 
 | Paket | Inhalt | Summe (ca.) |
 |---|---|---|
-| **Start (empfohlen)** | Mac mini M6 + Developer Account + iPhone 18 Pro + Reach RX2 + Handle + Lotstab + GCPs | **~5.100 €** |
-| Start (sparsam) | Gebrauchter Mac mini + gebrauchtes iPhone Pro + ArduSimple-Rover (gedruckte Halterung) | **~1.500–2.000 €** |
-| **+ Drohne** | Matrice 4E + 2 Akkus + Papierkram + Versicherung | **+ ~5.700 €** |
-| Laufend | Developer Account, Versicherung, Server | **~100–200 €/Monat** |
+| **Handscan + Entwicklung** | Mac mini M5 Pro (64 GB/1 TB) + iPhone 18 Pro Max 512 GB + Reach RX2 + Handle + Lotstab + GCPs | **~7.500–8.500 €** |
+| **Drohne** | Matrice 4E + 2 Akkus + Registrierung + Führerscheine | **~5.500–5.800 €** |
+| **Gesamt** | | **~13.000–14.300 €** |
 
-Vorhandenes (iPhone, Drohne des Kumpels, Heimserver) senkt die Summen entsprechend.
+Schätzung, gemischt brutto (Apple, DJI) und netto (Emlid). Vorhandene Drohne des Kumpels senkt die Summe um den Drohnenblock.
 
-### 3.7 Wo kaufen / beantragen
+### 3.7 Laufende Kosten
+
+**Monatlich**
+
+| Posten | Kosten netto |
+|---|---|
+| netcup RS 2000 G12.5 | 40,70 € |
+| netcup Storage Space C (1 TB) | 15,00 € |
+| Mobile Daten fürs iPhone auf der Baustelle (falls nicht vorhanden) | Schätzung 10–20 € |
+| **Summe monatlich** | **~56–76 €** |
+
+**Jährlich**
+
+| Posten | Kosten |
+|---|---|
+| Apple Developer Program | 99 $ |
+| Drohnen-Haftpflicht (gewerblich) | Schätzung 100–400 € |
+| DJI Care Enterprise Plus (Verlängerung ab Jahr 2, optional) | laut Händler |
+| AppleCare+ für Mac/iPhone (optional) | laut Apple |
+| **Summe jährlich (ohne Optionen)** | **~200–500 €** |
+
+**Alle 5 Jahre**
+
+| Posten | Kosten |
+|---|---|
+| EU-Kompetenznachweis A1/A3 erneuern | ~25 € |
+| A2-Fernpilotenzeugnis erneuern | Schätzung |
+
+**Gesamt laufend: ca. 900–1.400 € pro Jahr** (netcup + Apple + Versicherung, ohne Optionen).
+Später mit RS 4000 statt RS 2000: rund +450 € pro Jahr.
+
+### 3.8 Wo kaufen / beantragen
 
 | Was | Link | Notiz |
 |---|---|---|
-| Mac mini (neu) | [apple.com/de/mac-mini](https://www.apple.com/de/mac-mini/) | |
-| Mac mini (generalüberholt) | [Apple Refurbished Mac](https://www.apple.com/de/shop/refurbished/mac) | günstiger, mit Apple-Garantie |
+| Mac mini | [Apple Store – Mac mini kaufen](https://www.apple.com/de/shop/buy-mac/mac-mini) | M5 Pro konfigurieren |
+| iPhone 18 Pro / Pro Max | [Apple Store – iPhone kaufen](https://www.apple.com/de/shop/buy-iphone) | Pro-Modell (LiDAR) |
 | Apple Developer Program | [developer.apple.com/programs](https://developer.apple.com/programs/) | 99 $/Jahr |
-| iPhone Pro (neu) | [Apple Store – iPhone kaufen](https://www.apple.com/de/shop/buy-iphone) | Pro-Modell wählen (LiDAR) |
-| iPhone Pro (generalüberholt) | [Apple Refurbished iPhone](https://www.apple.com/de/shop/refurbished/iphone) | Verfügbarkeit schwankt |
 | Emlid Reach RX2, Scanning Handle, Lotstab | [Emlid EU-Store – Reach RX2](https://eu.store.emlid.com/en-es/collections/reachrx2-products) | Preise netto |
-| Budget-Rover ArduSimple (UM980) | [ArduSimple simpleRTK3B Budget](https://www.ardusimple.com/product/simplertk3b-budget) | Antenne + BLE-Modul extra |
 | DJI Matrice 4E | [Galaxus – DJI Matrice 4E (EU)](https://www.galaxus.de/en/s1/product/dji-matrice-4e-eu-1219-g-20-mpx-drone-54319549) | EU-Version (C2) nehmen |
-| DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Beratung, Schulung, Service |
+| DJI-Enterprise-Fachhändler | [Händlerübersicht drohnen.de](https://www.drohnen.de/22293/dji-enterprise-haendler/) | Alternative mit Beratung, Schulung, Service |
+| netcup Root-Server | [netcup Root-Server](https://www.netcup.com/de/server/root-server) | RS 2000 G12.5 |
+| netcup Speicher | [netcup Storage Space](https://netcup.com/en/server/storage-space) | Tarif C (1 TB) |
 | SAPOS-Korrekturdaten | [Zentrale Stelle SAPOS – Gebühren & Registrierung](https://zentrale-stelle-sapos.de/en/fees-registration/) | in BW kostenlos, Registrierung nötig |
 | LBA-Betreiberregistrierung | [uas-betrieb.bund.de – Registrierung als Betreiber](https://uas-betrieb.bund.de/homepage/en/applications-administrative-services/registration-as-an-operator) | e-ID für die Drohne |
 | Geozonen prüfen | [dipul.de](https://www.dipul.de) | vor jedem Flug |
-| Server | [Hetzner Dedicated Server](https://www.hetzner.com/dedicated-rootserver) | oder vorhandener Heimserver |
 
 ---
 
@@ -303,9 +339,8 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 - [ ] Welche Drohne hat der Kumpel bereits – RTK? mechanischer Verschluss?
 - [ ] Welche Use-Cases zuerst: Haufwerke, Gräben/Leitungen oder Flächen?
 - [ ] Welche Ausgabeformate braucht der Bauleiter / das Büro konkret (DXF? LandXML? REB?)
-- [ ] Self-hosted beim Kumpel oder zentral gehostet?
 - [ ] Open Source oder privat? Geschäftsmodell, falls Produkt
-- [ ] iPhone neu (18 Pro) oder gebraucht?
+- [ ] iPhone 18 Pro oder Pro Max?
 
 ---
 
@@ -313,7 +348,7 @@ iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austausc
 
 - Vorbild: [SDX-PocketScan](https://makineo.de/produkte/baudokumentation-3d/pocket-scan) · [SDX-Cloud](https://makineo.de/produkte/baudokumentation-3d/infrastruktur-sdx-cloud) · [Datenblatt](https://makineo.de/fileadmin/Home/Produkte/Baudokumentation/SDX-POCKETSCAN/2026/WEB_Makineo_SDX-PocketScan_Datenblatt.pdf)
 - Vergleichbar: Pix4Dcatch + Emlid Scanning Kit
-- Hardware: [Emlid Reach RX2 (EU-Store)](https://eu.store.emlid.com/en-es/collections/reachrx2-products) · DJI Matrice 4E · Mac mini M6 · iPhone 18 Pro
+- Hardware: [Emlid Reach RX2 (EU-Store)](https://eu.store.emlid.com/en-es/collections/reachrx2-products) · DJI Matrice 4E · Mac mini M5 Pro · iPhone 18 Pro Max · netcup
 - Open Source: OpenDroneMap / NodeODM, COLMAP, OpenMVS, PDAL, Open3D, Potree, CesiumJS, RTKLIB, PROJ
 - Korrekturdaten: SAPOS Baden-Württemberg (HEPS, kostenlos)
 - Drohnenrecht: [dipul.de](https://www.dipul.de), Luftfahrt-Bundesamt
