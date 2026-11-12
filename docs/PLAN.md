@@ -204,6 +204,24 @@ Preise und Varianten aus Händler-/Herstellerseiten, vor dem Kauf prüfen.
 
 netcup lässt sich innerhalb der Produktlinie hochstufen – wir müssen also nicht im Voraus für Reserven zahlen.
 
+### 3.4a Alternative: eigener Rechner statt Mietserver (Stand 12.11.2026)
+
+Die schwere Arbeit (OpenDroneMap) fällt nur gelegentlich an – ein eigener Rechner ist dafür deutlich stärker als ein Mietserver.
+**Entscheidung erst nach den ersten echten Flügen**; bis dahin reicht ein vorhandener PC mit öffentlichen Testdaten.
+
+| Teil | Empfehlung | ca. Preis |
+|---|---|---|
+| CPU | AMD Ryzen 9 9950X (16 Kerne) | ~430–460 € |
+| RAM | 64 GB DDR5 (2× 32 GB) + großer Swap – 128 GB aktuell zu teuer (RAM-Preise stark gestiegen), später aufrüstbar | ~1.100–1.400 € |
+| GPU | **NVIDIA** RTX 5060 Ti 16 GB (ODM nutzt nur CUDA, Image `opendronemap/odm:gpu`) | ~735–850 € |
+| Rest | AM5-Board, 2 TB NVMe, 850-W-Netzteil, Gehäuse | ~600–800 € |
+| **Summe** | Linux (Ubuntu Server), Docker/Podman | **ca. 3.000–3.500 €** |
+
+- Kaufen: Fertig-PC mit Garantie über einen deutschen Systembauer (z. B. CSL, MIFCOM, dubaro) – Bewertungen auf Geizhals/Trustpilot vor der Bestellung vergleichen; Vergleich: [Geizhals Komplettsysteme 9950X](https://geizhals.eu/komplettsystem-amd-ryzen-9-9950x-a3442862.html)
+- ODM-Faustregel RAM: ~32 GB für 500 Fotos, ~64 GB für 1.500 Fotos – eine Baugrube sind einige hundert Fotos
+- Betrieb: Rechner zu Hause für die Verarbeitung, kleiner Mietserver (5–10 €/Monat) oder Cloudflare Tunnel/Tailscale für Web/Upload, Backup außer Haus (4–15 €/Monat)
+- Laufend ca. 20–40 €/Monat statt 49–93 €; amortisiert sich gegenüber RS 4000 nach etwa 3–4 Jahren, ist dafür etwa doppelt so stark
+
 ### 3.5 Laufende Kosten
 
 | | Entwicklung | Echtbetrieb |
@@ -386,7 +404,8 @@ Quelle: [Emlid – How to integrate with Reach RX2](https://docs.emlid.com/reach
 **Reihenfolge: Drohne zuerst** (Baugruben), iPhone + Rover danach.
 
 ### Phase 0 – Setup (1–2 Wochen)
-- [ ] Repo-Struktur: `apps/web`, `crates/processing`, `infra`, `docs` (`apps/ios` erst ab Phase 4)
+- [x] Repo-Struktur begonnen: `crates/processing` (Volumen-Engine: Aushub-Differenz, Haufwerk, Tests)
+- [ ] Weitere Struktur: `apps/web`, `infra` (`apps/ios` erst ab Phase 4)
 - [ ] netcup RS 2000 aufsetzen, NodeODM testen
 - [ ] SAPOS-Zugang (BW) beantragen
 - [ ] **Mit der Firma klären:** Drohne (Matrice 4E) oder BLK2GO (+ Rover)? Matrice 4E kaufen? Wer macht A1/A3 + A2? Betreiberregistrierung, Versicherung
