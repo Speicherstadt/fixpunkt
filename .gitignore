@@ -1,0 +1,5 @@
+target/
+*.las
+*.laz
+*.asc
+!crates/processing/tests/data/**

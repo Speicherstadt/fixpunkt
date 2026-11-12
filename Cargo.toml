@@ -1,0 +1,7 @@
+[workspace]
+resolver = "2"
+members = ["crates/processing"]
+
+[profile.release]
+debug = false
+lto = "thin"
