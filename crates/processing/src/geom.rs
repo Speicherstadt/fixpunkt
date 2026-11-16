@@ -2,6 +2,7 @@
 //!
 //! Alle Koordinaten sind projiziert und metrisch (z. B. ETRS89/UTM32, EPSG:25832).
 
+use crate::crs::Utm;
 use anyhow::{bail, Context, Result};
 use serde_json::Value;
 use std::path::Path;
@@ -129,50 +130,162 @@ impl Polygon {
 
     /// Liest das erste Polygon aus einer GeoJSON-Datei (Polygon, Feature oder FeatureCollection).
     ///
-    /// Achtung: Koordinaten werden **nicht** umprojiziert. Die Datei muss im selben
-    /// metrischen System wie die Punktwolke vorliegen (z. B. in QGIS als EPSG:25832 exportieren).
+    /// Metrische Koordinaten werden unverändert übernommen (müssen im System der Punktwolke sein).
+    /// Längen-/Breitengrad (GeoJSON-Standard, ETRS89 ≈ WGS84) wird nach ETRS89/UTM32 umgerechnet.
     pub fn from_geojson_file(path: &Path) -> Result<Self> {
-        let text = std::fs::read_to_string(path)
-            .with_context(|| format!("Grenze {} nicht lesbar", path.display()))?;
-        Self::from_geojson_str(&text)
+        Ok(Self::regions_from_geojson_file(path)?.remove(0).polygon)
     }
 
     pub fn from_geojson_str(text: &str) -> Result<Self> {
-        let v: Value = serde_json::from_str(text).context("ungültiges GeoJSON")?;
-        let geom = find_polygon_geometry(&v).context("kein Polygon im GeoJSON gefunden")?;
-        let rings = match geom.get("type").and_then(Value::as_str) {
-            Some("Polygon") => geom.get("coordinates"),
-            Some("MultiPolygon") => geom.get("coordinates").and_then(|c| c.get(0)),
-            _ => None,
-        }
-        .and_then(Value::as_array)
-        .context("Polygon ohne Koordinaten")?;
+        Ok(Self::regions_from_geojson_str(text, Utm::default())?.remove(0).polygon)
+    }
 
-        let mut parsed = rings.iter().map(parse_ring).collect::<Result<Vec<_>>>()?;
-        if parsed.is_empty() {
-            bail!("Polygon ohne Ringe");
+    /// Alle Polygone einer GeoJSON-Datei als benannte Bereiche (Geofences).
+    pub fn regions_from_geojson_file(path: &Path) -> Result<Vec<Region>> {
+        let text = std::fs::read_to_string(path)
+            .with_context(|| format!("Grenze {} nicht lesbar", path.display()))?;
+        Self::regions_from_geojson_str(&text, Utm::default())
+    }
+
+    /// Wie [`regions_from_geojson_file`](Self::regions_from_geojson_file); `utm` = Zielzone für Grad-Koordinaten.
+    pub fn regions_from_geojson_str(text: &str, utm: Utm) -> Result<Vec<Region>> {
+        let v: Value = serde_json::from_str(text).context("ungültiges GeoJSON")?;
+        let metric = declares_metric_crs(&v);
+        let mut found = Vec::new();
+        collect_polygons(&v, None, &mut found);
+        if found.is_empty() {
+            bail!("kein Polygon im GeoJSON gefunden");
         }
-        let exterior = parsed.remove(0);
-        let poly = Polygon::with_holes(exterior, parsed)?;
-        let b = poly.bbox();
-        if b.max_x.abs() <= 180.0 && b.max_y.abs() <= 90.0 {
-            bail!(
-                "Grenze sieht nach Längen-/Breitengrad aus. Bitte im metrischen System der \
-                 Punktwolke speichern (z. B. EPSG:25832)."
-            );
+        let mut out = Vec::new();
+        for (i, (name, rings)) in found.into_iter().enumerate() {
+            let mut parsed = rings.iter().map(parse_ring).collect::<Result<Vec<_>>>()?;
+            if parsed.is_empty() {
+                bail!("Polygon ohne Ringe");
+            }
+            if !metric && looks_geographic(parsed.iter().flatten()) {
+                for ring in &mut parsed {
+                    for p in ring.iter_mut() {
+                        let (e, n) = utm.forward(p[1], p[0]);
+                        *p = [e, n];
+                    }
+                }
+            }
+            let exterior = parsed.remove(0);
+            let polygon = Polygon::with_holes(exterior, parsed)?;
+            out.push(Region { name: name.unwrap_or_else(|| format!("Bereich {}", i + 1)), polygon });
         }
-        Ok(poly)
+        Ok(out)
     }
 }
 
-fn find_polygon_geometry(v: &Value) -> Option<&Value> {
-    match v.get("type")?.as_str()? {
-        "Polygon" | "MultiPolygon" => Some(v),
-        "Feature" => find_polygon_geometry(v.get("geometry")?),
-        "FeatureCollection" => v.get("features")?.as_array()?.iter().find_map(find_polygon_geometry),
-        "GeometryCollection" => v.get("geometries")?.as_array()?.iter().find_map(find_polygon_geometry),
-        _ => None,
+fn looks_geographic<'a>(mut pts: impl Iterator<Item = &'a [f64; 2]>) -> bool {
+    pts.all(|p| p[0].abs() <= 180.0 && p[1].abs() <= 90.0)
+}
+
+/// `true`, wenn das (alte) GeoJSON-Feld `crs` ein anderes System als Länge/Breite nennt,
+/// z. B. `urn:ogc:def:crs:EPSG::25832` aus einem QGIS-Export.
+fn declares_metric_crs(v: &Value) -> bool {
+    let Some(name) = v.pointer("/crs/properties/name").and_then(Value::as_str) else { return false };
+    let n = name.to_ascii_uppercase();
+    !(n.contains("CRS84") || n.ends_with(":4326") || n.ends_with(":4258") || n.ends_with("::4326") || n.ends_with("::4258"))
+}
+
+/// Benannter Abrechnungsbereich
+#[derive(Debug, Clone, PartialEq)]
+pub struct Region {
+    pub name: String,
+    pub polygon: Polygon,
+}
+
+fn feature_name(v: &Value) -> Option<String> {
+    let p = v.get("properties")?;
+    ["name", "Name", "NAME", "bezeichnung", "Bezeichnung", "id"]
+        .iter()
+        .find_map(|k| p.get(*k))
+        .map(|n| n.as_str().map(str::to_string).unwrap_or_else(|| n.to_string()))
+}
+
+fn collect_polygons<'a>(v: &'a Value, name: Option<String>, out: &mut Vec<(Option<String>, &'a Vec<Value>)>) {
+    match v.get("type").and_then(Value::as_str) {
+        Some("Polygon") => {
+            if let Some(c) = v.get("coordinates").and_then(Value::as_array) {
+                out.push((name, c));
+            }
+        }
+        Some("MultiPolygon") => {
+            if let Some(ps) = v.get("coordinates").and_then(Value::as_array) {
+                let many = ps.len() > 1;
+                for (i, c) in ps.iter().filter_map(Value::as_array).enumerate() {
+                    let n = if many { name.clone().map(|n| format!("{n} ({})", i + 1)) } else { name.clone() };
+                    out.push((n, c));
+                }
+            }
+        }
+        Some("Feature") => {
+            if let Some(g) = v.get("geometry") {
+                collect_polygons(g, feature_name(v).or(name), out);
+            }
+        }
+        Some("FeatureCollection") => {
+            for f in v.get("features").and_then(Value::as_array).into_iter().flatten() {
+                collect_polygons(f, None, out);
+            }
+        }
+        Some("GeometryCollection") => {
+            for g in v.get("geometries").and_then(Value::as_array).into_iter().flatten() {
+                collect_polygons(g, name.clone(), out);
+            }
+        }
+        _ => {}
     }
+}
+
+/// Liest eine Linie (LineString) aus GeoJSON – z. B. Profilachse oder Leitungsverlauf.
+pub fn line_from_geojson_str(text: &str, utm: Utm) -> Result<Vec<[f64; 2]>> {
+    fn find(v: &Value) -> Option<&Value> {
+        match v.get("type")?.as_str()? {
+            "LineString" => v.get("coordinates"),
+            "MultiLineString" => v.get("coordinates")?.get(0),
+            "Feature" => find(v.get("geometry")?),
+            "FeatureCollection" => v.get("features")?.as_array()?.iter().find_map(find),
+            _ => None,
+        }
+    }
+    let v: Value = serde_json::from_str(text).context("ungültiges GeoJSON")?;
+    let mut pts = parse_ring(find(&v).context("keine Linie im GeoJSON gefunden")?)?;
+    if pts.len() < 2 {
+        bail!("Linie braucht mindestens 2 Punkte");
+    }
+    if !declares_metric_crs(&v) && looks_geographic(pts.iter()) {
+        for p in pts.iter_mut() {
+            let (e, n) = utm.forward(p[1], p[0]);
+            *p = [e, n];
+        }
+    }
+    Ok(pts)
+}
+
+/// Linie aus Datei: GeoJSON oder Text mit `x y` je Zeile.
+pub fn line_from_file(path: &Path) -> Result<Vec<[f64; 2]>> {
+    let text = std::fs::read_to_string(path).with_context(|| format!("{} nicht lesbar", path.display()))?;
+    if text.trim_start().starts_with('{') {
+        return line_from_geojson_str(&text, Utm::default());
+    }
+    let pts: Vec<[f64; 2]> = text
+        .lines()
+        .filter_map(|l| {
+            let v: Vec<f64> = l
+                .split(|c: char| c.is_whitespace() || c == ',' || c == ';')
+                .filter(|s| !s.is_empty())
+                .map_while(|s| s.parse().ok())
+                .collect();
+            (v.len() >= 2).then(|| [v[0], v[1]])
+        })
+        .collect();
+    if pts.len() < 2 {
+        bail!("{}: Linie braucht mindestens 2 Punkte (x y je Zeile)", path.display());
+    }
+    Ok(pts)
 }
 
 fn parse_ring(v: &Value) -> Result<Vec<[f64; 2]>> {
@@ -263,8 +376,28 @@ mod tests {
     }
 
     #[test]
-    fn geojson_rejects_wgs84() {
-        let gj = r#"{"type":"Polygon","coordinates":[[[9.1,48.7],[9.2,48.7],[9.2,48.8],[9.1,48.7]]]}"#;
-        assert!(Polygon::from_geojson_str(gj).is_err());
+    fn geojson_wgs84_is_projected_to_utm32() {
+        let gj = r#"{"type":"Polygon","coordinates":[[[9.0,48.0],[9.001,48.0],[9.001,48.001],[9.0,48.001],[9.0,48.0]]]}"#;
+        let p = Polygon::from_geojson_str(gj).unwrap();
+        let b = p.bbox();
+        assert!((b.min_x - 500_000.0).abs() < 1e-6, "{}", b.min_x);
+        assert!(b.min_y > 5_316_000.0 && b.min_y < 5_317_000.0, "{}", b.min_y);
+        // 0,001° ≈ 74,6 m × 111,2 m
+        assert!((p.area() - 74.6 * 111.2).abs() < 30.0, "{}", p.area());
+    }
+
+    #[test]
+    fn multiple_named_regions_and_lines() {
+        let gj = r#"{"type":"FeatureCollection","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:EPSG::25832"}},"features":[
+            {"type":"Feature","properties":{"name":"Grube Nord"},"geometry":{"type":"Polygon","coordinates":[[[0,0],[10,0],[10,10],[0,10]]]}},
+            {"type":"Feature","properties":{},"geometry":{"type":"LineString","coordinates":[[0,0],[5,5]]}},
+            {"type":"Feature","properties":{"id":7},"geometry":{"type":"MultiPolygon","coordinates":[[[[20,0],[30,0],[30,10]]]]}}]}"#;
+        let r = Polygon::regions_from_geojson_str(gj, Utm::default()).unwrap();
+        assert_eq!(r.len(), 2);
+        assert_eq!(r[0].name, "Grube Nord");
+        assert_eq!(r[1].name, "7");
+        assert!((r[0].polygon.area() - 100.0).abs() < 1e-9);
+        let l = line_from_geojson_str(gj, Utm::default()).unwrap();
+        assert_eq!(l, vec![[0.0, 0.0], [5.0, 5.0]]);
     }
 }

@@ -27,4 +27,4 @@ Details, Einkaufsliste und Phasen: **[docs/PLAN.md](docs/PLAN.md)**
 
 ## Status
 
-🟡 Planung · erste Engine in `crates/processing` (Volumenberechnung aus Drohnen-Punktwolken)
+🟡 Planung · **Rechenkern fertig** in `crates/processing` (Volumen, Soll/Ist, Bodenfilter, Georeferenzierung, Messen, Exporte – [Details](crates/processing/README.md))

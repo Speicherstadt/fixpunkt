@@ -238,6 +238,38 @@ impl Grid {
         )
     }
 
+    /// Überträgt das Raster bilinear auf ein anderes Gitter (z. B. ODM-DGM auf das Abrechnungsraster).
+    pub fn resample(&self, spec: GridSpec) -> Grid {
+        if spec == self.spec {
+            return self.clone();
+        }
+        let mut out = Grid::new_nodata(spec);
+        for r in 0..spec.rows {
+            for c in 0..spec.cols {
+                let (x, y) = spec.center(c, r);
+                if let Some(z) = self.sample(x, y) {
+                    out.set(c, r, z as f32);
+                }
+            }
+        }
+        out
+    }
+
+    /// Minimum, Maximum, Mittel der gültigen Zellen
+    pub fn z_stats(&self) -> Option<(f64, f64, f64)> {
+        let v: Vec<f64> = self.data.iter().filter(|v| !v.is_nan()).map(|&v| v as f64).collect();
+        if v.is_empty() {
+            return None;
+        }
+        let lo = v.iter().copied().fold(f64::INFINITY, f64::min);
+        let hi = v.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        Some((lo, hi, v.iter().sum::<f64>() / v.len() as f64))
+    }
+
+    pub fn bbox(&self) -> BBox {
+        BBox { min_x: self.spec.min_x, min_y: self.spec.min_y(), max_x: self.spec.max_x(), max_y: self.spec.max_y }
+    }
+
     /// Schreibt ein ESRI-ASCII-Grid (`.asc`), das QGIS & Co. direkt öffnen.
     pub fn write_asc(&self, path: &Path) -> Result<()> {
         let f = std::fs::File::create(path).with_context(|| format!("{} nicht schreibbar", path.display()))?;
@@ -351,6 +383,25 @@ mod tests {
         let filled = g.fill_gaps(10, None);
         assert_eq!(filled, 16);
         assert!(g.data.iter().all(|v| (v - 5.0).abs() < 1e-4));
+    }
+
+    #[test]
+    fn resample_plane_to_finer_grid() {
+        let f = |x: f64, y: f64| 10.0 + 0.2 * (x - 500_000.0) + 0.1 * (y - 5_400_000.0);
+        let mut g = Grid::new_nodata(GridSpec { min_x: 500_000.0, max_y: 5_400_020.0, cell: 1.0, cols: 20, rows: 20 });
+        for r in 0..20 {
+            for c in 0..20 {
+                let (x, y) = g.spec.center(c, r);
+                g.set(c, r, f(x, y) as f32);
+            }
+        }
+        let b = BBox { min_x: 500_005.0, min_y: 5_400_005.0, max_x: 500_015.0, max_y: 5_400_015.0 };
+        let fine = g.resample(GridSpec::covering(&b, 0.5).unwrap());
+        assert_eq!(fine.valid_cells(), 400);
+        let (x, y) = fine.spec.center(7, 3);
+        assert!((fine.get(7, 3) as f64 - f(x, y)).abs() < 1e-4);
+        let (lo, hi, _) = fine.z_stats().unwrap();
+        assert!(lo < hi);
     }
 
     #[test]

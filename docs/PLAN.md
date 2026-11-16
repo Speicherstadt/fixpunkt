@@ -383,9 +383,9 @@ Quelle: [Emlid – How to integrate with Reach RX2](https://docs.emlid.com/reach
 |---|---|
 | Punktwolken lesen/schreiben | `las`, `laz-rs` |
 | Georeferenzierung (Helmert/Umeyama, Ausgleich) | `nalgebra` |
-| Koordinaten ETRS89/UTM32 (EPSG:25832), Höhen DHHN2016 über GCG2016 | `proj` |
+| Koordinaten ETRS89/UTM32 (EPSG:25832), Höhen DHHN2016 über GCG2016 | eigener Code (Krüger-Reihen), kein PROJ nötig |
 | Nachbarschaftssuche, Parallelisierung | `kiddo`, `rayon` |
-| Bodenfilter, DGM, Raster | anfangs `pdal pipeline` (CLI), später eigener Code |
+| Bodenfilter, DGM, Raster | eigener Code (SMRF), kein PDAL nötig |
 | Volumen | DGM-Differenz / TIN (`delaunator`) |
 | Kacheln für den Browser | PotreeConverter bzw. py3dtiles (CLI) |
 | Drohnen-Photogrammetrie | NodeODM per HTTP-API |
@@ -405,6 +405,9 @@ Quelle: [Emlid – How to integrate with Reach RX2](https://docs.emlid.com/reach
 
 ### Phase 0 – Setup (1–2 Wochen)
 - [x] Repo-Struktur begonnen: `crates/processing` (Volumen-Engine: Aushub-Differenz, Haufwerk, Tests)
+- [x] Rechenkern fertig (`crates/processing`, s. dortige README): Aushub je Bereich, Haufwerk, Zeitreihe, Soll/Ist,
+      Bodenfilter (SMRF), Ausreißer, Passpunkt-Transformation (Helmert), UTM32 + GCG2016, Messen/Profile,
+      Exporte GeoTIFF/DXF/LandXML/OBJ/PLY/CSV, ODM-GeoTIFF als Eingabe – 43 Tests
 - [ ] Weitere Struktur: `apps/web`, `infra` (`apps/ios` erst ab Phase 4)
 - [ ] netcup RS 2000 aufsetzen, NodeODM testen
 - [ ] SAPOS-Zugang (BW) beantragen

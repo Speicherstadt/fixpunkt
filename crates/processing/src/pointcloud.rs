@@ -60,12 +60,7 @@ impl PointCloud {
 
     /// Liest anhand der Dateiendung: `.las`/`.laz` oder `.xyz`/`.txt`/`.csv`/`.pts`.
     pub fn read(path: &Path, opts: ReadOptions) -> Result<Self> {
-        let ext = path
-            .extension()
-            .and_then(|e| e.to_str())
-            .map(|e| e.to_ascii_lowercase())
-            .unwrap_or_default();
-        let cloud = match ext.as_str() {
+        let cloud = match ext_of(path).as_str() {
             "las" | "laz" => Self::read_las(path, opts),
             "xyz" | "txt" | "csv" | "pts" => Self::read_text(path),
             _ => bail!("unbekanntes Format: {} (erwartet .las, .laz, .xyz, .csv, .txt)", path.display()),
@@ -122,6 +117,16 @@ impl PointCloud {
 
     /// Schreibt LAS bzw. LAZ (je nach Endung), Auflösung 1 mm.
     pub fn write_las(&self, path: &Path) -> Result<()> {
+        self.write_las_classified(path, None)
+    }
+
+    /// Wie [`write_las`](Self::write_las), optional mit LAS-Klasse je Punkt (2 = Boden).
+    pub fn write_las_classified(&self, path: &Path, classes: Option<&[u8]>) -> Result<()> {
+        if let Some(c) = classes {
+            if c.len() != self.len() {
+                bail!("Klassen ({}) passen nicht zur Punktzahl ({})", c.len(), self.len());
+            }
+        }
         let b = self.bbox();
         let (zlo, _) = self.z_range().unwrap_or((0.0, 0.0));
         let mut builder = las::Builder::from((1, 2));
@@ -134,10 +139,144 @@ impl PointCloud {
         let header = builder.into_header()?;
         let mut w = las::Writer::from_path(path, header)
             .with_context(|| format!("{} nicht schreibbar", path.display()))?;
-        for p in &self.points {
-            w.write_point(las::Point { x: p.x, y: p.y, z: p.z, ..Default::default() })?;
+        for (i, p) in self.points.iter().enumerate() {
+            let classification = Classification::new(classes.map_or(0, |c| c[i]))?;
+            w.write_point(las::Point { x: p.x, y: p.y, z: p.z, classification, ..Default::default() })?;
         }
         w.close()?;
         Ok(())
+    }
+
+    /// Schreibt Text `x y z` (eine Zeile pro Punkt, mm-genau).
+    pub fn write_xyz(&self, path: &Path) -> Result<()> {
+        use std::io::Write;
+        let f = std::fs::File::create(path).with_context(|| format!("{} nicht schreibbar", path.display()))?;
+        let mut w = std::io::BufWriter::new(f);
+        for p in &self.points {
+            writeln!(w, "{:.3} {:.3} {:.3}", p.x, p.y, p.z)?;
+        }
+        w.flush()?;
+        Ok(())
+    }
+
+    /// Schreibt je nach Endung LAS/LAZ oder Text.
+    pub fn write(&self, path: &Path, classes: Option<&[u8]>) -> Result<()> {
+        match ext_of(path).as_str() {
+            "las" | "laz" => self.write_las_classified(path, classes),
+            "xyz" | "txt" | "csv" | "pts" => self.write_xyz(path),
+            _ => bail!("unbekanntes Ausgabeformat: {}", path.display()),
+        }
+    }
+}
+
+fn ext_of(path: &Path) -> String {
+    path.extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).unwrap_or_default()
+}
+
+/// Liest eine LAS/LAZ-Datei Punkt für Punkt und schreibt sie neu – **alle Attribute bleiben erhalten**
+/// (Farbe, Intensität, GPS-Zeit, VLRs …).
+///
+/// `f(idx, punkt)` darf den Punkt ändern und gibt zurück, ob er behalten wird. `idx` ist der Index
+/// unter den nicht gelöschten Punkten – also derselbe wie in [`PointCloud::read_las`] ohne
+/// `ground_only`; für als gelöscht markierte Punkte ist er `None`.
+/// `map_bounds` bildet eine Koordinate ab, um den neuen LAS-Offset zu bestimmen (z. B. die Transformation).
+pub fn rewrite_las(
+    input: &Path,
+    output: &Path,
+    map_bounds: Option<&dyn Fn([f64; 3]) -> [f64; 3]>,
+    mut f: impl FnMut(Option<usize>, &mut las::Point) -> bool,
+) -> Result<u64> {
+    let mut reader = las::Reader::from_path(input).with_context(|| format!("{} nicht lesbar", input.display()))?;
+    let header = reader.header().clone();
+    let mut builder = las::Builder::from(header.clone());
+    builder.generating_software = "fixpunkt".into();
+    if let Some(m) = map_bounds {
+        let b = header.bounds();
+        let mut lo = [f64::INFINITY; 3];
+        for x in [b.min.x, b.max.x] {
+            for y in [b.min.y, b.max.y] {
+                for z in [b.min.z, b.max.z] {
+                    let q = m([x, y, z]);
+                    for k in 0..3 {
+                        lo[k] = lo[k].min(q[k]);
+                    }
+                }
+            }
+        }
+        let t = header.transforms();
+        builder.transforms = las::Vector {
+            x: las::Transform { scale: t.x.scale, offset: lo[0].floor() },
+            y: las::Transform { scale: t.y.scale, offset: lo[1].floor() },
+            z: las::Transform { scale: t.z.scale, offset: lo[2].floor() },
+        };
+    }
+    let mut w = las::Writer::from_path(output, builder.into_header()?)
+        .with_context(|| format!("{} nicht schreibbar", output.display()))?;
+    let (mut idx, mut written) = (0usize, 0u64);
+    loop {
+        let chunk = reader.read_points(1_000_000)?;
+        if chunk.is_empty() {
+            break;
+        }
+        for p in chunk.points() {
+            let mut p = p?;
+            let i = if p.is_withheld {
+                None
+            } else {
+                idx += 1;
+                Some(idx - 1)
+            };
+            if f(i, &mut p) {
+                w.write_point(p)?;
+                written += 1;
+            }
+        }
+    }
+    w.close()?;
+    Ok(written)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn tmp(name: &str) -> std::path::PathBuf {
+        std::env::temp_dir().join(format!("fixpunkt-pc-{}-{name}", std::process::id()))
+    }
+
+    #[test]
+    fn las_laz_xyz_roundtrip_and_rewrite() {
+        let pts: Vec<Point3> = (0..50)
+            .map(|i| Point3 { x: 500_000.0 + i as f64 * 0.5, y: 5_400_000.0 + (i % 7) as f64, z: 300.0 + i as f64 * 0.01 })
+            .collect();
+        let cloud = PointCloud::new(pts.clone());
+        let classes: Vec<u8> = (0..50).map(|i| if i % 2 == 0 { 2 } else { 1 }).collect();
+        let laz = tmp("a.laz");
+        cloud.write(&laz, Some(&classes)).unwrap();
+        let back = PointCloud::read(&laz, ReadOptions::default()).unwrap();
+        assert_eq!(back.len(), 50);
+        assert!((back.points[13].x - pts[13].x).abs() < 1e-3 && (back.points[13].z - pts[13].z).abs() < 1e-3);
+        let ground = PointCloud::read(&laz, ReadOptions { ground_only: true }).unwrap();
+        assert_eq!(ground.len(), 25);
+
+        let out = tmp("b.las");
+        let shift = |p: [f64; 3]| [p[0] + 1000.0, p[1], p[2] + 0.5];
+        let n = rewrite_las(&laz, &out, Some(&shift), |i, p| {
+            p.x += 1000.0;
+            p.z += 0.5;
+            i.unwrap() < 40
+        })
+        .unwrap();
+        assert_eq!(n, 40);
+        let moved = PointCloud::read(&out, ReadOptions { ground_only: true }).unwrap();
+        assert_eq!(moved.len(), 20);
+        assert!((moved.points[0].x - 501_000.0).abs() < 1e-3);
+
+        let xyz = tmp("c.xyz");
+        cloud.write(&xyz, None).unwrap();
+        assert_eq!(PointCloud::read(&xyz, ReadOptions::default()).unwrap().len(), 50);
+        for p in [laz, out, xyz] {
+            std::fs::remove_file(p).ok();
+        }
     }
 }
