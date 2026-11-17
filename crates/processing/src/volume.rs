@@ -27,7 +27,11 @@ fn integrate(dz: impl Iterator<Item = Option<f64>>, cell_area: f64, cell: f64) -
         match d {
             Some(d) if d.is_finite() => {
                 used += 1;
-                if d > 0.0 { fill += d * cell_area } else { cut -= d * cell_area }
+                if d > 0.0 {
+                    fill += d * cell_area
+                } else {
+                    cut -= d * cell_area
+                }
             }
             _ => missing += 1,
         }
@@ -45,19 +49,25 @@ fn integrate(dz: impl Iterator<Item = Option<f64>>, cell_area: f64, cell: f64) -
 
 /// Differenz `after − before` auf deckungsgleichen Rastern, optional nur innerhalb `boundary`.
 /// Liefert Bericht und Differenzraster (für eine Höhendifferenz-Karte).
-pub fn difference(before: &Grid, after: &Grid, boundary: Option<&Polygon>) -> Result<(VolumeReport, Grid)> {
+pub fn difference(
+    before: &Grid,
+    after: &Grid,
+    boundary: Option<&Polygon>,
+) -> Result<(VolumeReport, Grid)> {
     if before.spec != after.spec {
         bail!("Raster sind nicht deckungsgleich");
     }
     let spec = before.spec;
     let mask = spec.mask(boundary);
     let mut diff = Grid::new_nodata(spec);
-    for i in 0..spec.len() {
-        if mask[i] {
+    for (i, &inside) in mask.iter().enumerate() {
+        if inside {
             diff.data[i] = after.data[i] - before.data[i];
         }
     }
-    let dz = (0..spec.len()).filter(|&i| mask[i]).map(|i| Some(diff.data[i] as f64));
+    let dz = (0..spec.len())
+        .filter(|&i| mask[i])
+        .map(|i| Some(diff.data[i] as f64));
     Ok((integrate(dz, spec.cell_area(), spec.cell), diff))
 }
 
@@ -79,7 +89,11 @@ pub fn difference_regions(
     let mut out = Vec::new();
     for r in regions {
         let (v, _) = difference(before, after, Some(&r.polygon))?;
-        out.push(RegionReport { name: r.name.clone(), boundary_area_m2: r.polygon.area(), volume: v });
+        out.push(RegionReport {
+            name: r.name.clone(),
+            boundary_area_m2: r.polygon.area(),
+            volume: v,
+        });
     }
     let total = sum(out.iter().map(|r| &r.volume));
     Ok((out, total))
@@ -87,7 +101,15 @@ pub fn difference_regions(
 
 /// Summe mehrerer Berichte (gleiche Zellgröße vorausgesetzt).
 pub fn sum<'a>(reports: impl Iterator<Item = &'a VolumeReport>) -> VolumeReport {
-    let mut t = VolumeReport { area_m2: 0.0, cut_m3: 0.0, fill_m3: 0.0, net_m3: 0.0, cells_used: 0, cells_missing: 0, cell_size_m: 0.0 };
+    let mut t = VolumeReport {
+        area_m2: 0.0,
+        cut_m3: 0.0,
+        fill_m3: 0.0,
+        net_m3: 0.0,
+        cells_used: 0,
+        cells_missing: 0,
+        cell_size_m: 0.0,
+    };
     for r in reports {
         t.area_m2 += r.area_m2;
         t.cut_m3 += r.cut_m3;
@@ -111,7 +133,11 @@ pub struct SeriesStep {
 }
 
 /// Fortschritt über die Bauphase: jede Aufnahme gegen Urgelände und gegen die vorherige.
-pub fn series(base: &Grid, epochs: &[(String, Grid)], boundary: Option<&Polygon>) -> Result<Vec<SeriesStep>> {
+pub fn series(
+    base: &Grid,
+    epochs: &[(String, Grid)],
+    boundary: Option<&Polygon>,
+) -> Result<Vec<SeriesStep>> {
     let mut prev = base;
     let mut out = Vec::new();
     for (label, g) in epochs {
@@ -160,14 +186,16 @@ pub fn stockpile(surface: &Grid, boundary: &Polygon, base: Base) -> Result<Volum
         }
     };
     let mask = spec.mask(Some(boundary));
-    let dz = (0..spec.rows).flat_map(|r| (0..spec.cols).map(move |c| (c, r))).filter_map(|(c, r)| {
-        if !mask[r * spec.cols + c] {
-            return None;
-        }
-        let z = surface.get(c, r);
-        let (x, y) = spec.center(c, r);
-        Some((!z.is_nan()).then(|| z as f64 - base_z(x, y)))
-    });
+    let dz = (0..spec.rows)
+        .flat_map(|r| (0..spec.cols).map(move |c| (c, r)))
+        .filter_map(|(c, r)| {
+            if !mask[r * spec.cols + c] {
+                return None;
+            }
+            let z = surface.get(c, r);
+            let (x, y) = spec.center(c, r);
+            Some((!z.is_nan()).then(|| z as f64 - base_z(x, y)))
+        });
     Ok(integrate(dz, spec.cell_area(), spec.cell))
 }
 
@@ -186,7 +214,8 @@ fn fit_plane(p: &[[f64; 3]]) -> Result<[f64; 3]> {
         }
     }
     let det = |m: &[[f64; 3]; 3]| {
-        m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+        m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+            - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
             + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0])
     };
     let d = det(&m);
@@ -218,14 +247,22 @@ mod tests {
         for j in 0..=500 {
             for i in 0..=500 {
                 let (dx, dy) = (i as f64 * 0.1, j as f64 * 0.1);
-                pts.push(Point3 { x: X0 + dx, y: Y0 + dy, z: f(dx, dy) });
+                pts.push(Point3 {
+                    x: X0 + dx,
+                    y: Y0 + dy,
+                    z: f(dx, dy),
+                });
             }
         }
         PointCloud::new(pts)
     }
 
     fn grid(c: &PointCloud) -> Grid {
-        Grid::from_points(c, GridSpec::covering(&c.bbox(), 0.25).unwrap(), Aggregate::Mean)
+        Grid::from_points(
+            c,
+            GridSpec::covering(&c.bbox(), 0.25).unwrap(),
+            Aggregate::Mean,
+        )
     }
 
     #[test]
@@ -241,7 +278,11 @@ mod tests {
         let b = Polygon::rect(X0 + 12.0, Y0 + 12.0, X0 + 38.0, Y0 + 38.0);
         let (rep, _) = difference(&before, &after, Some(&b)).unwrap();
         let exact = 3.0 / 6.0 * (400.0 + 196.0 + 4.0 * 289.0);
-        assert!((rep.cut_m3 - exact).abs() / exact < 0.01, "{} vs {exact}", rep.cut_m3);
+        assert!(
+            (rep.cut_m3 - exact).abs() / exact < 0.01,
+            "{} vs {exact}",
+            rep.cut_m3
+        );
         assert!(rep.fill_m3 < 1.0);
     }
 
@@ -255,7 +296,11 @@ mod tests {
         let b = Polygon::rect(X0 + 15.0, Y0 + 15.0, X0 + 35.0, Y0 + 35.0);
         let rep = stockpile(&surface, &b, Base::Plane).unwrap();
         let exact = std::f64::consts::PI * r * r * h / 3.0;
-        assert!((rep.fill_m3 - exact).abs() / exact < 0.01, "{} vs {exact}", rep.fill_m3);
+        assert!(
+            (rep.fill_m3 - exact).abs() / exact < 0.01,
+            "{} vs {exact}",
+            rep.fill_m3
+        );
     }
 
     #[test]
@@ -264,19 +309,41 @@ mod tests {
         let step1 = grid(&cloud(|dx, _| if dx < 25.0 { 299.0 } else { 300.0 }));
         let step2 = grid(&cloud(|_, _| 299.0));
         let regions = vec![
-            crate::geom::Region { name: "West".into(), polygon: Polygon::rect(X0 + 5.0, Y0 + 5.0, X0 + 15.0, Y0 + 15.0) },
-            crate::geom::Region { name: "Ost".into(), polygon: Polygon::rect(X0 + 35.0, Y0 + 5.0, X0 + 45.0, Y0 + 15.0) },
+            crate::geom::Region {
+                name: "West".into(),
+                polygon: Polygon::rect(X0 + 5.0, Y0 + 5.0, X0 + 15.0, Y0 + 15.0),
+            },
+            crate::geom::Region {
+                name: "Ost".into(),
+                polygon: Polygon::rect(X0 + 35.0, Y0 + 5.0, X0 + 45.0, Y0 + 15.0),
+            },
         ];
         let (per, total) = difference_regions(&flat, &step1, &regions).unwrap();
-        assert!((per[0].volume.cut_m3 - 100.0).abs() < 1.0, "{}", per[0].volume.cut_m3);
+        assert!(
+            (per[0].volume.cut_m3 - 100.0).abs() < 1.0,
+            "{}",
+            per[0].volume.cut_m3
+        );
         assert!(per[1].volume.cut_m3 < 0.5);
         assert!((total.cut_m3 - per[0].volume.cut_m3 - per[1].volume.cut_m3).abs() < 1e-9);
         assert_eq!(per[1].name, "Ost");
 
         let b = Polygon::rect(X0 + 5.0, Y0 + 5.0, X0 + 45.0, Y0 + 45.0);
-        let s = series(&flat, &[("KW 10".into(), step1), ("KW 11".into(), step2)], Some(&b)).unwrap();
-        assert!((s[1].since_start.cut_m3 - 1600.0).abs() < 2.0, "{}", s[1].since_start.cut_m3);
-        assert!((s[0].since_start.cut_m3 + s[1].since_previous.cut_m3 - s[1].since_start.cut_m3).abs() < 1e-6);
+        let s = series(
+            &flat,
+            &[("KW 10".into(), step1), ("KW 11".into(), step2)],
+            Some(&b),
+        )
+        .unwrap();
+        assert!(
+            (s[1].since_start.cut_m3 - 1600.0).abs() < 2.0,
+            "{}",
+            s[1].since_start.cut_m3
+        );
+        assert!(
+            (s[0].since_start.cut_m3 + s[1].since_previous.cut_m3 - s[1].since_start.cut_m3).abs()
+                < 1e-6
+        );
     }
 
     #[test]

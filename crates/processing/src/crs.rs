@@ -43,22 +43,31 @@ fn series() -> Series {
     let (n2, n3, n4, n5, n6) = (n * n, n.powi(3), n.powi(4), n.powi(5), n.powi(6));
     let a_rect = A / (1.0 + n) * (1.0 + n2 / 4.0 + n4 / 64.0 + n6 / 256.0);
     let alpha = [
-        n / 2.0 - 2.0 / 3.0 * n2 + 5.0 / 16.0 * n3 + 41.0 / 180.0 * n4 - 127.0 / 288.0 * n5 + 7891.0 / 37800.0 * n6,
-        13.0 / 48.0 * n2 - 3.0 / 5.0 * n3 + 557.0 / 1440.0 * n4 + 281.0 / 630.0 * n5 - 1983433.0 / 1935360.0 * n6,
+        n / 2.0 - 2.0 / 3.0 * n2 + 5.0 / 16.0 * n3 + 41.0 / 180.0 * n4 - 127.0 / 288.0 * n5
+            + 7891.0 / 37800.0 * n6,
+        13.0 / 48.0 * n2 - 3.0 / 5.0 * n3 + 557.0 / 1440.0 * n4 + 281.0 / 630.0 * n5
+            - 1983433.0 / 1935360.0 * n6,
         61.0 / 240.0 * n3 - 103.0 / 140.0 * n4 + 15061.0 / 26880.0 * n5 + 167603.0 / 181440.0 * n6,
         49561.0 / 161280.0 * n4 - 179.0 / 168.0 * n5 + 6601661.0 / 7257600.0 * n6,
         34729.0 / 80640.0 * n5 - 3418889.0 / 1995840.0 * n6,
         212378941.0 / 319334400.0 * n6,
     ];
     let beta = [
-        n / 2.0 - 2.0 / 3.0 * n2 + 37.0 / 96.0 * n3 - 1.0 / 360.0 * n4 - 81.0 / 512.0 * n5 + 96199.0 / 604800.0 * n6,
-        1.0 / 48.0 * n2 + 1.0 / 15.0 * n3 - 437.0 / 1440.0 * n4 + 46.0 / 105.0 * n5 - 1118711.0 / 3870720.0 * n6,
+        n / 2.0 - 2.0 / 3.0 * n2 + 37.0 / 96.0 * n3 - 1.0 / 360.0 * n4 - 81.0 / 512.0 * n5
+            + 96199.0 / 604800.0 * n6,
+        1.0 / 48.0 * n2 + 1.0 / 15.0 * n3 - 437.0 / 1440.0 * n4 + 46.0 / 105.0 * n5
+            - 1118711.0 / 3870720.0 * n6,
         17.0 / 480.0 * n3 - 37.0 / 840.0 * n4 - 209.0 / 4480.0 * n5 + 5569.0 / 90720.0 * n6,
         4397.0 / 161280.0 * n4 - 11.0 / 504.0 * n5 - 830251.0 / 7257600.0 * n6,
         4583.0 / 161280.0 * n5 - 108847.0 / 3991680.0 * n6,
         20648693.0 / 638668800.0 * n6,
     ];
-    Series { a_rect, e: (F * (2.0 - F)).sqrt(), alpha, beta }
+    Series {
+        a_rect,
+        e: (F * (2.0 - F)).sqrt(),
+        alpha,
+        beta,
+    }
 }
 
 impl Utm {
@@ -147,7 +156,8 @@ impl Geoid {
     ///   zeilenweise von Nord nach Süd, je Zeile von West nach Ost.
     /// - **Spalten** `lat lon N` (eine Zeile pro Gitterpunkt, regelmäßiges Gitter, beliebige Reihenfolge).
     pub fn read(path: &Path) -> Result<Self> {
-        let f = std::fs::File::open(path).with_context(|| format!("Geoid {} nicht lesbar", path.display()))?;
+        let f = std::fs::File::open(path)
+            .with_context(|| format!("Geoid {} nicht lesbar", path.display()))?;
         let mut rows: Vec<Vec<f64>> = Vec::new();
         for line in BufReader::new(f).lines() {
             let line = line?;
@@ -179,7 +189,10 @@ impl Geoid {
         } else if rows.iter().all(|r| r.len() >= 3) {
             Self::from_columns(rows.iter().map(|r| [r[0], r[1], r[2]]).collect())
         } else {
-            bail!("Geoid {}: Format nicht erkannt (GRAVSOFT oder 'lat lon N')", path.display())
+            bail!(
+                "Geoid {}: Format nicht erkannt (GRAVSOFT oder 'lat lon N')",
+                path.display()
+            )
         }
     }
 
@@ -195,14 +208,28 @@ impl Geoid {
         let rows = ((lat_max - lat_min) / dlat).round() as usize + 1;
         let cols = ((lon_max - lon_min) / dlon).round() as usize + 1;
         if values_north_first.len() != rows * cols {
-            bail!("Geoid: {} Werte, erwartet {}×{}", values_north_first.len(), rows, cols);
+            bail!(
+                "Geoid: {} Werte, erwartet {}×{}",
+                values_north_first.len(),
+                rows,
+                cols
+            );
         }
         let mut n = vec![0.0; rows * cols];
         for r in 0..rows {
             let src = rows - 1 - r;
-            n[r * cols..(r + 1) * cols].copy_from_slice(&values_north_first[src * cols..(src + 1) * cols]);
+            n[r * cols..(r + 1) * cols]
+                .copy_from_slice(&values_north_first[src * cols..(src + 1) * cols]);
         }
-        Ok(Geoid { lat_min, lon_min, dlat, dlon, rows, cols, n })
+        Ok(Geoid {
+            lat_min,
+            lon_min,
+            dlat,
+            dlon,
+            rows,
+            cols,
+            n,
+        })
     }
 
     pub fn from_columns(pts: Vec<[f64; 3]>) -> Result<Self> {
@@ -228,7 +255,15 @@ impl Geoid {
         if n.iter().any(|v| v.is_nan()) {
             bail!("Geoid: Gitter ist nicht vollständig bzw. nicht regelmäßig");
         }
-        Ok(Geoid { lat_min: lats[0], lon_min: lons[0], dlat, dlon, rows, cols, n })
+        Ok(Geoid {
+            lat_min: lats[0],
+            lon_min: lons[0],
+            dlat,
+            dlon,
+            rows,
+            cols,
+            n,
+        })
     }
 
     /// Höhenanomalie N in m an (Breite, Länge) – bilinear interpoliert.
@@ -289,11 +324,20 @@ mod tests {
     #[test]
     fn roundtrip_across_zone() {
         let u = Utm::default();
-        for &(lat, lon) in &[(48.7758, 9.1829), (47.3, 5.9), (54.8, 12.1), (50.0, 6.0), (52.5, 13.4)] {
+        for &(lat, lon) in &[
+            (48.7758, 9.1829),
+            (47.3, 5.9),
+            (54.8, 12.1),
+            (50.0, 6.0),
+            (52.5, 13.4),
+        ] {
             let (e, n) = u.forward(lat, lon);
             let (la, lo) = u.inverse(e, n);
             // 1e-9 Grad ≈ 0,1 mm
-            assert!((la - lat).abs() < 1e-9 && (lo - lon).abs() < 1e-9, "{lat},{lon} → {la},{lo}");
+            assert!(
+                (la - lat).abs() < 1e-9 && (lo - lon).abs() < 1e-9,
+                "{lat},{lon} → {la},{lo}"
+            );
         }
     }
 
@@ -329,7 +373,9 @@ mod tests {
         }
         let g = Geoid::from_gravsoft(48.0, 49.0, 9.0, 10.0, 0.5, 0.5, vals).unwrap();
         assert!((g.undulation(48.3, 9.7).unwrap() - f(48.3, 9.7)).abs() < 1e-9);
-        assert!((g.to_normal_height(48.3, 9.7, 400.0).unwrap() - (400.0 - f(48.3, 9.7))).abs() < 1e-9);
+        assert!(
+            (g.to_normal_height(48.3, 9.7, 400.0).unwrap() - (400.0 - f(48.3, 9.7))).abs() < 1e-9
+        );
         assert!(g.undulation(50.0, 9.5).is_err());
 
         let mut cols = Vec::new();
@@ -341,11 +387,23 @@ mod tests {
         let dir = std::env::temp_dir().join(format!("fixpunkt-geoid-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         // GRAVSOFT mit genau 3 Werten pro Zeile darf nicht als Spaltenformat erkannt werden
-        std::fs::write(dir.join("g.txt"), "48 49 9 10 0.5 0.5\n1 1 1\n2 2 2\n3 3 3\n").unwrap();
+        std::fs::write(
+            dir.join("g.txt"),
+            "48 49 9 10 0.5 0.5\n1 1 1\n2 2 2\n3 3 3\n",
+        )
+        .unwrap();
         let gf = Geoid::read(&dir.join("g.txt")).unwrap();
         assert!((gf.undulation(48.0, 9.0).unwrap() - 3.0).abs() < 1e-12);
         std::fs::write(dir.join("c.txt"), "48 9 1\n48 10 1\n49 9 2\n49 10 2\n").unwrap();
-        assert!((Geoid::read(&dir.join("c.txt")).unwrap().undulation(48.5, 9.5).unwrap() - 1.5).abs() < 1e-12);
+        assert!(
+            (Geoid::read(&dir.join("c.txt"))
+                .unwrap()
+                .undulation(48.5, 9.5)
+                .unwrap()
+                - 1.5)
+                .abs()
+                < 1e-12
+        );
         std::fs::remove_dir_all(&dir).ok();
         let g2 = Geoid::from_columns(cols).unwrap();
         assert!((g2.undulation(48.9, 9.1).unwrap() - f(48.9, 9.1)).abs() < 1e-9);

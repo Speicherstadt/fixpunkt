@@ -20,15 +20,25 @@ pub const CLASS_LOW_NOISE: u8 = 7;
 /// Behält je Voxel (Würfel mit Kantenlänge `size`) den Punkt, der der Voxelmitte am nächsten liegt.
 /// Gibt die Indizes der behaltenen Punkte in Originalreihenfolge zurück.
 pub fn voxel_thin(cloud: &PointCloud, size: f64) -> Result<Vec<usize>> {
-    if !(size > 0.0) {
+    if size.is_nan() || size <= 0.0 {
         bail!("Voxelgröße muss > 0 sein");
     }
     let mut best: HashMap<(i64, i64, i64), (usize, f64)> = HashMap::new();
     for (i, p) in cloud.points.iter().enumerate() {
-        let k = ((p.x / size).floor() as i64, (p.y / size).floor() as i64, (p.z / size).floor() as i64);
+        let k = (
+            (p.x / size).floor() as i64,
+            (p.y / size).floor() as i64,
+            (p.z / size).floor() as i64,
+        );
         let c = |v: i64| (v as f64 + 0.5) * size;
         let d = (p.x - c(k.0)).powi(2) + (p.y - c(k.1)).powi(2) + (p.z - c(k.2)).powi(2);
-        best.entry(k).and_modify(|e| if d < e.1 { *e = (i, d) }).or_insert((i, d));
+        best.entry(k)
+            .and_modify(|e| {
+                if d < e.1 {
+                    *e = (i, d)
+                }
+            })
+            .or_insert((i, d));
     }
     let mut keep: Vec<usize> = best.into_values().map(|(i, _)| i).collect();
     keep.sort_unstable();
@@ -52,7 +62,11 @@ impl<'a> SpatialHash<'a> {
     }
 
     fn key(p: &Point3, h: f64) -> (i64, i64, i64) {
-        ((p.x / h).floor() as i64, (p.y / h).floor() as i64, (p.z / h).floor() as i64)
+        (
+            (p.x / h).floor() as i64,
+            (p.y / h).floor() as i64,
+            (p.z / h).floor() as i64,
+        )
     }
 
     /// Mittlere Distanz zu den `k` nächsten Nachbarn (ohne den Punkt selbst).
@@ -71,7 +85,12 @@ impl<'a> SpatialHash<'a> {
                             for &j in v {
                                 if j as usize != i {
                                     let q = &self.pts[j as usize];
-                                    d.push(((p.x - q.x).powi(2) + (p.y - q.y).powi(2) + (p.z - q.z).powi(2)).sqrt());
+                                    d.push(
+                                        ((p.x - q.x).powi(2)
+                                            + (p.y - q.y).powi(2)
+                                            + (p.z - q.z).powi(2))
+                                        .sqrt(),
+                                    );
                                 }
                             }
                         }
@@ -106,7 +125,11 @@ pub struct OutlierReport {
 /// Statistischer Ausreißerfilter: entfernt Punkte, deren mittlere Distanz zu den `k` nächsten
 /// Nachbarn größer ist als Mittelwert + `std_ratio` · Standardabweichung über alle Punkte.
 /// Gibt eine Maske zurück (`true` = behalten).
-pub fn statistical_outliers(cloud: &PointCloud, k: usize, std_ratio: f64) -> Result<(Vec<bool>, OutlierReport)> {
+pub fn statistical_outliers(
+    cloud: &PointCloud,
+    k: usize,
+    std_ratio: f64,
+) -> Result<(Vec<bool>, OutlierReport)> {
     if k == 0 {
         bail!("k muss ≥ 1 sein");
     }
@@ -119,14 +142,25 @@ pub fn statistical_outliers(cloud: &PointCloud, k: usize, std_ratio: f64) -> Res
     let area = (b.width() * b.height()).max(1e-6);
     let h = (area * k as f64 / n as f64).sqrt().max(1e-3);
     let hash = SpatialHash::new(&cloud.points, h);
-    let md: Vec<f64> = (0..n).into_par_iter().map(|i| hash.mean_knn_distance(i, k)).collect();
+    let md: Vec<f64> = (0..n)
+        .into_par_iter()
+        .map(|i| hash.mean_knn_distance(i, k))
+        .collect();
     let finite: Vec<f64> = md.iter().copied().filter(|v| v.is_finite()).collect();
     let mean = finite.iter().sum::<f64>() / finite.len() as f64;
     let std = (finite.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / finite.len() as f64).sqrt();
     let threshold = mean + std_ratio * std;
     let keep: Vec<bool> = md.iter().map(|&d| d <= threshold).collect();
     let removed = keep.iter().filter(|k| !**k).count();
-    Ok((keep, OutlierReport { points: n, removed, mean_knn_distance: mean, threshold }))
+    Ok((
+        keep,
+        OutlierReport {
+            points: n,
+            removed,
+            mean_knn_distance: mean,
+            threshold,
+        },
+    ))
 }
 
 /// Parameter des Bodenfilters (Standardwerte für Baustellen/Drohne).
@@ -146,7 +180,13 @@ pub struct GroundParams {
 
 impl Default for GroundParams {
     fn default() -> Self {
-        GroundParams { cell: 1.0, slope: 0.7, max_window: 10.0, elevation_threshold: 0.3, elevation_scalar: 1.0 }
+        GroundParams {
+            cell: 1.0,
+            slope: 0.7,
+            max_window: 10.0,
+            elevation_threshold: 0.3,
+            elevation_scalar: 1.0,
+        }
     }
 }
 
@@ -161,7 +201,10 @@ pub struct GroundReport {
 
 /// Klassifiziert jeden Punkt als Boden (2), Nicht-Boden (1) oder Tiefpunkt/Rauschen (7).
 /// Liefert zusätzlich das vorläufige Gelände-Raster (DGM) in Zellgröße `params.cell`.
-pub fn classify_ground(cloud: &PointCloud, params: GroundParams) -> Result<(Vec<u8>, Grid, GroundReport)> {
+pub fn classify_ground(
+    cloud: &PointCloud,
+    params: GroundParams,
+) -> Result<(Vec<u8>, Grid, GroundReport)> {
     if cloud.is_empty() {
         bail!("leere Punktwolke");
     }
@@ -198,8 +241,13 @@ pub fn classify_ground(cloud: &PointCloud, params: GroundParams) -> Result<(Vec<
         .points
         .par_iter()
         .map(|p| {
-            let Some(g) = dtm.sample(p.x, p.y) else { return CLASS_UNCLASSIFIED };
-            let s = spec.locate(p.x, p.y).map(|(c, r)| slope[r * spec.cols + c]).unwrap_or(0.0);
+            let Some(g) = dtm.sample(p.x, p.y) else {
+                return CLASS_UNCLASSIFIED;
+            };
+            let s = spec
+                .locate(p.x, p.y)
+                .map(|(c, r)| slope[r * spec.cols + c])
+                .unwrap_or(0.0);
             let tol = params.elevation_threshold + params.elevation_scalar * s * params.cell;
             let dz = p.z - g;
             if dz < -tol - 0.5 * params.max_window * params.slope {
@@ -254,15 +302,29 @@ pub fn slope_grid(g: &Grid) -> Vec<f64> {
 fn window(data: &[f32], spec: GridSpec, r: usize, pick: fn(f32, f32) -> f32) -> Vec<f32> {
     let (cols, rows) = (spec.cols, spec.rows);
     let pass = |src: &[f32], horizontal: bool| -> Vec<f32> {
-        let (n_lines, len) = if horizontal { (rows, cols) } else { (cols, rows) };
-        let idx = move |line: usize, k: usize| if horizontal { line * cols + k } else { k * cols + line };
+        let (n_lines, len) = if horizontal {
+            (rows, cols)
+        } else {
+            (cols, rows)
+        };
+        let idx = move |line: usize, k: usize| {
+            if horizontal {
+                line * cols + k
+            } else {
+                k * cols + line
+            }
+        };
         let lines: Vec<Vec<f32>> = (0..n_lines)
             .into_par_iter()
             .map(|line| {
                 (0..len)
                     .map(|k| {
                         let (a, b) = (k.saturating_sub(r), (k + r).min(len - 1));
-                        (a..=b).map(|j| src[idx(line, j)]).filter(|v| !v.is_nan()).reduce(pick).unwrap_or(f32::NAN)
+                        (a..=b)
+                            .map(|j| src[idx(line, j)])
+                            .filter(|v| !v.is_nan())
+                            .reduce(pick)
+                            .unwrap_or(f32::NAN)
                     })
                     .collect()
             })
@@ -288,7 +350,15 @@ fn dilate(data: &[f32], spec: GridSpec, r: usize) -> Vec<f32> {
 
 /// Neue Punktwolke aus einer Maske.
 pub fn select(cloud: &PointCloud, keep: &[bool]) -> PointCloud {
-    PointCloud::new(cloud.points.iter().zip(keep).filter(|(_, &k)| k).map(|(p, _)| *p).collect())
+    PointCloud::new(
+        cloud
+            .points
+            .iter()
+            .zip(keep)
+            .filter(|(_, &k)| k)
+            .map(|(p, _)| *p)
+            .collect(),
+    )
 }
 
 #[cfg(test)]
@@ -304,7 +374,11 @@ mod tests {
         for j in 0..=n {
             for i in 0..=n {
                 let (dx, dy) = (i as f64 * step, j as f64 * step);
-                pts.push(Point3 { x: X0 + dx, y: Y0 + dy, z: z(dx, dy) });
+                pts.push(Point3 {
+                    x: X0 + dx,
+                    y: Y0 + dy,
+                    z: z(dx, dy),
+                });
             }
         }
         pts
@@ -322,8 +396,16 @@ mod tests {
     fn outliers_are_removed() {
         let mut pts = terrain(0.25, 20.0, |_, _| 300.0);
         let n_ground = pts.len();
-        pts.push(Point3 { x: X0 + 5.0, y: Y0 + 5.0, z: 315.0 }); // Vogel / Fehlmessung
-        pts.push(Point3 { x: X0 + 12.0, y: Y0 + 8.0, z: 290.0 });
+        pts.push(Point3 {
+            x: X0 + 5.0,
+            y: Y0 + 5.0,
+            z: 315.0,
+        }); // Vogel / Fehlmessung
+        pts.push(Point3 {
+            x: X0 + 12.0,
+            y: Y0 + 8.0,
+            z: 290.0,
+        });
         let (keep, rep) = statistical_outliers(&PointCloud::new(pts), 8, 2.0).unwrap();
         assert!(!keep[n_ground] && !keep[n_ground + 1]);
         assert_eq!(rep.removed, 2, "{rep:?}");
@@ -333,7 +415,11 @@ mod tests {
     fn ground_filter_removes_excavator_keeps_slope() {
         // Geneigtes Gelände (10 %) mit Grube und einem 3 m hohen „Bagger“ (4 × 6 m)
         let surface = |dx: f64, dy: f64| {
-            let pit = if (20.0..30.0).contains(&dx) && (20.0..30.0).contains(&dy) { -2.0 } else { 0.0 };
+            let pit = if (20.0..30.0).contains(&dx) && (20.0..30.0).contains(&dy) {
+                -2.0
+            } else {
+                0.0
+            };
             300.0 + 0.1 * dx + pit
         };
         let mut pts = terrain(0.25, 50.0, surface);
@@ -341,15 +427,35 @@ mod tests {
         for j in 0..=24 {
             for i in 0..=16 {
                 let (dx, dy) = (8.0 + i as f64 * 0.25, 30.0 + j as f64 * 0.25);
-                pts.push(Point3 { x: X0 + dx, y: Y0 + dy, z: surface(dx, dy) + 3.0 });
+                pts.push(Point3 {
+                    x: X0 + dx,
+                    y: Y0 + dy,
+                    z: surface(dx, dy) + 3.0,
+                });
             }
         }
         let cloud = PointCloud::new(pts);
-        let (cls, dtm, rep) = classify_ground(&cloud, GroundParams { cell: 0.5, ..Default::default() }).unwrap();
-        let machine_ground = cls[n_ground..].iter().filter(|&&c| c == CLASS_GROUND).count();
+        let (cls, dtm, rep) = classify_ground(
+            &cloud,
+            GroundParams {
+                cell: 0.5,
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        let machine_ground = cls[n_ground..]
+            .iter()
+            .filter(|&&c| c == CLASS_GROUND)
+            .count();
         assert_eq!(machine_ground, 0, "{rep:?}");
-        let terrain_ground = cls[..n_ground].iter().filter(|&&c| c == CLASS_GROUND).count();
-        assert!(terrain_ground as f64 > 0.98 * n_ground as f64, "{terrain_ground}/{n_ground}");
+        let terrain_ground = cls[..n_ground]
+            .iter()
+            .filter(|&&c| c == CLASS_GROUND)
+            .count();
+        assert!(
+            terrain_ground as f64 > 0.98 * n_ground as f64,
+            "{terrain_ground}/{n_ground}"
+        );
         // DGM unter dem Bagger ≈ Gelände
         let z = dtm.sample(X0 + 10.0, Y0 + 33.0).unwrap();
         assert!((z - surface(10.0, 33.0)).abs() < 0.3, "{z}");
@@ -361,6 +467,10 @@ mod tests {
         let spec = GridSpec::covering(&cloud.bbox(), 1.0).unwrap();
         let g = Grid::from_points(&cloud, spec, Aggregate::Mean);
         let s = slope_grid(&g);
-        assert!((s[spec.cols * 4 + 4] - 0.5).abs() < 0.02, "{}", s[spec.cols * 4 + 4]);
+        assert!(
+            (s[spec.cols * 4 + 4] - 0.5).abs() < 0.02,
+            "{}",
+            s[spec.cols * 4 + 4]
+        );
     }
 }

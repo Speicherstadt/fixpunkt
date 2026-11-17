@@ -79,10 +79,15 @@ impl Transform {
 
     pub fn apply(&self, p: [f64; 3]) -> [f64; 3] {
         let r = &self.rotation;
-        let d = [p[0] - self.src_center[0], p[1] - self.src_center[1], p[2] - self.src_center[2]];
+        let d = [
+            p[0] - self.src_center[0],
+            p[1] - self.src_center[1],
+            p[2] - self.src_center[2],
+        ];
         let mut out = [0.0; 3];
         for i in 0..3 {
-            out[i] = self.scale * (r[i][0] * d[0] + r[i][1] * d[1] + r[i][2] * d[2]) + self.dst_center[i];
+            out[i] = self.scale * (r[i][0] * d[0] + r[i][1] * d[1] + r[i][2] * d[2])
+                + self.dst_center[i];
         }
         out
     }
@@ -106,7 +111,10 @@ impl Transform {
 pub fn fit(points: &[ControlPoint], mode: Mode) -> Result<FitReport> {
     let min = if mode == Mode::Translation { 1 } else { 3 };
     if points.len() < min {
-        bail!("mindestens {min} Passpunkte nötig, {} vorhanden", points.len());
+        bail!(
+            "mindestens {min} Passpunkte nötig, {} vorhanden",
+            points.len()
+        );
     }
     let n = points.len() as f64;
     let v = |a: [f64; 3]| Vector3::new(a[0], a[1], a[2]);
@@ -173,7 +181,9 @@ pub fn fit(points: &[ControlPoint], mode: Mode) -> Result<FitReport> {
             }
         })
         .collect();
-    let rms = |f: &dyn Fn(&Residual) -> f64| (residuals.iter().map(|r| f(r).powi(2)).sum::<f64>() / n).sqrt();
+    let rms = |f: &dyn Fn(&Residual) -> f64| {
+        (residuals.iter().map(|r| f(r).powi(2)).sum::<f64>() / n).sqrt()
+    };
     Ok(FitReport {
         mode,
         points: points.len(),
@@ -192,7 +202,8 @@ pub fn fit(points: &[ControlPoint], mode: Mode) -> Result<FitReport> {
 /// Liest Passpunkte aus CSV: `name, x_quelle, y_quelle, z_quelle, x_ziel, y_ziel, z_ziel`
 /// (Trennzeichen Komma, Semikolon, Tab oder Leerzeichen; Kopfzeile wird übersprungen).
 pub fn read_control_points(path: &Path) -> Result<Vec<ControlPoint>> {
-    let text = std::fs::read_to_string(path).with_context(|| format!("{} nicht lesbar", path.display()))?;
+    let text = std::fs::read_to_string(path)
+        .with_context(|| format!("{} nicht lesbar", path.display()))?;
     parse_control_points(&text)
 }
 
@@ -229,19 +240,57 @@ mod tests {
 
     fn rot(rx: f64, ry: f64, rz: f64) -> Matrix3<f64> {
         let (rx, ry, rz) = (rx.to_radians(), ry.to_radians(), rz.to_radians());
-        Matrix3::new(rz.cos(), -rz.sin(), 0.0, rz.sin(), rz.cos(), 0.0, 0.0, 0.0, 1.0)
-            * Matrix3::new(ry.cos(), 0.0, ry.sin(), 0.0, 1.0, 0.0, -ry.sin(), 0.0, ry.cos())
-            * Matrix3::new(1.0, 0.0, 0.0, 0.0, rx.cos(), -rx.sin(), 0.0, rx.sin(), rx.cos())
+        Matrix3::new(
+            rz.cos(),
+            -rz.sin(),
+            0.0,
+            rz.sin(),
+            rz.cos(),
+            0.0,
+            0.0,
+            0.0,
+            1.0,
+        ) * Matrix3::new(
+            ry.cos(),
+            0.0,
+            ry.sin(),
+            0.0,
+            1.0,
+            0.0,
+            -ry.sin(),
+            0.0,
+            ry.cos(),
+        ) * Matrix3::new(
+            1.0,
+            0.0,
+            0.0,
+            0.0,
+            rx.cos(),
+            -rx.sin(),
+            0.0,
+            rx.sin(),
+            rx.cos(),
+        )
     }
 
     fn make(s: f64, r: Matrix3<f64>, t: Vector3<f64>, noise: f64) -> Vec<ControlPoint> {
-        let src = [[0.0, 0.0, 0.0], [30.0, 2.0, 1.0], [5.0, 40.0, -2.0], [35.0, 45.0, 3.0], [18.0, 20.0, 6.0]];
+        let src = [
+            [0.0, 0.0, 0.0],
+            [30.0, 2.0, 1.0],
+            [5.0, 40.0, -2.0],
+            [35.0, 45.0, 3.0],
+            [18.0, 20.0, 6.0],
+        ];
         src.iter()
             .enumerate()
             .map(|(i, p)| {
                 let q = s * r * Vector3::new(p[0], p[1], p[2]) + t;
                 let e = noise * [1.0, -1.0, 0.5, -0.5, 0.0][i];
-                ControlPoint { name: format!("P{i}"), src: *p, dst: [q.x + e, q.y - e, q.z + e] }
+                ControlPoint {
+                    name: format!("P{i}"),
+                    src: *p,
+                    dst: [q.x + e, q.y - e, q.z + e],
+                }
             })
             .collect()
     }
@@ -258,12 +307,19 @@ mod tests {
         assert!((ax - 0.3).abs() < 1e-8 && (ay + 0.2).abs() < 1e-8 && (az - 37.0).abs() < 1e-8);
         let q = rep.transform.apply([10.0, 10.0, 1.0]);
         let e = 1.0002 * r * Vector3::new(10.0, 10.0, 1.0) + t;
-        assert!((q[0] - e.x).abs() < 1e-6 && (q[1] - e.y).abs() < 1e-6 && (q[2] - e.z).abs() < 1e-6);
+        assert!(
+            (q[0] - e.x).abs() < 1e-6 && (q[1] - e.y).abs() < 1e-6 && (q[2] - e.z).abs() < 1e-6
+        );
     }
 
     #[test]
     fn rigid_keeps_scale_and_reports_residuals() {
-        let gcps = make(1.0, rot(0.0, 0.0, -12.0), Vector3::new(500_000.0, 5_400_000.0, 250.0), 0.01);
+        let gcps = make(
+            1.0,
+            rot(0.0, 0.0, -12.0),
+            Vector3::new(500_000.0, 5_400_000.0, 250.0),
+            0.01,
+        );
         let rep = fit(&gcps, Mode::Rigid).unwrap();
         assert_eq!(rep.transform.scale, 1.0);
         assert!(rep.rms_3d > 0.001 && rep.rms_3d < 0.02, "{}", rep.rms_3d);
@@ -277,7 +333,11 @@ mod tests {
         assert!((rep.translation[2] - 3.0).abs() < 1e-12);
         assert!(fit(&gcps[..2], Mode::Similarity).is_err());
         let line: Vec<_> = (0..4)
-            .map(|i| ControlPoint { name: "".into(), src: [i as f64, 0.0, 0.0], dst: [i as f64, 0.0, 0.0] })
+            .map(|i| ControlPoint {
+                name: "".into(),
+                src: [i as f64, 0.0, 0.0],
+                dst: [i as f64, 0.0, 0.0],
+            })
             .collect();
         assert!(fit(&line, Mode::Rigid).is_err());
     }

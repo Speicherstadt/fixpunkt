@@ -25,7 +25,7 @@ impl GridSpec {
     /// Raster, das `bbox` überdeckt; die Kanten werden auf Vielfache der Zellgröße gerundet,
     /// damit verschiedene Aufnahmen immer auf dasselbe Gitter fallen.
     pub fn covering(bbox: &BBox, cell: f64) -> Result<Self> {
-        if !(cell > 0.0) {
+        if cell.is_nan() || cell <= 0.0 {
             bail!("Zellgröße muss > 0 sein");
         }
         if bbox.is_empty() {
@@ -39,13 +39,25 @@ impl GridSpec {
         let rows = (((max_y - min_y) / cell).round() as usize).max(1);
         let cells = cols as u128 * rows as u128;
         if cells > 1_000_000_000 {
-            bail!("Raster zu groß ({cols} × {rows} Zellen) – größere Zellgröße oder Grenze verwenden");
+            bail!(
+                "Raster zu groß ({cols} × {rows} Zellen) – größere Zellgröße oder Grenze verwenden"
+            );
         }
-        Ok(GridSpec { min_x, max_y, cell, cols, rows })
+        Ok(GridSpec {
+            min_x,
+            max_y,
+            cell,
+            cols,
+            rows,
+        })
     }
 
     pub fn len(&self) -> usize {
         self.cols * self.rows
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
     }
 
     pub fn cell_area(&self) -> f64 {
@@ -114,7 +126,10 @@ pub struct Grid {
 
 impl Grid {
     pub fn new_nodata(spec: GridSpec) -> Self {
-        Grid { data: vec![f32::NAN; spec.len()], spec }
+        Grid {
+            data: vec![f32::NAN; spec.len()],
+            spec,
+        }
     }
 
     pub fn get(&self, col: usize, row: usize) -> f32 {
@@ -139,7 +154,9 @@ impl Grid {
         let mut acc = vec![0.0f64; n];
         let mut cnt = vec![0u32; n];
         for p in &cloud.points {
-            let Some((c, r)) = spec.locate(p.x, p.y) else { continue };
+            let Some((c, r)) = spec.locate(p.x, p.y) else {
+                continue;
+            };
             let i = r * spec.cols + c;
             let z = p.z - z_ref;
             if cnt[i] == 0 {
@@ -184,7 +201,12 @@ impl Grid {
                     for dr in -1i64..=1 {
                         for dc in -1i64..=1 {
                             let (rr, cc) = (r as i64 + dr, c as i64 + dc);
-                            if (dr, dc) == (0, 0) || rr < 0 || cc < 0 || rr >= rows as i64 || cc >= cols as i64 {
+                            if (dr, dc) == (0, 0)
+                                || rr < 0
+                                || cc < 0
+                                || rr >= rows as i64
+                                || cc >= cols as i64
+                            {
                                 continue;
                             }
                             let v = self.data[rr as usize * cols + cc as usize];
@@ -225,7 +247,12 @@ impl Grid {
         if x < x0 || x > s.max_x() || y < y0 || y > s.max_y {
             return None;
         }
-        let v = [self.get(c0, r0), self.get(c1, r0), self.get(c0, r1), self.get(c1, r1)];
+        let v = [
+            self.get(c0, r0),
+            self.get(c1, r0),
+            self.get(c0, r1),
+            self.get(c1, r1),
+        ];
         if v.iter().any(|v| v.is_nan()) {
             // Rand einer Lücke: nächste gültige Zelle
             let (c, r) = s.locate(x.min(s.max_x() - 1e-9), y.max(y0 + 1e-9))?;
@@ -234,7 +261,10 @@ impl Grid {
         }
         let v: [f64; 4] = v.map(|z| z as f64);
         Some(
-            v[0] * (1.0 - tx) * (1.0 - ty) + v[1] * tx * (1.0 - ty) + v[2] * (1.0 - tx) * ty + v[3] * tx * ty,
+            v[0] * (1.0 - tx) * (1.0 - ty)
+                + v[1] * tx * (1.0 - ty)
+                + v[2] * (1.0 - tx) * ty
+                + v[3] * tx * ty,
         )
     }
 
@@ -257,7 +287,12 @@ impl Grid {
 
     /// Minimum, Maximum, Mittel der gültigen Zellen
     pub fn z_stats(&self) -> Option<(f64, f64, f64)> {
-        let v: Vec<f64> = self.data.iter().filter(|v| !v.is_nan()).map(|&v| v as f64).collect();
+        let v: Vec<f64> = self
+            .data
+            .iter()
+            .filter(|v| !v.is_nan())
+            .map(|&v| v as f64)
+            .collect();
         if v.is_empty() {
             return None;
         }
@@ -267,12 +302,18 @@ impl Grid {
     }
 
     pub fn bbox(&self) -> BBox {
-        BBox { min_x: self.spec.min_x, min_y: self.spec.min_y(), max_x: self.spec.max_x(), max_y: self.spec.max_y }
+        BBox {
+            min_x: self.spec.min_x,
+            min_y: self.spec.min_y(),
+            max_x: self.spec.max_x(),
+            max_y: self.spec.max_y,
+        }
     }
 
     /// Schreibt ein ESRI-ASCII-Grid (`.asc`), das QGIS & Co. direkt öffnen.
     pub fn write_asc(&self, path: &Path) -> Result<()> {
-        let f = std::fs::File::create(path).with_context(|| format!("{} nicht schreibbar", path.display()))?;
+        let f = std::fs::File::create(path)
+            .with_context(|| format!("{} nicht schreibbar", path.display()))?;
         let mut w = BufWriter::new(f);
         let s = &self.spec;
         writeln!(w, "ncols {}", s.cols)?;
@@ -285,7 +326,11 @@ impl Grid {
             let line: Vec<String> = (0..s.cols)
                 .map(|c| {
                     let v = self.get(c, r);
-                    if v.is_nan() { "-9999".to_string() } else { format!("{v:.3}") }
+                    if v.is_nan() {
+                        "-9999".to_string()
+                    } else {
+                        format!("{v:.3}")
+                    }
                 })
                 .collect();
             writeln!(w, "{}", line.join(" "))?;
@@ -296,36 +341,62 @@ impl Grid {
 
     /// Liest ein ESRI-ASCII-Grid (z. B. ein exportiertes DGM).
     pub fn read_asc(path: &Path) -> Result<Self> {
-        let f = std::fs::File::open(path).with_context(|| format!("{} nicht lesbar", path.display()))?;
+        let f = std::fs::File::open(path)
+            .with_context(|| format!("{} nicht lesbar", path.display()))?;
         let mut lines = BufReader::new(f).lines();
         let mut hdr = std::collections::HashMap::new();
         let mut first_data = None;
         for line in lines.by_ref() {
             let line = line?;
             let mut it = line.split_whitespace();
-            let (Some(k), Some(v)) = (it.next(), it.next()) else { continue };
+            let (Some(k), Some(v)) = (it.next(), it.next()) else {
+                continue;
+            };
             if k.parse::<f64>().is_ok() {
                 first_data = Some(line);
                 break;
             }
-            hdr.insert(k.to_ascii_lowercase(), v.parse::<f64>().with_context(|| format!("Header {k}"))?);
+            hdr.insert(
+                k.to_ascii_lowercase(),
+                v.parse::<f64>().with_context(|| format!("Header {k}"))?,
+            );
             if hdr.len() == 6 {
                 break;
             }
         }
-        let get = |k: &str| hdr.get(k).copied().with_context(|| format!("ASC-Header {k} fehlt"));
+        let get = |k: &str| {
+            hdr.get(k)
+                .copied()
+                .with_context(|| format!("ASC-Header {k} fehlt"))
+        };
         let cols = get("ncols")? as usize;
         let rows = get("nrows")? as usize;
         let cell = get("cellsize")?;
-        let min_x = hdr.get("xllcorner").copied().or(hdr.get("xllcenter").map(|v| v - cell / 2.0)).context("xllcorner fehlt")?;
-        let min_y = hdr.get("yllcorner").copied().or(hdr.get("yllcenter").map(|v| v - cell / 2.0)).context("yllcorner fehlt")?;
+        let min_x = hdr
+            .get("xllcorner")
+            .copied()
+            .or(hdr.get("xllcenter").map(|v| v - cell / 2.0))
+            .context("xllcorner fehlt")?;
+        let min_y = hdr
+            .get("yllcorner")
+            .copied()
+            .or(hdr.get("yllcenter").map(|v| v - cell / 2.0))
+            .context("yllcorner fehlt")?;
         let nodata = hdr.get("nodata_value").copied().unwrap_or(-9999.0);
-        let spec = GridSpec { min_x, max_y: min_y + rows as f64 * cell, cell, cols, rows };
+        let spec = GridSpec {
+            min_x,
+            max_y: min_y + rows as f64 * cell,
+            cell,
+            cols,
+            rows,
+        };
         let mut data = Vec::with_capacity(spec.len());
         let rest = first_data.into_iter().map(Ok).chain(lines);
         for line in rest {
             for tok in line?.split_whitespace() {
-                let v: f64 = tok.parse().with_context(|| format!("ungültiger Wert {tok}"))?;
+                let v: f64 = tok
+                    .parse()
+                    .with_context(|| format!("ungültiger Wert {tok}"))?;
                 data.push(if v == nodata { f32::NAN } else { v as f32 });
             }
         }
@@ -355,7 +426,12 @@ mod tests {
 
     #[test]
     fn spec_is_snapped() {
-        let b = BBox { min_x: 10.13, min_y: 20.07, max_x: 12.01, max_y: 21.0 };
+        let b = BBox {
+            min_x: 10.13,
+            min_y: 20.07,
+            max_x: 12.01,
+            max_y: 21.0,
+        };
         let s = GridSpec::covering(&b, 0.5).unwrap();
         assert_eq!((s.min_x, s.max_y, s.cols, s.rows), (10.0, 21.0, 5, 2));
     }
@@ -388,14 +464,25 @@ mod tests {
     #[test]
     fn resample_plane_to_finer_grid() {
         let f = |x: f64, y: f64| 10.0 + 0.2 * (x - 500_000.0) + 0.1 * (y - 5_400_000.0);
-        let mut g = Grid::new_nodata(GridSpec { min_x: 500_000.0, max_y: 5_400_020.0, cell: 1.0, cols: 20, rows: 20 });
+        let mut g = Grid::new_nodata(GridSpec {
+            min_x: 500_000.0,
+            max_y: 5_400_020.0,
+            cell: 1.0,
+            cols: 20,
+            rows: 20,
+        });
         for r in 0..20 {
             for c in 0..20 {
                 let (x, y) = g.spec.center(c, r);
                 g.set(c, r, f(x, y) as f32);
             }
         }
-        let b = BBox { min_x: 500_005.0, min_y: 5_400_005.0, max_x: 500_015.0, max_y: 5_400_015.0 };
+        let b = BBox {
+            min_x: 500_005.0,
+            min_y: 5_400_005.0,
+            max_x: 500_015.0,
+            max_y: 5_400_015.0,
+        };
         let fine = g.resample(GridSpec::covering(&b, 0.5).unwrap());
         assert_eq!(fine.valid_cells(), 400);
         let (x, y) = fine.spec.center(7, 3);

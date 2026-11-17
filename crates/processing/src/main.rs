@@ -255,7 +255,11 @@ enum Cmd {
 }
 
 fn parse_xy(s: &str) -> Result<[f64; 2], String> {
-    let v: Vec<f64> = s.split(',').map(|t| t.trim().parse::<f64>()).collect::<Result<_, _>>().map_err(|e| e.to_string())?;
+    let v: Vec<f64> = s
+        .split(',')
+        .map(|t| t.trim().parse::<f64>())
+        .collect::<Result<_, _>>()
+        .map_err(|e| e.to_string())?;
     if v.len() != 2 {
         return Err("erwartet x,y".into());
     }
@@ -263,7 +267,11 @@ fn parse_xy(s: &str) -> Result<[f64; 2], String> {
 }
 
 fn parse_slope(s: &str) -> Result<[f64; 5], String> {
-    let v: Vec<f64> = s.split(',').map(|t| t.trim().parse::<f64>()).collect::<Result<_, _>>().map_err(|e| e.to_string())?;
+    let v: Vec<f64> = s
+        .split(',')
+        .map(|t| t.trim().parse::<f64>())
+        .collect::<Result<_, _>>()
+        .map_err(|e| e.to_string())?;
     <[f64; 5]>::try_from(v).map_err(|_| "erwartet x,y,z,gefälle_prozent,richtung_grad".to_string())
 }
 
@@ -293,7 +301,12 @@ fn union_bbox(rs: &[Region]) -> Option<BBox> {
 }
 
 fn write_grid(g: &Grid, path: &Path, epsg: u16) -> Result<()> {
-    match path.extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).as_deref() {
+    match path
+        .extension()
+        .and_then(|e| e.to_str())
+        .map(|e| e.to_ascii_lowercase())
+        .as_deref()
+    {
         Some("tif" | "tiff") => geotiff::write(g, path, Some(epsg), None),
         Some("asc") => g.write_asc(path),
         _ => bail!("{}: Raster bitte als .tif oder .asc", path.display()),
@@ -301,7 +314,13 @@ fn write_grid(g: &Grid, path: &Path, epsg: u16) -> Result<()> {
 }
 
 fn is_las(p: &Path) -> bool {
-    matches!(p.extension().and_then(|e| e.to_str()).map(|e| e.to_ascii_lowercase()).as_deref(), Some("las" | "laz"))
+    matches!(
+        p.extension()
+            .and_then(|e| e.to_str())
+            .map(|e| e.to_ascii_lowercase())
+            .as_deref(),
+        Some("las" | "laz")
+    )
 }
 
 /// Gemeinsames Raster für mehrere Eingaben: Grenze, sonst Schnittmenge der Ausdehnungen.
@@ -334,7 +353,10 @@ fn run() -> Result<()> {
     match cli.cmd {
         Cmd::Info { input } => {
             if surface::is_raster(&input) {
-                let (g, e) = if input.extension().is_some_and(|x| x.eq_ignore_ascii_case("asc")) {
+                let (g, e) = if input
+                    .extension()
+                    .is_some_and(|x| x.eq_ignore_ascii_case("asc"))
+                {
                     (Grid::read_asc(&input)?, None)
                 } else {
                     let r = geotiff::read(&input)?;
@@ -357,27 +379,46 @@ fn run() -> Result<()> {
                     "z_min": lo, "z_max": hi, "density_per_m2": c.len() as f64 / area,
                 });
                 if is_las(&input) {
-                    let g = PointCloud::read(&input, ReadOptions { ground_only: true }).map(|g| g.len()).unwrap_or(0);
+                    let g = PointCloud::read(&input, ReadOptions { ground_only: true })
+                        .map(|g| g.len())
+                        .unwrap_or(0);
                     v["ground_points"] = json!(g);
                 }
                 print(&v)?;
             }
         }
 
-        Cmd::Dem { input, out, s, boundary } => {
+        Cmd::Dem {
+            input,
+            out,
+            s,
+            boundary,
+        } => {
             let rs = regions(&boundary)?;
             let o = s.options();
             let mut g = surface::load(&input, None, union_bbox(&rs), &o)?;
             if let Some(m) = union_poly_mask(&rs, g.spec) {
-                g.data.iter_mut().zip(m).for_each(|(v, k)| if !k { *v = f32::NAN });
+                g.data.iter_mut().zip(m).for_each(|(v, k)| {
+                    if !k {
+                        *v = f32::NAN
+                    }
+                });
             }
             write_grid(&g, &out, epsg)?;
             let st = g.z_stats();
-            print(&json!({"out": out, "cols": g.spec.cols, "rows": g.spec.rows, "cell": g.spec.cell,
-                "valid_cells": g.valid_cells(), "z_min": st.map(|s| s.0), "z_max": st.map(|s| s.1)}))?;
+            print(
+                &json!({"out": out, "cols": g.spec.cols, "rows": g.spec.rows, "cell": g.spec.cell,
+                "valid_cells": g.valid_cells(), "z_min": st.map(|s| s.0), "z_max": st.map(|s| s.1)}),
+            )?;
         }
 
-        Cmd::Diff { before, after, s, boundary, diff_out } => {
+        Cmd::Diff {
+            before,
+            after,
+            s,
+            boundary,
+            diff_out,
+        } => {
             let o = s.options();
             let rs = regions(&boundary)?;
             let spec = common_spec(&[&before, &after], &rs, &o)?;
@@ -387,7 +428,11 @@ fn run() -> Result<()> {
                 let union = union_poly_mask(&rs, spec);
                 let (_, mut d) = volume::difference(&g0, &g1, None)?;
                 if let Some(m) = union {
-                    d.data.iter_mut().zip(m).for_each(|(v, k)| if !k { *v = f32::NAN });
+                    d.data.iter_mut().zip(m).for_each(|(v, k)| {
+                        if !k {
+                            *v = f32::NAN
+                        }
+                    });
                 }
                 write_grid(&d, p, epsg)?;
             }
@@ -401,12 +446,20 @@ fn run() -> Result<()> {
             }
         }
 
-        Cmd::Stockpile { surface: path, s, boundary, base } => {
+        Cmd::Stockpile {
+            surface: path,
+            s,
+            boundary,
+            base,
+        } => {
             let rs = Polygon::regions_from_geojson_file(&boundary)?;
             let base = match base.as_str() {
                 "plane" => Base::Plane,
                 "lowest" => Base::Lowest,
-                h => Base::Height(h.parse().map_err(|_| anyhow::anyhow!("--base: plane, lowest oder Zahl"))?),
+                h => Base::Height(
+                    h.parse()
+                        .map_err(|_| anyhow::anyhow!("--base: plane, lowest oder Zahl"))?,
+                ),
             };
             let o = s.options();
             let g = surface::load(&path, None, union_bbox(&rs), &o)?;
@@ -426,7 +479,13 @@ fn run() -> Result<()> {
             }
         }
 
-        Cmd::Series { base, epochs, s, boundary, labels } => {
+        Cmd::Series {
+            base,
+            epochs,
+            s,
+            boundary,
+            labels,
+        } => {
             let o = s.options();
             let rs = regions(&boundary)?;
             if rs.len() > 1 {
@@ -439,21 +498,38 @@ fn run() -> Result<()> {
             let mut eps = Vec::new();
             for (i, p) in epochs.iter().enumerate() {
                 let label = labels.get(i).cloned().unwrap_or_else(|| {
-                    p.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| format!("{}", i + 1))
+                    p.file_stem()
+                        .map(|s| s.to_string_lossy().into_owned())
+                        .unwrap_or_else(|| format!("{}", i + 1))
                 });
                 eps.push((label, surface::load(p, Some(spec), None, &o)?));
             }
             print(&volume::series(&g0, &eps, rs.first().map(|r| &r.polygon))?)?;
         }
 
-        Cmd::Ground { input, output, cell, slope, max_window, threshold, dtm_out } => {
-            let params = GroundParams { cell, slope, max_window, elevation_threshold: threshold, ..Default::default() };
+        Cmd::Ground {
+            input,
+            output,
+            cell,
+            slope,
+            max_window,
+            threshold,
+            dtm_out,
+        } => {
+            let params = GroundParams {
+                cell,
+                slope,
+                max_window,
+                elevation_threshold: threshold,
+                ..Default::default()
+            };
             let cloud = PointCloud::read(&input, ReadOptions::default())?;
             let (cls, dtm, rep) = filter::classify_ground(&cloud, params)?;
             if is_las(&input) && is_las(&output) {
                 pointcloud::rewrite_las(&input, &output, None, |i, p| {
                     if let Some(i) = i {
-                        p.classification = las::point::Classification::new(cls[i]).unwrap_or(p.classification);
+                        p.classification =
+                            las::point::Classification::new(cls[i]).unwrap_or(p.classification);
                     }
                     true
                 })?;
@@ -466,7 +542,13 @@ fn run() -> Result<()> {
             print(&rep)?;
         }
 
-        Cmd::Clean { input, output, voxel, neighbors, std_ratio } => {
+        Cmd::Clean {
+            input,
+            output,
+            voxel,
+            neighbors,
+            std_ratio,
+        } => {
             let cloud = PointCloud::read(&input, ReadOptions::default())?;
             let mut keep = vec![true; cloud.len()];
             let mut report = json!({"points_in": cloud.len()});
@@ -494,7 +576,12 @@ fn run() -> Result<()> {
             print(&report)?;
         }
 
-        Cmd::Georef { gcp, mode, input, output } => {
+        Cmd::Georef {
+            gcp,
+            mode,
+            input,
+            output,
+        } => {
             let pts = transform::read_control_points(&gcp)?;
             let rep = transform::fit(&pts, mode)?;
             if let Some(inp) = input {
@@ -514,7 +601,11 @@ fn run() -> Result<()> {
                             .iter()
                             .map(|p| {
                                 let q = t.apply([p.x, p.y, p.z]);
-                                Point3 { x: q[0], y: q[1], z: q[2] }
+                                Point3 {
+                                    x: q[0],
+                                    y: q[1],
+                                    z: q[2],
+                                }
                             })
                             .collect(),
                     );
@@ -524,18 +615,29 @@ fn run() -> Result<()> {
             print(&rep)?;
         }
 
-        Cmd::Coords { input, zone, geoid, inverse } => {
+        Cmd::Coords {
+            input,
+            zone,
+            geoid,
+            inverse,
+        } => {
             let utm = Utm::new(zone)?;
             let geoid = geoid.as_deref().map(Geoid::read).transpose()?;
             let reader: Box<dyn BufRead> = if input.as_os_str() == "-" {
                 Box::new(std::io::stdin().lock())
             } else {
-                Box::new(std::io::BufReader::new(std::fs::File::open(&input).with_context(|| format!("{} nicht lesbar", input.display()))?))
+                Box::new(std::io::BufReader::new(
+                    std::fs::File::open(&input)
+                        .with_context(|| format!("{} nicht lesbar", input.display()))?,
+                ))
             };
             let mut out = std::io::stdout().lock();
             for line in reader.lines() {
                 let line = line?;
-                let toks: Vec<&str> = line.split(|c: char| c.is_whitespace() || c == ',' || c == ';').filter(|s| !s.is_empty()).collect();
+                let toks: Vec<&str> = line
+                    .split(|c: char| c.is_whitespace() || c == ',' || c == ';')
+                    .filter(|s| !s.is_empty())
+                    .collect();
                 // optional führender Punktname
                 let (name, nums) = match toks.first().map(|t| t.parse::<f64>().is_ok()) {
                     Some(false) => (Some(toks[0]), &toks[1..]),
@@ -551,7 +653,10 @@ fn run() -> Result<()> {
                     o.push(format!("{lat:.9}"));
                     o.push(format!("{lon:.9}"));
                     if let Some(h) = v.get(2) {
-                        let h = match &geoid { Some(g) => g.to_ellipsoidal_height(lat, lon, *h)?, None => *h };
+                        let h = match &geoid {
+                            Some(g) => g.to_ellipsoidal_height(lat, lon, *h)?,
+                            None => *h,
+                        };
                         o.push(format!("{h:.4}"));
                     }
                 } else {
@@ -559,7 +664,10 @@ fn run() -> Result<()> {
                     o.push(format!("{e:.4}"));
                     o.push(format!("{n:.4}"));
                     if let Some(h) = v.get(2) {
-                        let h = match &geoid { Some(g) => g.to_normal_height(v[0], v[1], *h)?, None => *h };
+                        let h = match &geoid {
+                            Some(g) => g.to_normal_height(v[0], v[1], *h)?,
+                            None => *h,
+                        };
                         o.push(format!("{h:.4}"));
                     }
                 }
@@ -567,7 +675,13 @@ fn run() -> Result<()> {
             }
         }
 
-        Cmd::Measure { surface: path, s, at, line, area } => {
+        Cmd::Measure {
+            surface: path,
+            s,
+            at,
+            line,
+            area,
+        } => {
             let mut bb: Option<BBox> = None;
             let mut grow = |x: f64, y: f64, pad: f64| {
                 let b = bb.get_or_insert_with(BBox::empty);
@@ -575,18 +689,30 @@ fn run() -> Result<()> {
                 b.extend(x + pad, y + pad);
             };
             let line = line.as_deref().map(geom::line_from_file).transpose()?;
-            let area = area.as_deref().map(Polygon::from_geojson_file).transpose()?;
+            let area = area
+                .as_deref()
+                .map(Polygon::from_geojson_file)
+                .transpose()?;
             let pad = 4.0 * s.cell;
             at.iter().for_each(|p| grow(p[0], p[1], pad));
             line.iter().flatten().for_each(|p| grow(p[0], p[1], pad));
-            area.iter().flat_map(|a| a.exterior.iter()).for_each(|p| grow(p[0], p[1], pad));
+            area.iter()
+                .flat_map(|a| a.exterior.iter())
+                .for_each(|p| grow(p[0], p[1], pad));
             if bb.is_none() {
                 bail!("nichts zu messen: --at, --line oder --area angeben");
             }
             let g = surface::load(&path, None, bb, &s.options())?;
             let mut v = serde_json::Map::new();
             if !at.is_empty() {
-                v.insert("points".into(), serde_json::to_value(at.iter().map(|p| measure::point(&g, p[0], p[1])).collect::<Vec<_>>())?);
+                v.insert(
+                    "points".into(),
+                    serde_json::to_value(
+                        at.iter()
+                            .map(|p| measure::point(&g, p[0], p[1]))
+                            .collect::<Vec<_>>(),
+                    )?,
+                );
             }
             if let Some(l) = &line {
                 v.insert("line".into(), serde_json::to_value(measure::line(&g, l)?)?);
@@ -597,7 +723,13 @@ fn run() -> Result<()> {
             print(&Value::Object(v))?;
         }
 
-        Cmd::Profile { surface: path, s, line, step, csv } => {
+        Cmd::Profile {
+            surface: path,
+            s,
+            line,
+            step,
+            csv,
+        } => {
             let l = geom::line_from_file(&line)?;
             let mut b = BBox::empty();
             for p in &l {
@@ -609,13 +741,24 @@ fn run() -> Result<()> {
             match csv {
                 Some(p) => {
                     export::write_profile_csv(&prof, &p)?;
-                    print(&json!({"out": p, "points": prof.len(), "summary": measure::line(&g, &l)?}))?;
+                    print(
+                        &json!({"out": p, "points": prof.len(), "summary": measure::line(&g, &l)?}),
+                    )?;
                 }
                 None => print(&prof)?,
             }
         }
 
-        Cmd::Compare { scan, s, height, slope, design, boundary, tolerance, diff_out } => {
+        Cmd::Compare {
+            scan,
+            s,
+            height,
+            slope,
+            design,
+            boundary,
+            tolerance,
+            diff_out,
+        } => {
             let o = s.options();
             let rs = regions(&boundary)?;
             if rs.len() > 1 {
@@ -624,8 +767,16 @@ fn run() -> Result<()> {
             let g = surface::load(&scan, None, union_bbox(&rs), &o)?;
             let d = match (height, slope, design) {
                 (Some(h), None, None) => Design::Height(h),
-                (None, Some(v), None) => Design::Slope { x: v[0], y: v[1], z: v[2], percent: v[3], azimuth_deg: v[4] },
-                (None, None, Some(p)) => Design::Surface(surface::load(&p, Some(g.spec), None, &o)?),
+                (None, Some(v), None) => Design::Slope {
+                    x: v[0],
+                    y: v[1],
+                    z: v[2],
+                    percent: v[3],
+                    azimuth_deg: v[4],
+                },
+                (None, None, Some(p)) => {
+                    Design::Surface(surface::load(&p, Some(g.spec), None, &o)?)
+                }
                 _ => bail!("genau eins von --height, --slope oder --design angeben"),
             };
             let (rep, diff) = compare::compare(&g, &d, rs.first().map(|r| &r.polygon), tolerance)?;
@@ -635,11 +786,31 @@ fn run() -> Result<()> {
             print(&rep)?;
         }
 
-        Cmd::Export { surface: path, s, boundary, tif, asc, dxf, landxml, obj, ply, csv, contours, major, dxf_mesh, stride, local } => {
+        Cmd::Export {
+            surface: path,
+            s,
+            boundary,
+            tif,
+            asc,
+            dxf,
+            landxml,
+            obj,
+            ply,
+            csv,
+            contours,
+            major,
+            dxf_mesh,
+            stride,
+            local,
+        } => {
             let rs = regions(&boundary)?;
             let mut g = surface::load(&path, None, union_bbox(&rs), &s.options())?;
             if let Some(m) = union_poly_mask(&rs, g.spec) {
-                g.data.iter_mut().zip(m).for_each(|(v, k)| if !k { *v = f32::NAN });
+                g.data.iter_mut().zip(m).for_each(|(v, k)| {
+                    if !k {
+                        *v = f32::NAN
+                    }
+                });
             }
             let mut written = Vec::new();
             if let Some(p) = &tif {
@@ -658,7 +829,10 @@ fn run() -> Result<()> {
             } else {
                 [0.0; 3]
             };
-            let name = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| "DGM".into());
+            let name = path
+                .file_stem()
+                .map(|s| s.to_string_lossy().into_owned())
+                .unwrap_or_else(|| "DGM".into());
             if let (Some(p), Some(m)) = (&landxml, &mesh) {
                 m.write_landxml(p, &name, Some(epsg as u32))?;
                 written.push(p.clone());
@@ -678,7 +852,12 @@ fn run() -> Result<()> {
                 n_contours = cs.len();
                 d.contours(&cs, major);
                 for r in &rs {
-                    let pts: Vec<[f64; 3]> = r.polygon.exterior.iter().map(|q| [q[0], q[1], g.sample(q[0], q[1]).unwrap_or(0.0)]).collect();
+                    let pts: Vec<[f64; 3]> = r
+                        .polygon
+                        .exterior
+                        .iter()
+                        .map(|q| [q[0], q[1], g.sample(q[0], q[1]).unwrap_or(0.0)])
+                        .collect();
                     d.polyline("GRENZE", &pts, true);
                 }
                 if let (true, Some(m)) = (dxf_mesh, &mesh) {

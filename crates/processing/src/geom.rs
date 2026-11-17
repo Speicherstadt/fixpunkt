@@ -70,14 +70,22 @@ impl Polygon {
 
     pub fn with_holes(exterior: Vec<[f64; 2]>, holes: Vec<Vec<[f64; 2]>>) -> Result<Self> {
         let exterior = normalize_ring(exterior)?;
-        let holes = holes.into_iter().map(normalize_ring).collect::<Result<_>>()?;
+        let holes = holes
+            .into_iter()
+            .map(normalize_ring)
+            .collect::<Result<_>>()?;
         Ok(Polygon { exterior, holes })
     }
 
     /// Rechteck – praktisch für Tests und schnelle Auswertungen.
     pub fn rect(min_x: f64, min_y: f64, max_x: f64, max_y: f64) -> Self {
         Polygon {
-            exterior: vec![[min_x, min_y], [max_x, min_y], [max_x, max_y], [min_x, max_y]],
+            exterior: vec![
+                [min_x, min_y],
+                [max_x, min_y],
+                [max_x, max_y],
+                [min_x, max_y],
+            ],
             holes: Vec::new(),
         }
     }
@@ -137,7 +145,9 @@ impl Polygon {
     }
 
     pub fn from_geojson_str(text: &str) -> Result<Self> {
-        Ok(Self::regions_from_geojson_str(text, Utm::default())?.remove(0).polygon)
+        Ok(Self::regions_from_geojson_str(text, Utm::default())?
+            .remove(0)
+            .polygon)
     }
 
     /// Alle Polygone einer GeoJSON-Datei als benannte Bereiche (Geofences).
@@ -172,7 +182,10 @@ impl Polygon {
             }
             let exterior = parsed.remove(0);
             let polygon = Polygon::with_holes(exterior, parsed)?;
-            out.push(Region { name: name.unwrap_or_else(|| format!("Bereich {}", i + 1)), polygon });
+            out.push(Region {
+                name: name.unwrap_or_else(|| format!("Bereich {}", i + 1)),
+                polygon,
+            });
         }
         Ok(out)
     }
@@ -185,9 +198,15 @@ fn looks_geographic<'a>(mut pts: impl Iterator<Item = &'a [f64; 2]>) -> bool {
 /// `true`, wenn das (alte) GeoJSON-Feld `crs` ein anderes System als Länge/Breite nennt,
 /// z. B. `urn:ogc:def:crs:EPSG::25832` aus einem QGIS-Export.
 fn declares_metric_crs(v: &Value) -> bool {
-    let Some(name) = v.pointer("/crs/properties/name").and_then(Value::as_str) else { return false };
+    let Some(name) = v.pointer("/crs/properties/name").and_then(Value::as_str) else {
+        return false;
+    };
     let n = name.to_ascii_uppercase();
-    !(n.contains("CRS84") || n.ends_with(":4326") || n.ends_with(":4258") || n.ends_with("::4326") || n.ends_with("::4258"))
+    !(n.contains("CRS84")
+        || n.ends_with(":4326")
+        || n.ends_with(":4258")
+        || n.ends_with("::4326")
+        || n.ends_with("::4258"))
 }
 
 /// Benannter Abrechnungsbereich
@@ -202,10 +221,18 @@ fn feature_name(v: &Value) -> Option<String> {
     ["name", "Name", "NAME", "bezeichnung", "Bezeichnung", "id"]
         .iter()
         .find_map(|k| p.get(*k))
-        .map(|n| n.as_str().map(str::to_string).unwrap_or_else(|| n.to_string()))
+        .map(|n| {
+            n.as_str()
+                .map(str::to_string)
+                .unwrap_or_else(|| n.to_string())
+        })
 }
 
-fn collect_polygons<'a>(v: &'a Value, name: Option<String>, out: &mut Vec<(Option<String>, &'a Vec<Value>)>) {
+fn collect_polygons<'a>(
+    v: &'a Value,
+    name: Option<String>,
+    out: &mut Vec<(Option<String>, &'a Vec<Value>)>,
+) {
     match v.get("type").and_then(Value::as_str) {
         Some("Polygon") => {
             if let Some(c) = v.get("coordinates").and_then(Value::as_array) {
@@ -216,7 +243,11 @@ fn collect_polygons<'a>(v: &'a Value, name: Option<String>, out: &mut Vec<(Optio
             if let Some(ps) = v.get("coordinates").and_then(Value::as_array) {
                 let many = ps.len() > 1;
                 for (i, c) in ps.iter().filter_map(Value::as_array).enumerate() {
-                    let n = if many { name.clone().map(|n| format!("{n} ({})", i + 1)) } else { name.clone() };
+                    let n = if many {
+                        name.clone().map(|n| format!("{n} ({})", i + 1))
+                    } else {
+                        name.clone()
+                    };
                     out.push((n, c));
                 }
             }
@@ -227,12 +258,22 @@ fn collect_polygons<'a>(v: &'a Value, name: Option<String>, out: &mut Vec<(Optio
             }
         }
         Some("FeatureCollection") => {
-            for f in v.get("features").and_then(Value::as_array).into_iter().flatten() {
+            for f in v
+                .get("features")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+            {
                 collect_polygons(f, None, out);
             }
         }
         Some("GeometryCollection") => {
-            for g in v.get("geometries").and_then(Value::as_array).into_iter().flatten() {
+            for g in v
+                .get("geometries")
+                .and_then(Value::as_array)
+                .into_iter()
+                .flatten()
+            {
                 collect_polygons(g, name.clone(), out);
             }
         }
@@ -267,7 +308,8 @@ pub fn line_from_geojson_str(text: &str, utm: Utm) -> Result<Vec<[f64; 2]>> {
 
 /// Linie aus Datei: GeoJSON oder Text mit `x y` je Zeile.
 pub fn line_from_file(path: &Path) -> Result<Vec<[f64; 2]>> {
-    let text = std::fs::read_to_string(path).with_context(|| format!("{} nicht lesbar", path.display()))?;
+    let text = std::fs::read_to_string(path)
+        .with_context(|| format!("{} nicht lesbar", path.display()))?;
     if text.trim_start().starts_with('{') {
         return line_from_geojson_str(&text, Utm::default());
     }
@@ -283,7 +325,10 @@ pub fn line_from_file(path: &Path) -> Result<Vec<[f64; 2]>> {
         })
         .collect();
     if pts.len() < 2 {
-        bail!("{}: Linie braucht mindestens 2 Punkte (x y je Zeile)", path.display());
+        bail!(
+            "{}: Linie braucht mindestens 2 Punkte (x y je Zeile)",
+            path.display()
+        );
     }
     Ok(pts)
 }
@@ -293,8 +338,14 @@ fn parse_ring(v: &Value) -> Result<Vec<[f64; 2]>> {
         .context("Ring ist kein Array")?
         .iter()
         .map(|p| {
-            let x = p.get(0).and_then(Value::as_f64).context("Koordinate ohne x")?;
-            let y = p.get(1).and_then(Value::as_f64).context("Koordinate ohne y")?;
+            let x = p
+                .get(0)
+                .and_then(Value::as_f64)
+                .context("Koordinate ohne x")?;
+            let y = p
+                .get(1)
+                .and_then(Value::as_f64)
+                .context("Koordinate ohne y")?;
             Ok([x, y])
         })
         .collect()
@@ -381,7 +432,11 @@ mod tests {
         let p = Polygon::from_geojson_str(gj).unwrap();
         let b = p.bbox();
         assert!((b.min_x - 500_000.0).abs() < 1e-6, "{}", b.min_x);
-        assert!(b.min_y > 5_316_000.0 && b.min_y < 5_317_000.0, "{}", b.min_y);
+        assert!(
+            b.min_y > 5_316_000.0 && b.min_y < 5_317_000.0,
+            "{}",
+            b.min_y
+        );
         // 0,001° ≈ 74,6 m × 111,2 m
         assert!((p.area() - 74.6 * 111.2).abs() < 30.0, "{}", p.area());
     }

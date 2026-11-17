@@ -54,7 +54,11 @@ pub struct AreaMeasure {
 }
 
 pub fn point(g: &Grid, x: f64, y: f64) -> PointMeasure {
-    PointMeasure { x, y, z: g.sample(x, y) }
+    PointMeasure {
+        x,
+        y,
+        z: g.sample(x, y),
+    }
 }
 
 /// Punkte entlang einer Polylinie etwa alle `step` m, inkl. aller Stützpunkte und Endpunkt.
@@ -62,7 +66,7 @@ pub fn profile(g: &Grid, line: &[[f64; 2]], step: f64) -> Result<Vec<ProfilePoin
     if line.len() < 2 {
         bail!("Linie braucht mindestens 2 Punkte");
     }
-    if !(step > 0.0) {
+    if step.is_nan() || step <= 0.0 {
         bail!("Schrittweite muss > 0 sein");
     }
     let mut out = Vec::new();
@@ -74,12 +78,22 @@ pub fn profile(g: &Grid, line: &[[f64; 2]], step: f64) -> Result<Vec<ProfilePoin
         for s in 0..k {
             let t = s as f64 / k as f64;
             let (x, y) = (x0 + t * (x1 - x0), y0 + t * (y1 - y0));
-            out.push(ProfilePoint { station: station + t * len, x, y, z: g.sample(x, y) });
+            out.push(ProfilePoint {
+                station: station + t * len,
+                x,
+                y,
+                z: g.sample(x, y),
+            });
         }
         station += len;
     }
     let [x, y] = line[line.len() - 1];
-    out.push(ProfilePoint { station, x, y, z: g.sample(x, y) });
+    out.push(ProfilePoint {
+        station,
+        x,
+        y,
+        z: g.sample(x, y),
+    });
     Ok(out)
 }
 
@@ -155,7 +169,11 @@ mod tests {
         for j in 0..=200 {
             for i in 0..=200 {
                 let (dx, dy) = (i as f64 * 0.1, j as f64 * 0.1);
-                pts.push(Point3 { x: X0 + dx, y: Y0 + dy, z: 100.0 + a * dx + b * dy });
+                pts.push(Point3 {
+                    x: X0 + dx,
+                    y: Y0 + dy,
+                    z: 100.0 + a * dx + b * dy,
+                });
             }
         }
         let c = PointCloud::new(pts);
@@ -168,7 +186,11 @@ mod tests {
         let g = plane(0.02, 0.0); // 2 % Gefälle in x
         let m = line(&g, &[[X0 + 2.0, Y0 + 5.0], [X0 + 17.0, Y0 + 5.0]]).unwrap();
         assert!((m.length_2d - 15.0).abs() < 1e-9);
-        assert!((m.length_3d - 15.0 * (1.0f64 + 0.0004).sqrt()).abs() < 1e-3, "{}", m.length_3d);
+        assert!(
+            (m.length_3d - 15.0 * (1.0f64 + 0.0004).sqrt()).abs() < 1e-3,
+            "{}",
+            m.length_3d
+        );
         assert!((m.slope_percent.unwrap() - 2.0).abs() < 0.01);
         assert!((m.dz.unwrap() - 0.3).abs() < 0.002);
     }
@@ -176,7 +198,16 @@ mod tests {
     #[test]
     fn polyline_profile_stations() {
         let g = plane(0.0, 0.0);
-        let p = profile(&g, &[[X0 + 1.0, Y0 + 1.0], [X0 + 4.0, Y0 + 5.0], [X0 + 4.0, Y0 + 8.0]], 1.0).unwrap();
+        let p = profile(
+            &g,
+            &[
+                [X0 + 1.0, Y0 + 1.0],
+                [X0 + 4.0, Y0 + 5.0],
+                [X0 + 4.0, Y0 + 8.0],
+            ],
+            1.0,
+        )
+        .unwrap();
         assert_eq!(p.first().unwrap().station, 0.0);
         assert!((p.last().unwrap().station - 8.0).abs() < 1e-9);
         assert!(p.iter().all(|q| (q.z.unwrap() - 100.0).abs() < 1e-3));

@@ -1,0 +1,7 @@
+// Renovate: gemeinsame Einstellungen aus firsttris/workflows (renovate/default.json5) –
+// Minor- und Patch-Updates einmal im Monat in einem Pull Request, der sich bei grüner CI selbst
+// merged; Majors auf Anfrage im Dependency Dashboard.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: ["github>firsttris/workflows//renovate/default.json5"],
+}

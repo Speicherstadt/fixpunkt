@@ -381,29 +381,43 @@ Aufbau wie in `haul`:
 
 | Bereich | Technik |
 |---|---|
-| HTTP, API | `tokio`, `axum`, JSON; Live-Fortschritt der Jobs per Server-Sent Events (`/api/events`) |
-| Datenbank | SQLite über `sqlx`, Migrationen beim Start |
+| HTTP, API | `tokio`, `axum`, `serde`, JSON; Live-Fortschritt der Jobs per Server-Sent Events (`/api/events`); Logs mit `tracing` |
+| Datenbank | SQLite über `sqlx`, Migrationen eingecheckt, in die Binärdatei eingebettet, laufen beim Start |
 | Dateien | Datenverzeichnis: Rohdaten, Ergebnisse, Kacheln je Aufnahme; Sicherung per restic/rsync auf netcup Storage Space |
 | Jobs | Warteschlange in SQLite, Ausführung im Prozess (`spawn_blocking` + `rayon`), überlebt Neustarts |
 | Rechenkern | `crates/processing` direkt als Bibliothek (kein Aufruf der CLI) |
 | Web-UI | `rust-embed` auf `ui/dist`; `build.rs` legt leere Ordner an, damit `cargo test` ohne Bun baut |
-| Auth | Login mit Sitzungs-Cookie, Rollen (Admin, Bauleiter, nur lesen), API-Token für die iOS-App |
+| Auth | eigener Login: argon2id, Sitzungs-Cookie, CSRF, Passkeys (`webauthn-rs`); Rollen (Admin, Bauleiter, nur lesen); API-Token für die iOS-App |
 | Upload | große Dateien und Fotomengen in Teilen, fortsetzbar (tus-Protokoll o. ä.) |
 | Drohne | NodeODM per HTTP: Fotos übergeben, Fortschritt abfragen, Ergebnis abholen |
-| Ausliefern | eine Binärdatei (systemd) oder Docker in drei Stufen: Bun (UI) → Rust (Binärdatei) → Debian slim |
+| Ausliefern | Docker-Image `tristanteu/fixpunkt` (amd64 + arm64) in drei Stufen: Bun (UI) → Rust mit cargo-chef (Binärdatei) → Debian slim; betrieben mit Podman-Quadlet oder Docker Compose. Zusätzlich statische musl-Binärdateien + `install.sh` mit systemd-Unit (wie haul) |
 
 Datenmodell: Mandant → Baustelle → Aufnahme (Scan/Flug) → Rohdaten, Ergebnisse, Passpunkte, Messungen, Bereiche.
 
+Begründung der Abweichungen von `tech-stack.md` (Rust statt TypeScript, SQLite trotz mehrerer Nutzer,
+SPA statt TanStack Start, eigener Login statt Better Auth) steht in `CLAUDE.md`.
+
 ### 5.2a Web-UI (TypeScript) – Verantwortung: Tristan
-Wie in unseren anderen Projekten:
-- **Bun**, **Vite**, **TypeScript**, **React** mit **TanStack Router** und **TanStack Query**
-- **shadcn/ui** + Tailwind, Icons von lucide
-- **Paraglide JS** für Texte (Deutsch zuerst, Englisch später); der Server schickt Schlüssel statt fertiger Texte
+Nach `tech-stack.md` in `firsttris/workflows`, wie in snapraid-ui:
+- **Bun**, **Vite**, **TypeScript strict**, **React** mit **TanStack Router** (dateibasierte Routen), **TanStack Query**, **TanStack Table/Virtual** für lange Listen
+- **shadcn/ui**-Stil (eigene Komponenten auf **Radix**, `class-variance-authority`), **Tailwind CSS 4** (hell/dunkel), Icons von **lucide**
+- Diagramme (Massen über die Zeit, Profile) mit **uPlot**
+- Formulare kontrolliert, bei Bedarf **TanStack Form**; **Zod** an jeder Grenze (API-Antworten, Uploads)
+- **Paraglide JS** für Texte (`ui/messages/{de,en}.json`, Deutsch zuerst); der Server schickt Schlüssel statt fertiger Texte
+- **PWA**: auf dem Tablet/Handy auf der Baustelle installierbar
 - **Single-Page-App** (kein TanStack Start mit eigenem JS-Server): Der Rust-Server liefert nur statische Dateien aus
 - Viewer: **CesiumJS** (Karte + Punktwolke/3D Tiles + Orthofoto in einem) oder Potree – Entscheidung nach einem Test mit echten ODM-Daten
 - Messwerkzeuge im Viewer (Punkt, Linie, Fläche, Profil, Volumen-Polygon), Ergebnisse vom Rechenkern
 - Berichte als PDF, DXF-Pläne als Overlay
-- `bun run dev`: Server auf :8080, UI mit Hot Reload auf :5173
+- `bun run dev`: `bun run --parallel dev:server dev:ui` – Server auf :8080, UI mit Hot Reload auf :5173
+
+### 5.2b Tooling, CI, Releases
+Wie in allen Projekten (`firsttris/workflows`):
+- **Biome** (TS), `cargo fmt` + `cargo clippy -D warnings` (Rust); **Vitest**, `cargo test`; **Playwright** auf Bun für E2E und Screenshots
+- `ci.yml` mit dem gemeinsamen Kopf (Entwürfe bauen nicht, `workflow_call` für den Release) – ✅ angelegt, prüft bisher den Rechenkern
+- Release nur per Tag `vX.Y.Z`: `bump.yml` (Button „Bump version“, Version aus `Cargo.toml`) → `release.yml` → `tested-on-main` → `docker-release.yml` (Image + GitHub-Release) → musl-Binärdateien anhängen
+- **Renovate** mit den gemeinsamen Einstellungen – ✅ angelegt
+- Doku später mit **MkDocs Material** auf GitHub Pages, README nach der Vorlage
 
 ### 5.3 Rechenkern (Rust, `crates/processing`) – Verantwortung: Tristan – ✅ fertig
 | Aufgabe | Crates / Tools |
@@ -435,7 +449,8 @@ Wie in unseren anderen Projekten:
 - [x] Rechenkern fertig (`crates/processing`, s. dortige README): Aushub je Bereich, Haufwerk, Zeitreihe, Soll/Ist,
       Bodenfilter (SMRF), Ausreißer, Passpunkt-Transformation (Helmert), UTM32 + GCG2016, Messen/Profile,
       Exporte GeoTIFF/DXF/LandXML/OBJ/PLY/CSV, ODM-GeoTIFF als Eingabe – 43 Tests
-- [ ] Weitere Struktur: `crates/server` (Rust, axum), `ui/` (Bun, Vite, React, TanStack, shadcn/ui, Paraglide), `docker/` (`apps/ios` erst ab Phase 4)
+- [x] CI (`ci.yml`), Renovate, `CLAUDE.md` nach den Vorlagen aus `firsttris/workflows`
+- [ ] Weitere Struktur: `crates/server` (Rust, axum), `ui/` (Bun, Vite, React, TanStack, shadcn/ui, Paraglide), `docker/`, `bump.yml` + `release.yml` (`apps/ios` erst ab Phase 4)
 - [ ] netcup RS 2000 aufsetzen, NodeODM testen
 - [ ] SAPOS-Zugang (BW) beantragen
 - [ ] **Mit der Firma klären:** Drohne (Matrice 4E) oder BLK2GO (+ Rover)? Matrice 4E kaufen? Wer macht A1/A3 + A2? Betreiberregistrierung, Versicherung

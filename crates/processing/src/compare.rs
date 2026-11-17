@@ -14,7 +14,13 @@ pub enum Design {
     Height(f64),
     /// geneigte Ebene: Höhe `z` am Bezugspunkt (`x`, `y`), Gefälle in % in Richtung `azimuth_deg`
     /// (0° = Nord, 90° = Ost; die Fläche fällt in diese Richtung)
-    Slope { x: f64, y: f64, z: f64, percent: f64, azimuth_deg: f64 },
+    Slope {
+        x: f64,
+        y: f64,
+        z: f64,
+        percent: f64,
+        azimuth_deg: f64,
+    },
     /// Soll-DGM (muss deckungsgleich mit dem Scan sein; sonst wird bilinear abgetastet)
     Surface(Grid),
 }
@@ -23,7 +29,13 @@ impl Design {
     pub fn height_at(&self, x: f64, y: f64) -> Option<f64> {
         match self {
             Design::Height(h) => Some(*h),
-            Design::Slope { x: x0, y: y0, z, percent, azimuth_deg } => {
+            Design::Slope {
+                x: x0,
+                y: y0,
+                z,
+                percent,
+                azimuth_deg,
+            } => {
                 let (s, c) = azimuth_deg.to_radians().sin_cos();
                 let along = (x - x0) * s + (y - y0) * c;
                 Some(z - percent / 100.0 * along)
@@ -80,10 +92,20 @@ pub struct DeviationReport {
 }
 
 /// Vergleicht `scan` mit `design` innerhalb `boundary`. `tolerance` in m (z. B. 0,03).
-pub fn compare(scan: &Grid, design: &Design, boundary: Option<&Polygon>, tolerance: f64) -> Result<(DeviationReport, Grid)> {
+pub fn compare(
+    scan: &Grid,
+    design: &Design,
+    boundary: Option<&Polygon>,
+    tolerance: f64,
+) -> Result<(DeviationReport, Grid)> {
     let soll = design.rasterize(scan);
     let (volume, diff) = volume::difference(&soll, scan, boundary)?;
-    let d: Vec<f64> = diff.data.iter().filter(|v| v.is_finite()).map(|&v| v as f64).collect();
+    let d: Vec<f64> = diff
+        .data
+        .iter()
+        .filter(|v| v.is_finite())
+        .map(|&v| v as f64)
+        .collect();
     if d.is_empty() {
         bail!("keine überlappenden Daten zwischen Scan und Soll");
     }
@@ -92,7 +114,10 @@ pub fn compare(scan: &Grid, design: &Design, boundary: Option<&Polygon>, toleran
     let rms = (d.iter().map(|v| v * v).sum::<f64>() / n).sqrt();
     let std_dev = (d.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / n).sqrt();
     let pct = |f: &dyn Fn(f64) -> bool| d.iter().filter(|&&v| f(v)).count() as f64 / n * 100.0;
-    let (min, max) = (d.iter().copied().fold(f64::INFINITY, f64::min), d.iter().copied().fold(f64::NEG_INFINITY, f64::max));
+    let (min, max) = (
+        d.iter().copied().fold(f64::INFINITY, f64::min),
+        d.iter().copied().fold(f64::NEG_INFINITY, f64::max),
+    );
     Ok((
         DeviationReport {
             min,
@@ -126,8 +151,16 @@ fn histogram(d: &[f64], tol: f64) -> Vec<HistogramBin> {
     edges
         .windows(2)
         .map(|w| {
-            let cells = d.iter().filter(|&&v| v >= w[0] && v < w[1] || (w[1].is_infinite() && v >= w[0])).count();
-            HistogramBin { from: w[0], to: w[1], cells, percent: cells as f64 / n * 100.0 }
+            let cells = d
+                .iter()
+                .filter(|&&v| v >= w[0] && v < w[1] || (w[1].is_infinite() && v >= w[0]))
+                .count();
+            HistogramBin {
+                from: w[0],
+                to: w[1],
+                cells,
+                percent: cells as f64 / n * 100.0,
+            }
         })
         .collect()
 }
@@ -138,7 +171,13 @@ mod tests {
     use crate::grid::GridSpec;
 
     fn grid(f: impl Fn(f64, f64) -> f64) -> Grid {
-        let spec = GridSpec { min_x: 500_000.0, max_y: 5_400_020.0, cell: 0.5, cols: 40, rows: 40 };
+        let spec = GridSpec {
+            min_x: 500_000.0,
+            max_y: 5_400_020.0,
+            cell: 0.5,
+            cols: 40,
+            rows: 40,
+        };
         let mut g = Grid::new_nodata(spec);
         for r in 0..spec.rows {
             for c in 0..spec.cols {
@@ -156,7 +195,11 @@ mod tests {
         assert!((rep.mean - 0.05).abs() < 1e-4);
         assert!((rep.above_tolerance_percent - 100.0).abs() < 1e-9);
         // 20 m × 20 m × 5 cm = 20 m³ noch abzutragen
-        assert!((rep.volume.fill_m3 - 20.0).abs() < 0.01, "{}", rep.volume.fill_m3);
+        assert!(
+            (rep.volume.fill_m3 - 20.0).abs() < 0.01,
+            "{}",
+            rep.volume.fill_m3
+        );
         assert_eq!(diff.valid_cells(), 1600);
         let total: usize = rep.histogram.iter().map(|b| b.cells).sum();
         assert_eq!(total, 1600);
@@ -166,7 +209,13 @@ mod tests {
     fn inclined_design_matches_scan() {
         // Fläche fällt nach Osten (90°) mit 2 %
         let scan = grid(|dx, _| 300.0 - 0.02 * dx);
-        let design = Design::Slope { x: 500_000.0, y: 5_400_000.0, z: 300.0, percent: 2.0, azimuth_deg: 90.0 };
+        let design = Design::Slope {
+            x: 500_000.0,
+            y: 5_400_000.0,
+            z: 300.0,
+            percent: 2.0,
+            azimuth_deg: 90.0,
+        };
         let (rep, _) = compare(&scan, &design, None, 0.01).unwrap();
         assert!(rep.rms < 1e-3, "{}", rep.rms);
         assert!((rep.within_tolerance_percent - 100.0).abs() < 1e-9);

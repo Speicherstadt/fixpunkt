@@ -33,9 +33,17 @@ pub fn read(path: &Path) -> Result<GeoRaster> {
         .with_context(|| format!("{} ist kein TIFF", path.display()))?
         .with_limits(Limits::unlimited());
     let (w, h) = d.dimensions()?;
-    let spp = d.find_tag_unsigned::<u16>(Tag::SamplesPerPixel)?.unwrap_or(1) as usize;
-    let scale = d.find_tag(Tag::ModelPixelScaleTag)?.context("GeoTIFF ohne ModelPixelScale")?.into_f64_vec()?;
-    let tie = d.find_tag(Tag::ModelTiepointTag)?.context("GeoTIFF ohne ModelTiepoint")?.into_f64_vec()?;
+    let spp = d
+        .find_tag_unsigned::<u16>(Tag::SamplesPerPixel)?
+        .unwrap_or(1) as usize;
+    let scale = d
+        .find_tag(Tag::ModelPixelScaleTag)?
+        .context("GeoTIFF ohne ModelPixelScale")?
+        .into_f64_vec()?;
+    let tie = d
+        .find_tag(Tag::ModelTiepointTag)?
+        .context("GeoTIFF ohne ModelTiepoint")?
+        .into_f64_vec()?;
     if scale.len() < 2 || tie.len() < 6 {
         bail!("GeoTIFF: unvollständige Georeferenz");
     }
@@ -47,7 +55,12 @@ pub fn read(path: &Path) -> Result<GeoRaster> {
         Some(v) => v.into_u16_vec()?,
         None => Vec::new(),
     };
-    let key = |id: u16| keys.chunks(4).skip(1).find(|k| k.len() == 4 && k[0] == id && k[1] == 0).map(|k| k[3]);
+    let key = |id: u16| {
+        keys.chunks(4)
+            .skip(1)
+            .find(|k| k.len() == 4 && k[0] == id && k[1] == 0)
+            .map(|k| k[3])
+    };
     let pixel_is_point = key(KEY_RASTER_TYPE) == Some(2);
     let epsg = key(KEY_PROJECTED_CRS).filter(|&e| e != 0 && e != 32767);
     let nodata: Option<f64> = d
@@ -58,7 +71,13 @@ pub fn read(path: &Path) -> Result<GeoRaster> {
     let half = if pixel_is_point { sx / 2.0 } else { 0.0 };
     let min_x = tie[3] - tie[0] * sx - half;
     let max_y = tie[4] + tie[1] * sy + half;
-    let spec = GridSpec { min_x, max_y, cell: sx, cols: w as usize, rows: h as usize };
+    let spec = GridSpec {
+        min_x,
+        max_y,
+        cell: sx,
+        cols: w as usize,
+        rows: h as usize,
+    };
 
     let raw: Vec<f64> = match d.read_image()? {
         DecodingResult::F32(v) => v.into_iter().map(f64::from).collect(),
@@ -79,23 +98,35 @@ pub fn read(path: &Path) -> Result<GeoRaster> {
         .step_by(spp)
         .take(spec.len())
         .map(|&v| {
-            let bad = !v.is_finite() || nodata.is_some_and(|n| (v - n).abs() < 1e-6 * n.abs().max(1.0));
-            if bad { f32::NAN } else { v as f32 }
+            let bad =
+                !v.is_finite() || nodata.is_some_and(|n| (v - n).abs() < 1e-6 * n.abs().max(1.0));
+            if bad {
+                f32::NAN
+            } else {
+                v as f32
+            }
         })
         .collect();
-    Ok(GeoRaster { grid: Grid { spec, data }, epsg })
+    Ok(GeoRaster {
+        grid: Grid { spec, data },
+        epsg,
+    })
 }
 
 /// Schreibt ein Float32-GeoTIFF (Deflate). `epsg` z. B. 25832; `vertical_epsg` z. B. 7837 (DHHN2016).
 pub fn write(g: &Grid, path: &Path, epsg: Option<u16>, vertical_epsg: Option<u16>) -> Result<()> {
     let f = File::create(path).with_context(|| format!("{} nicht schreibbar", path.display()))?;
-    let mut enc = TiffEncoder::new(std::io::BufWriter::new(f))?.with_compression(Compression::Deflate(DeflateLevel::Balanced));
+    let mut enc = TiffEncoder::new(std::io::BufWriter::new(f))?
+        .with_compression(Compression::Deflate(DeflateLevel::Balanced));
     let s = g.spec;
     let mut img = enc.new_image::<Gray32Float>(s.cols as u32, s.rows as u32)?;
     {
         let e = img.encoder();
         e.write_tag(Tag::ModelPixelScaleTag, &[s.cell, s.cell, 0.0][..])?;
-        e.write_tag(Tag::ModelTiepointTag, &[0.0, 0.0, 0.0, s.min_x, s.max_y, 0.0][..])?;
+        e.write_tag(
+            Tag::ModelTiepointTag,
+            &[0.0, 0.0, 0.0, s.min_x, s.max_y, 0.0][..],
+        )?;
         let mut keys: Vec<[u16; 4]> = vec![[KEY_MODEL_TYPE, 0, 1, 1], [KEY_RASTER_TYPE, 0, 1, 1]];
         if let Some(c) = epsg {
             keys.push([KEY_PROJECTED_CRS, 0, 1, c]);
@@ -108,7 +139,11 @@ pub fn write(g: &Grid, path: &Path, epsg: Option<u16>, vertical_epsg: Option<u16
         e.write_tag(Tag::GeoKeyDirectoryTag, &dir[..])?;
         e.write_tag(Tag::GdalNodata, "-9999")?;
     }
-    let data: Vec<f32> = g.data.iter().map(|v| if v.is_nan() { NODATA } else { *v }).collect();
+    let data: Vec<f32> = g
+        .data
+        .iter()
+        .map(|v| if v.is_nan() { NODATA } else { *v })
+        .collect();
     img.write_data(&data)?;
     Ok(())
 }
@@ -119,7 +154,13 @@ mod tests {
 
     #[test]
     fn roundtrip_keeps_georef_nodata_and_epsg() {
-        let spec = GridSpec { min_x: 512_000.0, max_y: 5_401_000.0, cell: 0.5, cols: 7, rows: 5 };
+        let spec = GridSpec {
+            min_x: 512_000.0,
+            max_y: 5_401_000.0,
+            cell: 0.5,
+            cols: 7,
+            rows: 5,
+        };
         let mut g = Grid::new_nodata(spec);
         for r in 0..5 {
             for c in 0..7 {
