@@ -104,6 +104,7 @@
   "doc_actual": "Ist {h} ({diff})",
   "doc_add": "Zwangspunkt oder Notiz anlegen",
   "doc_delete": "{name} löschen",
+  "doc_direction": "Blickrichtung {direction}",
   "doc_dxf": "DXF für CAD",
   "doc_east": "Ost (E) in m",
   "doc_empty": "Noch nichts dokumentiert. Fotos mit GPS landen an ihrer Stelle in der Ansicht.",

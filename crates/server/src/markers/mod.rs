@@ -45,6 +45,8 @@ pub struct Marker {
     /// Linie: Stützpunkte `[[x, y, z?], …]` als JSON
     #[serde(serialize_with = "db::raw_json")]
     pub points: Option<String>,
+    /// Foto: Blickrichtung in Grad von Gitter-Nord im Uhrzeigersinn
+    pub direction: Option<f64>,
 }
 
 impl Marker {
@@ -188,6 +190,7 @@ pub async fn create(
 
 #[derive(Debug, Deserialize)]
 pub struct MarkerPatch {
+    direction: Option<f64>,
     kind: Option<String>,
     title: Option<String>,
     note: Option<String>,
@@ -209,15 +212,22 @@ pub async fn update(
         x: p.x.or(m.x),
         y: p.y.or(m.y),
         z: p.z.or(m.z),
+        direction: p.direction.or(m.direction),
         ..m
     };
+    if next
+        .direction
+        .is_some_and(|d| !(0.0..=360.0).contains(&d) || !d.is_finite())
+    {
+        return Err(ApiError::bad_request(code::INVALID_INPUT).with_detail("Blickrichtung"));
+    }
     validate(&next.kind, &next.title, next.x, next.y, next.z)?;
     // eine Linie bleibt eine Linie (ihre Stützpunkte gehen nicht verloren), ein Punkt wird keine
     if (next.kind == "line") != next.points.is_some() {
         return Err(ApiError::bad_request(code::INVALID_INPUT).with_detail("Art einer Linie"));
     }
     sqlx::query(
-        "UPDATE markers SET kind = ?, title = ?, note = ?, x = ?, y = ?, z = ? WHERE id = ?",
+        "UPDATE markers SET kind = ?, title = ?, note = ?, x = ?, y = ?, z = ?, direction = ? WHERE id = ?",
     )
     .bind(&next.kind)
     .bind(&next.title)
@@ -225,6 +235,7 @@ pub async fn update(
     .bind(next.x)
     .bind(next.y)
     .bind(next.z)
+    .bind(next.direction)
     .bind(id)
     .execute(&app.db)
     .await?;
@@ -247,6 +258,15 @@ pub async fn delete(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult
 pub fn site_position(epsg: i64, lat: f64, lon: f64) -> Option<(f64, f64)> {
     let zone = utm_zone(u32::try_from(epsg).ok()?)?;
     Some(Utm::new(zone).ok()?.forward(lat, lon))
+}
+
+/// Richtung von geografisch Nord → Gitter-Nord der Baustelle: um die Meridiankonvergenz drehen, aus der
+/// Abbildung selbst bestimmt (Richtung des Meridians 100 m nach Norden im Gitter)
+pub fn site_azimuth(epsg: i64, lat: f64, lon: f64, azimuth: f64) -> Option<f64> {
+    let (e0, n0) = site_position(epsg, lat, lon)?;
+    let (e1, n1) = site_position(epsg, lat + 100.0 / 111_200.0, lon)?;
+    let meridian = (e1 - e0).atan2(n1 - n0).to_degrees();
+    Some((azimuth + meridian).rem_euclid(360.0))
 }
 
 #[derive(Deserialize)]
@@ -283,11 +303,16 @@ pub async fn upload_photo(
     let pos = exif
         .lat_lon
         .and_then(|(lat, lon)| site_position(s.epsg, lat, lon));
+    let direction = exif
+        .lat_lon
+        .zip(exif.direction)
+        .and_then(|((lat, lon), d)| site_azimuth(s.epsg, lat, lon, d))
+        .or(exif.direction);
     let title = file
         .rsplit_once('.')
         .map_or(file.as_str(), |(stem, _)| stem);
     let id = sqlx::query(
-        "INSERT INTO markers(site_id, kind, title, x, y, photo, taken_at, created_by, created_at) VALUES(?, 'photo', ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO markers(site_id, kind, title, x, y, photo, taken_at, direction, created_by, created_at) VALUES(?, 'photo', ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(site)
     .bind(title)
@@ -295,6 +320,7 @@ pub async fn upload_photo(
     .bind(pos.map(|p| p.1))
     .bind(&file)
     .bind(exif.taken_at)
+    .bind(direction)
     .bind(me.id)
     .bind(now_ms())
     .execute(&app.db)
@@ -389,6 +415,7 @@ mod tests {
             created_by: None,
             created_at: 0,
             points: Some("[[0,0],[3,4,298.5],[3,10]]".into()),
+            direction: None,
         };
         let l = m.line();
         assert_eq!(l[1], ([3.0, 4.0], Some(298.5)));
@@ -407,5 +434,26 @@ mod tests {
             "{e} {n}"
         );
         assert_eq!(site_position(4326, 48.0, 9.0), None);
+    }
+
+    #[test]
+    fn azimuth_to_grid_north() {
+        // auf dem Mittelmeridian (9° O) sind geografisch und Gitter-Nord gleich
+        assert!((site_azimuth(25832, 48.0, 9.0, 90.0).unwrap() - 90.0).abs() < 1e-6);
+        // 1,5° östlich: Konvergenz γ = atan(tan 1,5° · sin 48°) = 1,1148°; der Meridian zeigt im Gitter nach
+        // links (Nord-West), eine Richtung nach geografisch Ost also γ weniger
+        let gamma = (1.5f64.to_radians().tan() * 48f64.to_radians().sin())
+            .atan()
+            .to_degrees();
+        let a = site_azimuth(25832, 48.0, 10.5, 90.0).unwrap();
+        assert!(
+            (a - (90.0 - gamma)).abs() < 0.01,
+            "{a} gegen {}",
+            90.0 - gamma
+        );
+        // westlich davon andersherum, und über 360° hinweg
+        let w = site_azimuth(25832, 48.0, 7.5, 359.5).unwrap();
+        assert!((w - (359.5 + gamma - 360.0)).abs() < 0.01, "{w}");
+        assert_eq!(site_azimuth(4326, 48.0, 9.0, 10.0), None);
     }
 }

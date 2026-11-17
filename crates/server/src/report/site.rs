@@ -35,6 +35,13 @@ fn head(ctx: &SiteContext, title: &str, subtitle: String) -> Doc {
     }
 }
 
+/// Blickrichtung als „135° (SO)“
+pub fn compass(deg: f64) -> String {
+    const NAMES: [&str; 8] = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"];
+    let d = (deg.round() as i64).rem_euclid(360);
+    format!("{d}° ({})", NAMES[((d as f64 / 45.0).round() as usize) % 8])
+}
+
 /// „+5,0 cm“ / „−2,0 cm“: Ist − Soll mit Vorzeichen
 pub fn signed_cm(m: f64) -> String {
     let v = cm(m.abs());
@@ -68,6 +75,8 @@ pub struct Entry {
     pub photo: Option<(Vec<u8>, usize, usize)>,
     /// Linie: Länge in der Ebene und Zahl der Stützpunkte
     pub line: Option<(f64, usize)>,
+    /// Foto: Blickrichtung in Grad von Gitter-Nord
+    pub direction: Option<f64>,
 }
 
 fn status(e: &Entry) -> (&'static str, Option<f64>) {
@@ -197,6 +206,9 @@ pub fn documentation_doc(ctx: &SiteContext, entries: &[Entry]) -> Doc {
         d.blocks.push(Block::Heading("Fotos".into()));
         for e in photos {
             let mut lines = vec![date_time(e.at), position(e.x, e.y)];
+            if let Some(d) = e.direction {
+                lines.push(format!("Blickrichtung {}", compass(d)));
+            }
             if !e.note.is_empty() {
                 lines.push(e.note.clone());
             }
@@ -333,7 +345,15 @@ mod tests {
             ist,
             photo: None,
             line: None,
+            direction: None,
         }
+    }
+
+    #[test]
+    fn compass_directions() {
+        assert_eq!(compass(135.377), "135° (SO)");
+        assert_eq!(compass(359.6), "0° (N)");
+        assert_eq!(compass(-90.0), "270° (W)");
     }
 
     #[test]

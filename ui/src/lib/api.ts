@@ -126,6 +126,8 @@ export const Marker = z.object({
   createdAt: z.number(),
   /** Linie: Stützpunkte [x, y] oder [x, y, z] */
   points: z.array(z.array(z.number())).nullable().optional(),
+  /** Foto: Blickrichtung in Grad von Gitter-Nord */
+  direction: z.number().nullable().optional(),
 });
 export type Marker = z.infer<typeof Marker>;
 

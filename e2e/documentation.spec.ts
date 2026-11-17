@@ -17,6 +17,8 @@ test("Fotos und Zwangspunkte dokumentieren", async ({ page }) => {
   await doc.getByLabel("Fotos hochladen").setInputFiles("e2e/data/foto-gps.jpg");
   const photo = doc.getByRole("listitem").filter({ hasText: "foto-gps" });
   await expect(photo).toContainText("E 512025,00 · N 5403015,00");
+  // GPSImgDirection 135,5° geografisch, im Gitter 135,38°
+  await expect(photo).toContainText("Blickrichtung 135° (SO)");
   await expect(photo.getByRole("img", { name: "foto-gps" })).toBeVisible();
 
   // Zwangspunkt mitten in der Grube: Gelände 298,20 m, Soll 298,15 m → 5 cm zu hoch

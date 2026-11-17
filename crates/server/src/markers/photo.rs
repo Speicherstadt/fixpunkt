@@ -16,6 +16,9 @@ pub struct Exif {
     pub altitude: Option<f64>,
     /// Aufnahmezeit, ms seit 1970
     pub taken_at: Option<i64>,
+    /// Blickrichtung in Grad von Nord im Uhrzeigersinn (GPSImgDirection; „M“ magnetisch wird wie geografisch
+    /// behandelt, in Deutschland 3–4° Unterschied)
+    pub direction: Option<f64>,
 }
 
 fn rationals(v: &Value) -> Option<Vec<f64>> {
@@ -70,6 +73,7 @@ pub fn read_exif(bytes: &[u8]) -> Exif {
         lat_lon: None,
         altitude: None,
         taken_at: None,
+        direction: None,
     };
     let Ok(e) = Reader::new().read_from_container(&mut Cursor::new(bytes)) else {
         return none;
@@ -98,10 +102,16 @@ pub fn read_exif(bytes: &[u8]) -> Exif {
             field(Tag::OffsetTimeOriginal).and_then(ascii).as_deref(),
         )
     });
+    let direction = field(Tag::GPSImgDirection)
+        .and_then(rationals)
+        .and_then(|v| v.first().copied())
+        .filter(|d| d.is_finite() && (0.0..=360.0).contains(d))
+        .map(|d| d % 360.0);
     Exif {
         lat_lon,
         altitude,
         taken_at,
+        direction,
     }
 }
 
@@ -141,6 +151,8 @@ mod tests {
         assert!((e.altitude.unwrap() - 348.5).abs() < 1e-9);
         // 10:30 MEZ = 09:30 UTC
         assert_eq!(e.taken_at, Some(1_794_907_800_000));
+        // GPSImgDirection 1355/10, Bezug „T“ (geografisch)
+        assert_eq!(e.direction, Some(135.5));
     }
 
     #[test]
@@ -171,7 +183,8 @@ mod tests {
             Exif {
                 lat_lon: None,
                 altitude: None,
-                taken_at: None
+                taken_at: None,
+                direction: None
             }
         );
         let t = image::load_from_memory(&thumbnail(&png).unwrap()).unwrap();

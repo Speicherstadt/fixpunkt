@@ -91,6 +91,7 @@ async fn documentation_and_plan_reports() {
         "Labor Z0",
         "Schacht",
         "aushub.xyz",
+        "Blickrichtung 135",
     ] {
         assert!(text.contains(s), "{s} fehlt in {text}");
     }

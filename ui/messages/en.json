@@ -104,6 +104,7 @@
   "doc_actual": "Actual {h} ({diff})",
   "doc_add": "Add constraint point or note",
   "doc_delete": "Delete {name}",
+  "doc_direction": "Viewing direction {direction}",
   "doc_dxf": "DXF for CAD",
   "doc_east": "East (E) in m",
   "doc_empty": "Nothing documented yet. Photos with GPS appear at their location in the view.",

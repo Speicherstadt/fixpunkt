@@ -69,7 +69,28 @@ async fn constraint_points_notes_and_photos() {
         "{photo}"
     );
     assert_eq!(photo["takenAt"], 1_794_907_800_000i64);
+    // Blickrichtung 135,5° geografisch; bei 9,1637° O ist Gitter-Nord um
+    // γ = atan(tan 0,1637° · sin 48,78°) = 0,1231° gedreht → 135,377° im Gitter
+    let d = photo["direction"].as_f64().unwrap();
+    assert!((d - 135.377).abs() < 0.002, "{d}");
     let pid = photo["id"].as_i64().unwrap();
+    // von Hand korrigieren, außerhalb 0…360° abgelehnt
+    let r = c
+        .json(
+            Method::PATCH,
+            &format!("/api/markers/{pid}"),
+            json!({"direction": 90.0}),
+        )
+        .await;
+    assert_eq!(r.json()["direction"], 90.0);
+    let r = c
+        .json(
+            Method::PATCH,
+            &format!("/api/markers/{pid}"),
+            json!({"direction": 400.0}),
+        )
+        .await;
+    assert_eq!(r.status, StatusCode::BAD_REQUEST);
     let full = c.get(&format!("/api/markers/{pid}/photo")).await;
     assert_eq!(full.body, PHOTO);
     let thumb = c.get(&format!("/api/markers/{pid}/thumb")).await;

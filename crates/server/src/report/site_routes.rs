@@ -89,6 +89,7 @@ pub async fn documentation(
             });
             Entry {
                 line,
+                direction: m.direction,
                 at: m.taken_at.unwrap_or(m.created_at),
                 kind: m.kind,
                 title: m.title,

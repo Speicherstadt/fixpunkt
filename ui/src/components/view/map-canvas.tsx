@@ -5,6 +5,7 @@
  */
 import { type KeyboardEvent, type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
 import type { PlanGeometry } from "@/lib/api";
+import { viewCone } from "@/lib/markers";
 import { renderDeviation, renderHeights } from "@/lib/view/colors";
 import type { Pt } from "@/lib/view/geometry";
 import { bboxOf, type HeightGrid } from "@/lib/view/grid";
@@ -23,7 +24,7 @@ import { m } from "@/paraglide/messages";
 export type Shape = { points: Pt[]; closed: boolean };
 export type Outline = { name: string; points: Pt[] };
 /** Markierung der Dokumentation: Raute für Zwangspunkte, Kreis für Fotos und Notizen */
-export type Pin = { label: string; at: Pt; diamond: boolean };
+export type Pin = { label: string; at: Pt; diamond: boolean; direction?: number | null };
 
 type Props = {
   grid: HeightGrid;
@@ -226,6 +227,21 @@ export function MapCanvas({
       ctx.strokeText(l.name, sx + 6, sy - 6);
       ctx.fillStyle = fg;
       ctx.fillText(l.name, sx + 6, sy - 6);
+    }
+    for (const p of pins) {
+      if (p.direction === null || p.direction === undefined) continue;
+      const cone = viewCone(toScreen(view, p.at[0], p.at[1]), p.direction, 30);
+      ctx.beginPath();
+      for (const [i, [x, y]] of cone.entries()) {
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.closePath();
+      ctx.fillStyle = `color-mix(in srgb, ${accent} 30%, transparent)`;
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = accent;
+      ctx.stroke();
     }
     for (const p of pins) {
       const [sx, sy] = toScreen(view, p.at[0], p.at[1]);

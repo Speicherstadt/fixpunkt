@@ -1,6 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { Marker } from "@/lib/api";
-import { checkConstraint, lineLength, linesOf, pinsOf, tracePoints } from "@/lib/markers";
+import {
+  checkConstraint,
+  compass,
+  lineLength,
+  linesOf,
+  pinsOf,
+  tracePoints,
+  viewCone,
+} from "@/lib/markers";
 import type { HeightGrid } from "@/lib/view/grid";
 
 const marker = (over: Partial<Marker>): Marker => ({
@@ -44,8 +52,15 @@ describe("markers", () => {
   });
 
   it("Punkte für die Ansicht nur mit Lage", () => {
-    const pins = pinsOf([marker({}), marker({ id: 2, kind: "photo", x: null, y: null })]);
-    expect(pins).toEqual([{ label: "Kanal", at: [5, 5], diamond: true }]);
+    const pins = pinsOf([
+      marker({}),
+      marker({ id: 2, kind: "photo", x: null, y: null }),
+      marker({ id: 3, kind: "photo", title: "Foto", direction: 135 }),
+    ]);
+    expect(pins).toEqual([
+      { label: "Kanal", at: [5, 5], diamond: true, direction: null },
+      { label: "Foto", at: [5, 5], diamond: false, direction: 135 },
+    ]);
   });
 });
 
@@ -93,5 +108,26 @@ describe("Linien", () => {
         ],
       },
     ]);
+  });
+});
+
+describe("Blickrichtung", () => {
+  it("nennt Grad und Himmelsrichtung", () => {
+    expect(compass(135.377)).toBe("135° (SO)");
+    expect(compass(359.6)).toBe("0° (N)");
+    expect(compass(-90)).toBe("270° (W)");
+    expect(compass(22)).toBe("22° (N)");
+    expect(compass(23)).toBe("23° (NO)");
+  });
+
+  it("öffnet den Sichtkegel in Blickrichtung (Bildschirm: y nach unten)", () => {
+    // nach Osten: beide Ecken rechts, eine 30° über, eine 30° unter der Waagerechten
+    const [tip, a, b] = viewCone([100, 100], 90, 20);
+    expect(tip).toEqual([100, 100]);
+    expect(a![0]).toBeCloseTo(100 + 20 * Math.cos(Math.PI / 6), 9);
+    expect(a![1]).toBeCloseTo(100 - 10, 9);
+    expect(b![1]).toBeCloseTo(100 + 10, 9);
+    // nach Norden: Ecken oberhalb
+    expect(viewCone([0, 0], 0, 10)[1]![1]).toBeLessThan(0);
   });
 });

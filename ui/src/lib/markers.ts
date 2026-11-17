@@ -29,7 +29,14 @@ export const checkConstraint = (
 export const pinsOf = (markers: Marker[]) =>
   markers.flatMap((m) =>
     m.kind !== "line" && m.x !== null && m.y !== null
-      ? [{ label: m.title, at: [m.x, m.y] as [number, number], diamond: m.kind === "constraint" }]
+      ? [
+          {
+            label: m.title,
+            at: [m.x, m.y] as [number, number],
+            diamond: m.kind === "constraint",
+            direction: m.direction ?? null,
+          },
+        ]
       : [],
   );
 
@@ -56,3 +63,26 @@ export const tracePoints = (pts: [number, number][], grid: HeightGrid | undefine
     const z = grid ? sampleAt(grid, x, y) : null;
     return z === null || Number.isNaN(z) ? [x, y] : [x, y, Math.round(z * 1000) / 1000];
   });
+
+const COMPASS = ["N", "NO", "O", "SO", "S", "SW", "W", "NW"] as const;
+
+/** Blickrichtung als „135° (SO)“: auf ganze Grad, Himmelsrichtung in Achteln */
+export const compass = (deg: number) => {
+  const d = ((Math.round(deg) % 360) + 360) % 360;
+  return `${d}° (${COMPASS[Math.round(d / 45) % 8]})`;
+};
+
+/** Sichtkegel eines Fotos auf dem Bildschirm (y nach unten): Spitze und zwei Ecken, Öffnung ±30° */
+export const viewCone = (
+  [sx, sy]: [number, number],
+  deg: number,
+  length: number,
+): [number, number][] =>
+  [deg - 30, deg + 30].reduce<[number, number][]>(
+    (pts, a) => {
+      const r = (a * Math.PI) / 180;
+      pts.push([sx + Math.sin(r) * length, sy - Math.cos(r) * length]);
+      return pts;
+    },
+    [[sx, sy]],
+  );

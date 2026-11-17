@@ -13,7 +13,7 @@ import { api, type Marker, type MarkerKind, uploadPhoto } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatDateTime, formatHeight, formatNumber } from "@/lib/format";
 import { chronological } from "@/lib/jobs";
-import { checkConstraint, lineLength } from "@/lib/markers";
+import { checkConstraint, compass, lineLength } from "@/lib/markers";
 import { capturesQuery, markersQuery } from "@/lib/queries";
 import { fetchGrid, type HeightGrid } from "@/lib/view/grid";
 import { m } from "@/paraglide/messages";
@@ -164,6 +164,11 @@ function MarkerRow({
             ? ` · ${m.doc_position({ e: mk.x.toFixed(2).replace(".", ","), n: mk.y.toFixed(2).replace(".", ",") })}`
             : ` · ${m.doc_no_position()}`}
         </span>
+        {mk.direction !== null && mk.direction !== undefined ? (
+          <span className="tabular text-[13px]">
+            {m.doc_direction({ direction: compass(mk.direction) })}
+          </span>
+        ) : null}
         {mk.note ? <span className="text-[13px]">{mk.note}</span> : null}
         {mk.kind === "line" && mk.points ? (
           <span className="tabular text-[13px]">

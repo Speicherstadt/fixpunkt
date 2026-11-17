@@ -115,6 +115,7 @@ mod tests {
             created_by: None,
             created_at: 0,
             points: points.map(Into::into),
+            direction: None,
         }
     }
 

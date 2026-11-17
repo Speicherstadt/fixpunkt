@@ -57,7 +57,7 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 
 ### Dokumentieren
 - [x] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte mit Sollhöhe und Soll/Ist; Leitungsverlauf nachzeichnen; alles als PDF und DXF
-- [ ] Fotos georeferenziert inkl. Blickrichtung, Notizen dazu – Fotos mit GPS-Position und Notizen ✅, Dokumentation als PDF ✅, Blickrichtung offen
+- [x] Fotos georeferenziert inkl. Blickrichtung, Notizen dazu – auch als PDF
 - [x] Berichte (PDF) je Berechnung
 - [x] Dashboards pro Baustelle (Überblick oben auf der Baustellenseite)
 - [x] Kartenansicht aller Baustellen/Scans

@@ -35,6 +35,11 @@ Drohnen speichern sie im Foto (EXIF) –, rechnet Fixpunkt sie in das Bezugssyst
 Foto an seiner Stelle; die Aufnahmezeit kommt ebenfalls aus dem Foto. Ein Klick auf das Vorschaubild öffnet das
 Original.
 
+Speichert das Gerät auch die **Blickrichtung** (EXIF `GPSImgDirection`, bei Drohnen und den meisten Handys mit
+Kompass), steht sie in der Liste („Blickrichtung 135° (SO)“), im PDF-Bericht und als Sichtkegel am Foto in der
+Ansicht. Fixpunkt dreht sie von geografisch Nord auf Gitter-Nord der Baustelle (Meridiankonvergenz, in
+Deutschland bis etwa 2°); eine Angabe zu magnetisch Nord wird wie geografisch behandelt (3–4° Unterschied).
+
 > [!NOTE]
 > Handy-GPS ist auf einige Meter genau – gut genug, um ein Foto wiederzufinden, nicht zum Messen. Ohne GPS-Position
 > steht das Foto nur in der Liste.
