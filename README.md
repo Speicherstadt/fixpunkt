@@ -164,10 +164,11 @@ Punktwolke, sie erscheint als Aufnahme – in der Zone der Baustelle
 ([Drohnenfotos auswerten](https://speicherstadt.github.io/fixpunkt/drohnenfotos.html)). Ohne NodeODM lädt man die
 Punktwolke aus WebODM hoch.
 
-**Ist Fixpunkt eine Alternative zu SDX-Cloud, Propeller oder DroneDeploy?**<br>
-Für die Massenermittlung von Baugruben und Haufwerken: ja, selbst gehostet und ohne Abo – mit 2D- und 3D-Ansicht,
-Messen, PDF-Bericht, Passpunkten, Plänen und Drohnenfotos über NodeODM. Die iPhone-App mit RTK-Rover
-folgt ([Projektplan](https://speicherstadt.github.io/fixpunkt/PLAN.html)).
+**Was kann Fixpunkt, und was kommt noch?**<br>
+Alles auf einen Blick im [Funktionsumfang](https://speicherstadt.github.io/fixpunkt/funktionen.html); die
+iPhone-App mit RTK-Rover für Leitungsgräben und die Erprobung auf echten Baustellen stehen in der
+[Roadmap](https://speicherstadt.github.io/fixpunkt/roadmap.html), die nötigen Geräte unter
+[Geräte](https://speicherstadt.github.io/fixpunkt/geraete.html).
 
 **Welche Koordinatensysteme werden unterstützt?**<br>
 ETRS89/UTM Zone 32 (EPSG:25832) als Standard, andere UTM-Zonen auf der Kommandozeile. Höhen DHHN2016 über GCG2016.
@@ -185,7 +186,7 @@ bun run dev    # Server auf :8080, UI mit Hot Reload auf http://localhost:5173 (
 
 [Architektur](https://speicherstadt.github.io/fixpunkt/architektur.html) ·
 [Entwicklung und Tests](https://speicherstadt.github.io/fixpunkt/entwicklung.html) ·
-[Projektplan](https://speicherstadt.github.io/fixpunkt/PLAN.html)
+[Roadmap](https://speicherstadt.github.io/fixpunkt/roadmap.html)
 
 > [!NOTE]
 > Fixpunkt ersetzt kein amtliches Aufmaß. Bis die Genauigkeit auf euren Baustellen belegt ist, Ergebnisse vor der

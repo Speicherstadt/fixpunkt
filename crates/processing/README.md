@@ -94,7 +94,8 @@ geneigtem Gelände, Höhenlinien eines Kegels (Kreisumfang), Rundreisen für LAS
   `coords --geoid` verwenden bzw. die Punktwolke vorab umrechnen.
 - `georef` aktualisiert die CRS-Angabe im LAS-Header nicht – das Zielsystem ist das der Passpunkte.
 
-## Noch nicht im Rechenkern (gehört in Worker/Backend)
+## Nicht im Rechenkern
 
-NodeODM-Anbindung (HTTP), Browser-Kacheln (PotreeConverter/py3dtiles), E57 vom BLK2GO, PDF-Berichte,
-DXF-Import von Plänen, Abschnittsweiser Ausgleich der iPhone-Trajektorie (Phase 4).
+Im Server (`crates/server`): NodeODM-Anbindung, PDF-Berichte, DXF-Pläne. Noch offen
+([Roadmap](https://speicherstadt.github.io/fixpunkt/roadmap.html)): Kacheln für sehr große Punktwolken im
+Browser und der abschnittsweise Ausgleich der iPhone-Trajektorie für die iOS-App.

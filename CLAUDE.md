@@ -4,7 +4,8 @@
 
 Die Doku ist in `docs/` (<https://speicherstadt.github.io/fixpunkt/>), gebaut mit Zensical wie firsttris/haben
 (`mkdocs.yml`, `requirements-docs.txt`, `.github/workflows/docs.yml`). Vor einer Änderung die betroffenen Seiten
-lesen: `architektur.md`, `methode.md`, `aushub.md`, Projektplan `PLAN.md` (Architektur: Abschnitt 5).
+lesen: `architektur.md`, `methode.md`, `aushub.md`, `funktionen.md`, `roadmap.md`. Keine Vergleiche mit
+oder Bezüge auf Produkte anderer Anbieter in Repo und Doku (vergleichende Werbung, UWG).
 Rechenkern: `crates/processing/README.md`. Links in README und Doku zeigen auf die Website, nicht auf `docs/*.md`.
 Jede Seite braucht `description:` im Front Matter (docs.yml prüft das). Doku auf Deutsch; Englisch, sobald
 Zensical mehrsprachig kann.

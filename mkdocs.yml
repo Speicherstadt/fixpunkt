@@ -22,7 +22,9 @@ use_directory_urls: false
 
 nav:
   - Start: index.md
+  - Funktionsumfang: funktionen.md
   - Betrieb:
+      - Geräte: geraete.md
       - Installation: installation.md
       - Konfiguration: konfiguration.md
       - Backup und Updates: backup.md
@@ -42,7 +44,7 @@ nav:
       - Kommandozeile: kommandozeile.md
       - Architektur: architektur.md
       - Entwicklung und Tests: entwicklung.md
-      - Projektplan: PLAN.md
+      - Roadmap: roadmap.md
 
 theme:
   name: material
