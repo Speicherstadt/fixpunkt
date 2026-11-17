@@ -3,7 +3,7 @@
 
 use super::doc::{col, Block, Doc, Kpi, Table, Tone};
 use super::site::{head, SiteContext};
-use super::text::{date, number, percent, volume};
+use super::text::{date, date_time, number, percent, volume};
 use serde_json::Value;
 
 /// Preiseinheit als Text
@@ -25,6 +25,15 @@ fn opt(v: &Value, f: impl Fn(f64) -> String) -> String {
     v.as_f64().map(f).unwrap_or_else(|| "–".into())
 }
 
+/// „Grube“ oder „Grube · Lehm“ bei Schichten
+fn label(p: &Value) -> String {
+    let name = p["name"].as_str().unwrap_or("");
+    match p["layer"].as_str() {
+        Some(l) => format!("{name} · {l}"),
+        None => name.into(),
+    }
+}
+
 fn capture(v: &Value) -> String {
     format!(
         "{} ({})",
@@ -41,7 +50,7 @@ fn positions(s: &Value) -> Table {
             let unit = p["unit"].as_str().unwrap_or("m3");
             vec![
                 p["lvPosition"].as_str().unwrap_or("–").into(),
-                p["name"].as_str().unwrap_or("").into(),
+                label(p),
                 p["material"].as_str().unwrap_or("–").into(),
                 match p["quantity"].as_f64() {
                     Some(q) => format!("{} {}", number(q, 1), unit_label(unit)),
@@ -93,7 +102,7 @@ fn quantities(s: &Value) -> Table {
             .map(|p| {
                 let q = &p["period"];
                 vec![
-                    p["name"].as_str().unwrap_or("").into(),
+                    label(p),
                     n(&p["previous"], 1),
                     n(&p["total"], 1),
                     n(&q["bankM3"], 1),
@@ -220,6 +229,13 @@ pub fn billing_doc(
             missing.join(" und ")
         )));
     }
+    if s["layersOutdated"].as_bool() == Some(true) {
+        doc.blocks.push(Block::Note(
+            "Schichten sind angelegt, aber die Aushub-Berechnungen sind älter; die Mengen sind nicht nach \
+             Schichten aufgeteilt. Berechnungen neu starten."
+                .into(),
+        ));
+    }
     if s["unconverted"].as_u64().is_some_and(|n| n > 0) {
         doc.blocks.push(Block::Note(
             "Für Preise je t oder m³ lose fehlen Dichte oder Auflockerung des Materials; diese Positionen haben \
@@ -241,6 +257,46 @@ pub fn billing_doc(
     doc.blocks.extend(checks(s));
     doc.blocks
         .push(Block::Text(factors(materials, s["truckT"].as_f64())));
+    doc
+}
+
+/// Stand der Freigabe als Kopfzeile und Abschnitt am Ende
+pub fn with_decision(mut doc: Doc, sent: i64, d: Option<&crate::billing::shares::Decision>) -> Doc {
+    let who = |d: &crate::billing::shares::Decision| match &d.organization {
+        Some(o) => format!("{} ({o})", d.name),
+        None => d.name.clone(),
+    };
+    let (status, text) = match d {
+        Some(d) if d.decision == "approved" => (
+            format!("anerkannt am {}", date(d.at)),
+            format!(
+                "Zur Freigabe gesendet am {}. Anerkannt von {} am {}.",
+                date(sent),
+                who(d),
+                date_time(d.at)
+            ),
+        ),
+        Some(d) => (
+            format!("Einwand am {}", date(d.at)),
+            format!(
+                "Zur Freigabe gesendet am {}. Einwand von {} am {}: {}",
+                date(sent),
+                who(d),
+                date_time(d.at),
+                d.comment.as_deref().unwrap_or("")
+            ),
+        ),
+        None => (
+            "offen".into(),
+            format!(
+                "Zur Freigabe gesendet am {}; noch keine Entscheidung.",
+                date(sent)
+            ),
+        ),
+    };
+    doc.meta.push(("Freigabe".into(), status));
+    doc.blocks.push(Block::Heading("Freigabe".into()));
+    doc.blocks.push(Block::Text(text));
     doc
 }
 
@@ -303,5 +359,38 @@ mod tests {
         gap["unconverted"] = json!(1);
         let t = billing_doc(&ctx, &gap, &[]).texts().join("\n");
         assert!(t.contains("fehlen Dichte oder Auflockerung"));
+        // Schichten: Bereich und Schicht in einer Zeile, Hinweis bei älteren Berechnungen
+        gap["positions"][0]["layer"] = json!("Lehm");
+        gap["layersOutdated"] = json!(true);
+        let t = billing_doc(&ctx, &gap, &[]).texts().join("\n");
+        assert!(t.contains("Grube · Lehm"));
+        assert!(t.contains("nicht nach Schichten aufgeteilt"));
+        // Freigabe: offen, anerkannt, Einwand
+        let open = with_decision(billing_doc(&ctx, &s, &[]), 0, None)
+            .texts()
+            .join("\n");
+        assert!(open.contains("Zur Freigabe gesendet am 01.01.1970; noch keine Entscheidung."));
+        let d = crate::billing::shares::Decision {
+            decision: "approved".into(),
+            name: "M. Muster".into(),
+            organization: Some("Bau GmbH".into()),
+            comment: None,
+            at: 86_400_000 + 9 * 3_600_000,
+        };
+        let ok = with_decision(billing_doc(&ctx, &s, &[]), 0, Some(&d))
+            .texts()
+            .join("\n");
+        assert!(ok.contains("anerkannt am 02.01.1970"));
+        assert!(ok.contains("Anerkannt von M. Muster (Bau GmbH) am 02.01.1970, 09:00 UTC."));
+        let no = crate::billing::shares::Decision {
+            decision: "objected".into(),
+            comment: Some("Rampe fehlt".into()),
+            organization: None,
+            ..d
+        };
+        let no = with_decision(billing_doc(&ctx, &s, &[]), 0, Some(&no))
+            .texts()
+            .join("\n");
+        assert!(no.contains("Einwand von M. Muster am 02.01.1970, 09:00 UTC: Rampe fehlt"));
     }
 }

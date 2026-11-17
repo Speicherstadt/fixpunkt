@@ -374,6 +374,30 @@ test("Abrechnung @screenshots", async () => {
   await billing.screenshot({ path: `${DOCS}/screenshot-abrechnung.png` });
 });
 
+test("Freigabe @screenshots", async ({ browser }) => {
+  const caps = (await api("GET", `/sites/${siteId}/captures`)) as { id: number; name: string }[];
+  const from = caps.find((c) => c.name === "Zwischenstand")!.id;
+  const to = caps.find((c) => c.name === "Aushub fertig")!.id;
+  const share = await api("POST", `/sites/${siteId}/billing/shares`, {
+    from,
+    to,
+    note: "Abschlagsrechnung 2 – bitte bis 24.11. prüfen",
+  });
+  const ctx = await browser.newContext({
+    viewport: DESKTOP,
+    locale: "de-DE",
+    timezoneId: "Europe/Berlin",
+    reducedMotion: "reduce",
+  });
+  const guest = await ctx.newPage();
+  await guest.goto(`/freigabe/${share.token}`);
+  const form = guest.getByRole("form", { name: "Freigabe" });
+  await form.getByLabel("Ihr Name").fill("M. Muster");
+  await form.getByLabel("Firma (optional)").fill("Bauherr GmbH");
+  await guest.screenshot({ path: `${DOCS}/screenshot-freigabe.png`, fullPage: true });
+  await ctx.close();
+});
+
 test("Orthofoto @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const view = page.getByRole("region", { name: "Ansicht" });

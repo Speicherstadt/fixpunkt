@@ -14,10 +14,12 @@ const statement: Statement = {
   amount: 12740,
   unpriced: 1,
   unconverted: 0,
+  layersOutdated: false,
   positions: [
     {
       regionId: 1,
       name: "Grube",
+      layer: null,
       lvPosition: "01.02.0010",
       material: "Lehm",
       kind: "cut",
@@ -32,6 +34,7 @@ const statement: Statement = {
     {
       regionId: 3,
       name: "Rand",
+      layer: null,
       lvPosition: null,
       material: null,
       kind: "cut",

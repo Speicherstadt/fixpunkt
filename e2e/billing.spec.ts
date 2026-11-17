@@ -1,4 +1,5 @@
-import { expect, test } from "@playwright/test";
+import AxeBuilder from "@axe-core/playwright";
+import { expect, type Page, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { boundaries, terrainXyz } from "./fixtures";
 
@@ -98,4 +99,112 @@ test("Aufmaß mit Preis, Kennwerten und Lieferscheinen", async ({ page }) => {
   const pdf = await page.request.get(href!);
   expect(pdf.status()).toBe(200);
   expect(pdf.headers()["content-type"]).toBe("application/pdf");
+});
+
+/** Baustelle mit Urgelände und Aushub, Bereichen und fertiger Aushub-Berechnung */
+const pitSite = async (page: Page, name: string) => {
+  const api = await apiFor(page);
+  const site = await api.call("POST", "/sites", { name });
+  const day = 86_400_000;
+  const before = await api.upload(site.id, "u.xyz", "Urgelände", day, terrainXyz(false));
+  const after = await api.upload(site.id, "a.xyz", "Januar", 31 * day, terrainXyz(true));
+  await api.call("POST", `/sites/${site.id}/regions`, { geojson: boundaries() });
+  await api.settled(site.id);
+  const regions = (await api.call("GET", `/sites/${site.id}/regions`)) as {
+    id: number;
+    name: string;
+  }[];
+  const volume = async () => {
+    await api.call("POST", `/sites/${site.id}/jobs`, {
+      kind: "volume",
+      params: { before, after, regionIds: regions.map((r) => r.id) },
+    });
+    await api.settled(site.id);
+  };
+  await volume();
+  return { api, site, regions, volume };
+};
+
+/**
+ * Schichten: Grube 2 m tief, Oberboden bis 0,5 m → 400 m² × 0,5 m = 200 m³, Lehm darunter 600 m³; je
+ * 6 € und 9 € je m³.
+ */
+test("Aufmaß nach Schichten", async ({ page }) => {
+  const { site, volume } = await pitSite(page, "Schichten");
+  await page.goto(`/sites/${site.id}`);
+
+  const billing = page.getByRole("region", { name: "Abrechnung" });
+  await billing.getByRole("button", { name: "Schichten (0)" }).click();
+  const form = billing.getByRole("form", { name: "Schichten (Homogenbereiche)" });
+  await form.getByRole("button", { name: "Schicht hinzufügen" }).click();
+  await form.getByRole("button", { name: "Schicht hinzufügen" }).click();
+  await form.getByLabel("Schicht", { exact: true }).nth(0).fill("Oberboden");
+  await form.getByLabel("Schicht", { exact: true }).nth(1).fill("Lehm");
+  await form.getByLabel("Unterkante von Oberboden").fill("0,5");
+  await expect(form.getByLabel("Unterkante von Lehm")).toBeDisabled();
+  await form.getByLabel("Einheitspreis von Oberboden").fill("6");
+  await form.getByLabel("Einheitspreis von Lehm").fill("9");
+  await form.getByRole("button", { name: "Schichten speichern" }).click();
+  await expect(form.getByRole("status")).toContainText("Schichten gespeichert");
+  // die Berechnung ist älter als die Schichten
+  await expect(billing).toContainText(
+    "Schichten sind angelegt, aber die Aushub-Berechnungen sind älter",
+  );
+
+  await volume();
+  const positions = billing.getByRole("table", { name: "Positionen des Aufmaßes" });
+  const top = positions.getByRole("row", { name: /Grube Oberboden/ });
+  const rest = positions.getByRole("row", { name: /Grube Lehm/ });
+  await expect(top).toContainText(/(19\d|20\d),\d/);
+  await expect(rest).toContainText(/(59\d|60\d),\d/);
+  await expect(top).toContainText(/6,00\s€\/m³/);
+  await expect(billing).not.toContainText("Aushub-Berechnungen sind älter");
+});
+
+/** Freigabe: Link erzeugen, als Auftraggeber ohne Anmeldung anerkennen, Stand in der Baustelle */
+test("Aufmaß zur Freigabe", async ({ page, browser }) => {
+  const { api, site, regions } = await pitSite(page, "Freigabe");
+  const grube = regions.find((r) => r.name === "Grube")!;
+  await api.call("PATCH", `/regions/${grube.id}`, { unitPrice: 10, priceUnit: "m3" });
+  await page.goto(`/sites/${site.id}`);
+  const billing = page.getByRole("region", { name: "Abrechnung" });
+  await billing.getByRole("button", { name: "Zur Freigabe senden" }).click();
+  const dialog = page.getByRole("dialog", { name: "Zur Freigabe senden" });
+  await dialog.getByLabel("Notiz für den Auftraggeber (optional)").fill("Abschlag Januar");
+  await dialog.getByRole("button", { name: "Link erzeugen" }).click();
+  const link = await dialog.getByLabel("Link zur Freigabe").inputValue();
+  expect(link).toMatch(/\/freigabe\/[A-Za-z0-9_-]{20,}$/);
+  await page.keyboard.press("Escape");
+
+  // Auftraggeber ohne Anmeldung
+  const ctx = await browser.newContext({ storageState: undefined });
+  const guest = await ctx.newPage();
+  await guest.goto(link);
+  await expect(guest.getByRole("heading", { level: 1, name: "Aufmaß zur Freigabe" })).toBeVisible();
+  await expect(guest.getByText("Abschlag Januar")).toBeVisible();
+  await expect(
+    guest
+      .getByRole("table", { name: "Positionen des Aufmaßes" })
+      .getByRole("row", { name: /Grube/ }),
+  ).toContainText(/(7\.99\d|8\.0\d\d),\d\d\s€/);
+  const axe = await new AxeBuilder({ page: guest })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(axe.violations.map((v) => v.id)).toEqual([]);
+  const decide = guest.getByRole("form", { name: "Freigabe" });
+  await expect(decide.getByRole("button", { name: "Einwand erheben" })).toBeDisabled();
+  await decide.getByLabel("Ihr Name").fill("M. Muster");
+  await decide.getByLabel("Firma (optional)").fill("Bau GmbH");
+  await decide.getByRole("button", { name: "Aufmaß anerkennen" }).click();
+  await expect(guest.getByRole("status")).toContainText("Anerkannt von M. Muster (Bau GmbH)");
+  const pdf = await guest.request.get(`${link.replace("/freigabe/", "/api/public/shares/")}/pdf`);
+  expect(pdf.headers()["content-type"]).toBe("application/pdf");
+  await ctx.close();
+
+  // in der Baustelle: Stand live, zurückziehen
+  await billing.getByRole("button", { name: "Freigaben (1)" }).click();
+  const list = billing.getByRole("list", { name: "Freigaben" });
+  await expect(list).toContainText("Anerkannt von M. Muster (Bau GmbH)");
+  await list.getByRole("button", { name: "Freigabe bis Januar zurückziehen" }).click();
+  await expect(list.getByRole("button", { name: /zurückziehen/ })).toHaveCount(0);
 });

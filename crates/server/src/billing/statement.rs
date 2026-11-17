@@ -4,9 +4,10 @@
 //! Die Menge eines Zeitraums ist der Unterschied der Aushubmengen gegen das Urgelände (älteste Aufnahme):
 //! Stand bis „bis“ minus Stand bis „von“. So addieren sich die Zeiträume zur Gesamtmenge.
 
-use super::convert::{in_unit, quantities, to_bank, Props, Quantities};
+use super::convert::{to_bank, Props};
 use super::deliveries::Delivery;
-use crate::dashboard::{params, result};
+use super::layers::Layer;
+pub use super::positions::{missing, positions, round2, Position};
 use crate::db::{status, Capture, Job, RegionRow};
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -16,6 +17,8 @@ use serde_json::{json, Value};
 pub struct Settings {
     pub truck_t: Option<f64>,
     pub materials: Vec<(String, Props)>,
+    /// Schichten von oben nach unten; leer, wenn nicht nach Schichten abgerechnet wird
+    pub layers: Vec<Layer>,
 }
 
 impl Settings {
@@ -25,27 +28,6 @@ impl Settings {
             .map(|(_, p)| *p)
             .unwrap_or_default()
     }
-}
-
-#[derive(Debug, Clone, Serialize, PartialEq)]
-#[serde(rename_all = "camelCase")]
-pub struct Position {
-    pub region_id: i64,
-    pub name: String,
-    pub lv_position: Option<String>,
-    pub material: Option<String>,
-    /// `cut` oder `fill`
-    pub kind: String,
-    /// Stand bis „von“ und bis „bis“ in m³ fest; `None`, wenn die Berechnung fehlt
-    pub previous: Option<f64>,
-    pub total: Option<f64>,
-    /// Menge im Zeitraum in allen Einheiten
-    pub period: Option<Quantities>,
-    pub unit: Option<String>,
-    pub unit_price: Option<f64>,
-    /// Menge in der Preiseinheit und Betrag in € (netto)
-    pub quantity: Option<f64>,
-    pub amount: Option<f64>,
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -61,100 +43,6 @@ pub struct Check {
     pub measured_bank: Option<f64>,
     /// (geliefert − gemessen) ÷ gemessen
     pub deviation_percent: Option<f64>,
-}
-
-/// neueste fertige Aushub-Berechnung `base → cap`
-fn volume_job(base: i64, cap: i64, jobs: &[Job]) -> Option<&Job> {
-    jobs.iter()
-        .filter(|j| j.kind == "volume" && j.status == status::DONE)
-        .filter(|j| {
-            let p = params(j);
-            p["before"].as_i64() == Some(base) && p["after"].as_i64() == Some(cap)
-        })
-        .max_by_key(|j| j.id)
-}
-
-/// Stand eines Bereichs bis zur Aufnahme `cap` in m³ fest; das Urgelände selbst hat 0
-fn cumulative(region: &RegionRow, base: i64, cap: i64, jobs: &[Job]) -> Option<f64> {
-    if cap == base {
-        return Some(0.0);
-    }
-    let field = if region.target_kind.as_deref() == Some("fill") {
-        "fill_m3"
-    } else {
-        "cut_m3"
-    };
-    result(volume_job(base, cap, jobs)?)["regions"]
-        .as_array()?
-        .iter()
-        .find(|x| x["name"] == region.name.as_str())?[field]
-        .as_f64()
-}
-
-/// Aufnahmen ohne fertige Aushub-Berechnung gegen das Urgelände (außer dem Urgelände selbst)
-pub fn missing(base: i64, caps: &[&Capture], jobs: &[Job]) -> Vec<String> {
-    caps.iter()
-        .filter(|c| c.id != base && volume_job(base, c.id, jobs).is_none())
-        .map(|c| c.name.clone())
-        .collect()
-}
-
-pub fn positions(
-    regions: &[RegionRow],
-    base: i64,
-    from: i64,
-    to: i64,
-    jobs: &[Job],
-    s: &Settings,
-) -> Vec<Position> {
-    let mut out: Vec<Position> = regions
-        .iter()
-        .filter(|r| r.target_kind.as_deref() != Some("stock"))
-        .map(|r| {
-            let previous = cumulative(r, base, from, jobs);
-            let total = cumulative(r, base, to, jobs);
-            let period = previous
-                .zip(total)
-                .map(|(a, b)| quantities(b - a, s.props(r.material.as_deref()), s.truck_t));
-            let quantity = period
-                .as_ref()
-                .zip(r.price_unit.as_deref())
-                .and_then(|(q, u)| in_unit(q, u));
-            Position {
-                region_id: r.id,
-                name: r.name.clone(),
-                lv_position: r.lv_position.clone(),
-                material: r.material.clone(),
-                kind: r.target_kind.clone().unwrap_or_else(|| "cut".into()),
-                previous,
-                total,
-                period,
-                unit: r.price_unit.clone(),
-                unit_price: r.unit_price,
-                quantity,
-                amount: quantity.zip(r.unit_price).map(|(q, p)| round2(q * p)),
-            }
-        })
-        .collect();
-    // nach Leistungsposition, Bereiche ohne Position am Ende
-    out.sort_by(|a, b| {
-        (
-            a.lv_position.is_none(),
-            a.lv_position.as_deref(),
-            a.name.to_lowercase(),
-        )
-            .cmp(&(
-                b.lv_position.is_none(),
-                b.lv_position.as_deref(),
-                b.name.to_lowercase(),
-            ))
-    });
-    out
-}
-
-/// auf Cent runden, wie auf der Rechnung
-fn round2(v: f64) -> f64 {
-    (v * 100.0).round() / 100.0
 }
 
 const DAY: i64 = 86_400_000;
@@ -242,7 +130,7 @@ pub fn statement(
     if (f.captured_at, f.id) >= (t.captured_at, t.id) {
         return Err("„von“ muss vor „bis“ liegen");
     }
-    let ps = positions(regions, base.id, f.id, t.id, jobs, s);
+    let (ps, outdated) = positions(regions, base.id, f.id, t.id, jobs, s);
     let ds: Vec<&Delivery> = deliveries
         .iter()
         .filter(|d| in_period(d, f.captured_at, t.captured_at))
@@ -255,6 +143,8 @@ pub fn statement(
         "missing": missing(base.id, &[f, t], jobs),
         "truckT": s.truck_t,
         "amount": (!amounts.is_empty()).then(|| round2(amounts.iter().sum())),
+        // Schichten angelegt, aber die Berechnungen sind älter: Bereiche ohne Aufteilung
+        "layersOutdated": outdated,
         "unpriced": ps.iter().filter(|p| p.unit_price.is_none()).count(),
         // Preis je t oder m³ lose, aber Dichte oder Auflockerung fehlt
         "unconverted": ps
@@ -315,6 +205,7 @@ mod tests {
     fn settings() -> Settings {
         Settings {
             truck_t: Some(15.0),
+            layers: Vec::new(),
             materials: vec![(
                 "Lehm".into(),
                 Props {

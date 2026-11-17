@@ -7,6 +7,9 @@
 
 pub mod convert;
 pub mod deliveries;
+pub mod layers;
+pub mod positions;
+pub mod shares;
 pub mod statement;
 
 use crate::db::{self, Capture, Job, RegionRow};
@@ -39,6 +42,9 @@ pub struct MaterialProps {
 pub struct SettingsBody {
     pub truck_t: Option<f64>,
     pub materials: Vec<MaterialProps>,
+    /// Schichten von oben nach unten; fehlt das Feld, bleiben sie unverändert
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub layers: Option<Vec<layers::Layer>>,
 }
 
 pub async fn load_settings(app: &AppRef, site: i64) -> ApiResult<Settings> {
@@ -54,6 +60,7 @@ pub async fn load_settings(app: &AppRef, site: i64) -> ApiResult<Settings> {
     .await?;
     Ok(Settings {
         truck_t,
+        layers: layers::load(app, site).await?,
         materials: rows
             .into_iter()
             .map(|(n, density, bulking)| (n, Props { density, bulking }))
@@ -85,7 +92,11 @@ pub async fn get_settings(
             bulking: p.bulking,
         })
         .collect();
-    for name in used {
+    // jede Schicht ist ein Material
+    for name in used
+        .into_iter()
+        .chain(s.layers.iter().map(|l| l.name.clone()))
+    {
         if !materials.iter().any(|m| m.name == name) {
             materials.push(MaterialProps {
                 name,
@@ -98,6 +109,7 @@ pub async fn get_settings(
     Ok(Json(SettingsBody {
         truck_t: s.truck_t,
         materials,
+        layers: Some(s.layers),
     }))
 }
 
@@ -120,7 +132,7 @@ pub fn validate_settings(b: &SettingsBody) -> Result<(), String> {
             return Err(format!("Auflockerung von {} (1–2)", m.name));
         }
     }
-    Ok(())
+    layers::validate(b.layers.as_deref().unwrap_or_default())
 }
 
 /// Kennwerte ersetzen; Materialien ohne Werte werden nicht gespeichert
@@ -155,6 +167,9 @@ pub async fn put_settings(
         .bind(m.bulking)
         .execute(&mut *tx)
         .await?;
+    }
+    if let Some(ls) = &b.layers {
+        layers::save(&mut tx, site, ls).await?;
     }
     tx.commit().await?;
     app.events.changed(Topic::Billing, Some(site));
@@ -211,6 +226,7 @@ mod tests {
                 density,
                 bulking,
             }],
+            layers: None,
         };
         assert!(validate_settings(&body(Some(15.0), Some(2.0), Some(1.25))).is_ok());
         assert!(validate_settings(&body(None, None, None)).is_ok());

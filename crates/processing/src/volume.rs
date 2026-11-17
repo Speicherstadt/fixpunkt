@@ -71,6 +71,43 @@ pub fn difference(
     Ok((integrate(dz, spec.cell_area(), spec.cell), diff))
 }
 
+/// Abtrag nach Schichten (Homogenbereichen) unter der früheren Oberfläche `before`.
+///
+/// `bottoms`: Unterkante jeder Schicht in m unter `before`, aufsteigend; die letzte Schicht reicht unbegrenzt
+/// nach unten und kommt dazu. Je Zelle mit Abtragstiefe `d` zählt in Schicht `[oben, unten)` der Anteil
+/// `min(d, unten) − oben` (nicht negativ). Die Summe aller Schichten ist genau der Abtrag.
+pub fn cut_by_layers(
+    before: &Grid,
+    after: &Grid,
+    boundary: Option<&Polygon>,
+    bottoms: &[f64],
+) -> Result<Vec<f64>> {
+    if before.spec != after.spec {
+        bail!("Raster sind nicht deckungsgleich");
+    }
+    if bottoms.iter().any(|b| !b.is_finite() || *b <= 0.0)
+        || bottoms.windows(2).any(|w| w[0] >= w[1])
+    {
+        bail!("Schichtgrenzen müssen positiv und aufsteigend sein");
+    }
+    let spec = before.spec;
+    let mask = spec.mask(boundary);
+    let mut out = vec![0.0; bottoms.len() + 1];
+    for (i, &inside) in mask.iter().enumerate() {
+        let d = (before.data[i] - after.data[i]) as f64;
+        if !inside || !d.is_finite() || d <= 0.0 {
+            continue;
+        }
+        let mut top = 0.0;
+        for (k, v) in out.iter_mut().enumerate() {
+            let bottom = bottoms.get(k).copied().unwrap_or(f64::INFINITY);
+            *v += (d.min(bottom) - top).max(0.0) * spec.cell_area();
+            top = bottom;
+        }
+    }
+    Ok(out)
+}
+
 /// Ergebnis für einen benannten Bereich
 #[derive(Debug, Clone, Serialize)]
 pub struct RegionReport {
@@ -263,6 +300,33 @@ mod tests {
             GridSpec::covering(&c.bbox(), 0.25).unwrap(),
             Aggregate::Mean,
         )
+    }
+
+    #[test]
+    fn layers_split_the_cut_exactly() {
+        // Grube 20 × 20 m, 2 m tief: Oberboden bis 0,3 m = 120 m³, Lehm bis 1,5 m = 480 m³, Fels darunter = 200 m³
+        let terrain = |_: f64, _: f64| 300.0;
+        let pit = |dx: f64, dy: f64| {
+            let inside = (15.0..35.0).contains(&dx) && (15.0..35.0).contains(&dy);
+            300.0 - if inside { 2.0 } else { 0.0 }
+        };
+        let (before, after) = (grid(&cloud(terrain)), grid(&cloud(pit)));
+        let b = Polygon::rect(X0 + 10.0, Y0 + 10.0, X0 + 40.0, Y0 + 40.0);
+        let l = cut_by_layers(&before, &after, Some(&b), &[0.3, 1.5]).unwrap();
+        let (total, _) = difference(&before, &after, Some(&b)).unwrap();
+        // Randzellen der Grube sind nur teilweise tief (Mittelwert): 1,5 % Spielraum
+        for (got, want) in l.iter().zip([120.0, 480.0, 200.0]) {
+            assert!((got - want).abs() / want < 0.015, "{l:?}");
+        }
+        assert!((l.iter().sum::<f64>() - total.cut_m3).abs() < 1e-6);
+        // eine Grenze unter der Sohle: die letzte Schicht bleibt leer
+        let deep = cut_by_layers(&before, &after, Some(&b), &[0.3, 5.0]).unwrap();
+        assert_eq!(deep[2], 0.0);
+        // ohne Grenzen eine Schicht = Abtrag
+        let one = cut_by_layers(&before, &after, Some(&b), &[]).unwrap();
+        assert!((one[0] - total.cut_m3).abs() < 1e-6);
+        assert!(cut_by_layers(&before, &after, None, &[1.0, 0.5]).is_err());
+        assert!(cut_by_layers(&before, &after, None, &[0.0]).is_err());
     }
 
     #[test]

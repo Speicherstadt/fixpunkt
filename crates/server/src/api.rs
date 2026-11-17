@@ -120,6 +120,12 @@ pub fn router(app: AppRef) -> Router {
             get(billing::get_settings).put(billing::put_settings),
         )
         .route("/sites/{id}/billing", get(billing::get_statement))
+        .route(
+            "/sites/{id}/billing/shares",
+            get(billing::shares::list).post(billing::shares::create),
+        )
+        .route("/billing/shares/{id}", delete(billing::shares::revoke))
+        .route("/billing/shares/{id}/pdf", get(billing::shares::pdf))
         .route("/sites/{id}/billing.pdf", get(report::site_routes::billing))
         .route(
             "/sites/{id}/deliveries",
@@ -149,6 +155,16 @@ pub fn router(app: AppRef) -> Router {
         .route("/auth/logout", post(auth::logout))
         .route("/auth/passkey/start", post(passkeys::login_start))
         .route("/auth/passkey/finish", post(passkeys::login_finish))
+        // Freigabe eines Aufmaßes: ohne Anmeldung, nur mit dem Token aus dem Link
+        .route("/public/shares/{token}", get(billing::shares::public_get))
+        .route(
+            "/public/shares/{token}/decision",
+            post(billing::shares::public_decide),
+        )
+        .route(
+            "/public/shares/{token}/pdf",
+            get(billing::shares::public_pdf),
+        )
         .merge(protected)
         .with_state(app)
 }

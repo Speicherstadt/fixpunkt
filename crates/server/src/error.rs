@@ -39,6 +39,7 @@ pub mod code {
     pub const PASSKEYS_DISABLED: &str = "passkeys.disabled";
     pub const PASSKEY_FAILED: &str = "passkeys.failed";
     pub const NO_PASSKEY: &str = "passkeys.none";
+    pub const SHARE_DECIDED: &str = "shares.decided";
 
     pub const ALL: &[&str] = &[
         NOT_LOGGED_IN,
@@ -73,6 +74,7 @@ pub mod code {
         PASSKEYS_DISABLED,
         PASSKEY_FAILED,
         NO_PASSKEY,
+        SHARE_DECIDED,
     ];
 }
 

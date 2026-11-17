@@ -34,7 +34,13 @@ export function BillingSettingsForm({ siteId, canEdit }: { siteId: number; canEd
         {m.billing_settings()}
       </Button>
       {open && settings.data ? (
-        <SettingsEditor siteId={siteId} canEdit={canEdit} initial={settings.data} />
+        <SettingsEditor
+          // neu, wenn Materialien dazukommen (z. B. eine neue Schicht)
+          key={settings.data.materials.map((x) => x.name).join("|")}
+          siteId={siteId}
+          canEdit={canEdit}
+          initial={settings.data}
+        />
       ) : null}
     </div>
   );
@@ -62,6 +68,8 @@ function SettingsEditor({
     mutationFn: () =>
       api.saveBillingSettings(siteId, {
         truckT: value(truck),
+        // Schichten bleiben, wie sie sind
+        layers: undefined,
         materials: rows.map((r) => ({
           name: r.name,
           density: value(r.density),

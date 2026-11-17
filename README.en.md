@@ -66,8 +66,9 @@ processed by [OpenDroneMap](https://opendronemap.org/), directly from Fixpunkt v
 - Plan vs. actual against a formation level, an inclined plane or a design surface
 - Ground filter for excavators, containers and vegetation
 - Report as PDF with map, as CSV or GeoTIFF; documentation, plan vs. actual and a custom site report as PDF
-- Billing: statement per period with item number and unit price, in bank and loose m³, tonnes and truck loads;
-  delivery tickets imported as CSV and checked against the measurement
+- Billing: statement per period with item number and unit price, in bank and loose m³, tonnes and truck loads,
+  split by soil layers; delivery tickets imported as CSV and checked against the measurement; client approval
+  via link
 - Site overview, arranged by each user: excavation per flight, quantity targets, stock and history per material,
   plan vs. actual, constraint points
 

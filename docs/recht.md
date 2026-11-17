@@ -151,13 +151,15 @@ aufzuheben (bei Bauwerken in der Regel fünf Jahre nach Abnahme, **§ 634a BGB**
 
 - [ ] Geozonen prüfen, Beschäftigte informieren
 - [ ] **Urgelände befliegen**, Mengenbericht bzw. Aufnahme an den Auftraggeber schicken und bestätigen lassen
+  (z. B. über einen [Freigabe-Link](abrechnung.md#5-freigabe-durch-den-auftraggeber))
 - [ ] Abrechnungsgrenzen festlegen und ebenfalls abstimmen
 - [ ] 2–3 Kontrollpunkte mit einem Rover einmessen (Genauigkeitsnachweis, [Geräte](geraete.md))
 
 **Während der Arbeiten**
 
 - [ ] in festen Abständen fliegen (z. B. monatlich zur Abschlagsrechnung)
-- [ ] Aufmaßblatt des Zeitraums als PDF der Rechnung beilegen ([Abrechnung](abrechnung.md))
+- [ ] Aufmaß des Zeitraums zur Freigabe senden und das Aufmaßblatt mit der Entscheidung der Rechnung beilegen
+  ([Abrechnung](abrechnung.md))
 - [ ] auf den ersten Baustellen Lieferscheine bzw. LKW-Ladungen in Fixpunkt einlesen und mit der gemessenen Menge
   vergleichen
 
@@ -187,7 +189,7 @@ Den Text an den Vertrag anpassen, etwa wenn nach Tonnen oder LKW-Ladungen abgere
 |---|---|
 | prüfbare Mengenberechnung (§ 650g BGB, § 14 VOB/B) | Mengenbericht als PDF mit Karte, Bereichen, Mengen und Berechnungsgrundlagen ([Aushub berechnen](aushub.md#4-mengenbericht)); Aufmaßblatt je Zeitraum mit LV-Position, Preis und Betrag ([Abrechnung](abrechnung.md)) |
 | Plausibilisierung | Lieferscheine und Wiegescheine einlesen, Abweichung zur gemessenen Menge je Material ([Abrechnung](abrechnung.md#abgleich)) |
-| gemeinsame Feststellung des Urgeländes | jede Aufnahme bleibt unverändert gespeichert, mit Datum; Bericht je Stand |
+| gemeinsame Feststellung (§ 14 Abs. 2 VOB/B) | jede Aufnahme bleibt unverändert gespeichert, mit Datum; Freigabe-Link, über den der Auftraggeber das eingefrorene Aufmaß anerkennt oder Einwand erhebt, mit Name und Zeit im PDF ([Freigabe](abrechnung.md#5-freigabe-durch-den-auftraggeber)) |
 | nachvollziehbar und wiederholbar | gleiche Daten und Einstellungen ergeben dieselbe Menge; Verfahren offen beschrieben ([Methode](methode.md)) |
 | Genauigkeit belegbar | Rechnung gegen bekannte Formeln geprüft; Kontrollpunkte und Passpunkte mit Restklaffen |
 | amtliches Koordinatensystem | ETRS89/UTM32 (EPSG:25832), Höhen DHHN2016 |

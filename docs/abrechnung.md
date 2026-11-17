@@ -1,7 +1,8 @@
 ---
 description: >-
   Abrechnung in Fixpunkt: Leistungsposition und Einheitspreis je Bereich, Umrechnung in Tonnen, m³ lose und
-  LKW-Ladungen, Aufmaß je Zeitraum als PDF, Lieferscheine als CSV einlesen und gegen die gemessene Menge prüfen.
+  LKW-Ladungen, Schichten (Homogenbereiche) nach Tiefe, Aufmaß je Zeitraum als PDF, Lieferscheine als CSV
+  einlesen und gegen die gemessene Menge prüfen, Freigabe durch den Auftraggeber per Link.
 ---
 
 # Abrechnung
@@ -66,6 +67,35 @@ Betrag; darunter die Summe netto. **Aufmaß als PDF** lädt das Aufmaßblatt her
 Zeitraum und Urgelände, Positionen, Mengen je Bereich (bisher, gesamt, im Zeitraum), Abgleich mit Lieferscheinen
 und die verwendeten Kennwerte. Beträge sind auf Cent gerundet.
 
+## 3a. Schichten (Homogenbereiche)
+
+Oberboden, Lehm und Fels haben verschiedene Preise und gehen oft an verschiedene Stellen. Unter **Abrechnung →
+Schichten** legt man sie von oben nach unten an:
+
+| Schicht | Unterkante | LV-Position | Einheitspreis |
+|---|---|---|---|
+| Oberboden | 0,3 m | 02.01.0010 | 6,00 €/m³ |
+| Lehm | 1,5 m | 02.01.0020 | 9,00 €/m³ |
+| Fels | bis Sohle | 02.01.0030 | 40,00 €/m³ |
+
+Die Unterkante zählt **unter dem Urgelände**, an jeder Stelle der Grube. Je Rasterzelle mit Abtragstiefe *d*
+rechnet Fixpunkt in die Schicht von *oben* bis *unten* den Anteil
+
+> min(*d*, unten) − oben (nicht negativ)
+
+– bei 2 m Aushub also 0,3 m Oberboden, 1,2 m Lehm und 0,5 m Fels. Die Schichten zusammen ergeben genau den Abtrag
+des Bereichs (geprüft gegen eine Grube mit bekannten Schichtdicken).
+
+- Jede Schicht ist zugleich ein **Material** mit eigenen Kennwerten (Dichte, Auflockerung).
+- Hat eine Schicht keinen eigenen Preis, gilt der des Bereichs.
+- Das Aufmaß hat dann je Bereich eine Zeile je Schicht, etwa „Grube · Lehm“.
+- Bereiche zum Auftragen und Lager werden nicht nach Schichten geteilt.
+- Schichten gelten für **Aushub-Berechnungen, die danach starten**. Sind die Berechnungen älter, sagt Fixpunkt es
+  und rechnet bis dahin je Bereich.
+
+Die Schichtgrenzen sind waagerecht unter dem Urgelände angenommen, wie in einem Baugrundgutachten mit mittleren
+Schichtdicken. Liegt eine Grenze schräg oder springt sie, teilt man die Grube in mehrere Bereiche.
+
 ## 4. Lieferscheine
 
 Lieferscheine und Wiegescheine lassen sich einzeln erfassen oder als CSV einlesen, etwa aus der Waage oder einer
@@ -99,6 +129,26 @@ genau voll. Große Abweichungen deuten auf falsche Kennwerte, vergessene Scheine
 Bereich oder eine fehlende Befliegung hin. Auf den ersten Baustellen ist der Abgleich der beste Beleg, dass die
 Drohnenmengen stimmen ([Abrechnung und Recht → Checkliste](recht.md#checkliste)).
 
+## 5. Freigabe durch den Auftraggeber
+
+Die VOB/B verlangt, die Feststellungen für die Abrechnung **möglichst gemeinsam** zu treffen
+([Abrechnung und Recht](recht.md#vobb-und-vobc)). Dafür gibt es unter **Abrechnung → Zur Freigabe senden**
+einen Link:
+
+1. Zeitraum wählen, **Zur Freigabe senden**, optional eine Notiz („Abschlag Januar“), **Link erzeugen**.
+2. Den Link kopieren oder per E-Mail schicken. Er erscheint **nur dieses eine Mal**; gespeichert ist nur ein
+   Prüfwert, nicht der Link selbst.
+3. Der Auftraggeber öffnet ihn **ohne Anmeldung** und sieht das Aufmaß so, wie es beim Erzeugen war – spätere
+   Änderungen an Preisen oder Berechnungen ändern es nicht. Er kann das Aufmaßblatt als PDF laden.
+4. Er **erkennt an** (mit Name und optional Firma) oder **erhebt Einwand** (mit Begründung). Es zählt die erste
+   Entscheidung.
+5. Unter **Abrechnung → Freigaben** steht der Stand live; das PDF dort enthält die Entscheidung mit Name und
+   Zeit. **Zurückziehen** macht den Link unbrauchbar, eine schon getroffene Entscheidung bleibt erhalten.
+
+![Freigabe-Seite für den Auftraggeber ohne Anmeldung: Aufmaß mit Positionen und Betrag, darunter Name, Firma, Bemerkung und die Knöpfe Einwand erheben und Aufmaß anerkennen](screenshot-freigabe.png)
+
+Der Link ist so geheim wie ein Passwort: Wer ihn hat, sieht dieses eine Aufmaß – nichts sonst von der Baustelle.
+
 ## Über die API
 
 | Was | Aufruf |
@@ -108,6 +158,9 @@ Drohnenmengen stimmen ([Abrechnung und Recht → Checkliste](recht.md#checkliste
 | Aufmaßblatt als PDF | `GET /api/sites/{id}/billing.pdf?from=…&to=…` |
 | Lieferscheine | `GET`/`POST /api/sites/{id}/deliveries`, `DELETE /api/deliveries/{id}` |
 | CSV einlesen | `PUT /api/sites/{id}/deliveries.csv` (Datei als Körper) |
+| Schichten | `layers` in `PUT /api/sites/{id}/billing/settings` (`name`, `bottomM`, `lvPosition`, `unitPrice`, `priceUnit`) |
+| Freigaben | `GET`/`POST /api/sites/{id}/billing/shares`, `DELETE /api/billing/shares/{id}`, `GET …/{id}/pdf` |
+| Freigabe ohne Anmeldung | `GET /api/public/shares/{token}`, `POST …/decision`, `GET …/pdf` |
 | Preis am Bereich | `PATCH /api/regions/{id}` mit `lvPosition`, `unitPrice`, `priceUnit` (`m3`, `m3_loose`, `t`) |
 
 Mit einem [API-Token](benutzer.md#api-tokens) lassen sich so Lieferscheine aus anderen Programmen übernehmen.

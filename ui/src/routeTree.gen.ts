@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as FreigabeTokenRouteImport } from './routes/freigabe.$token'
 import { Route as AppJobsJobIdRouteImport } from './routes/_app/jobs.$jobId'
 import { Route as AppSitesSiteIdRouteImport } from './routes/_app/sites.$siteId'
 
@@ -41,6 +42,11 @@ const AppUsersRoute = AppUsersRouteImport.update({
   path: '/users',
   getParentRoute: () => AppRoute,
 } as any)
+const FreigabeTokenRoute = FreigabeTokenRouteImport.update({
+  id: '/freigabe/$token',
+  path: '/freigabe/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppJobsJobIdRoute = AppJobsJobIdRouteImport.update({
   id: '/jobs/$jobId',
   path: '/jobs/$jobId',
@@ -57,6 +63,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/account': typeof AppAccountRoute
   '/users': typeof AppUsersRoute
+  '/freigabe/$token': typeof FreigabeTokenRoute
   '/jobs/$jobId': typeof AppJobsJobIdRoute
   '/sites/$siteId': typeof AppSitesSiteIdRoute
 }
@@ -64,6 +71,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/account': typeof AppAccountRoute
   '/users': typeof AppUsersRoute
+  '/freigabe/$token': typeof FreigabeTokenRoute
   '/': typeof AppIndexRoute
   '/jobs/$jobId': typeof AppJobsJobIdRoute
   '/sites/$siteId': typeof AppSitesSiteIdRoute
@@ -74,6 +82,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/account': typeof AppAccountRoute
   '/_app/users': typeof AppUsersRoute
+  '/freigabe/$token': typeof FreigabeTokenRoute
   '/_app/': typeof AppIndexRoute
   '/_app/jobs/$jobId': typeof AppJobsJobIdRoute
   '/_app/sites/$siteId': typeof AppSitesSiteIdRoute
@@ -81,15 +90,29 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/account' | '/users' | '/jobs/$jobId' | '/sites/$siteId'
+    | '/'
+    | '/login'
+    | '/account'
+    | '/users'
+    | '/freigabe/$token'
+    | '/jobs/$jobId'
+    | '/sites/$siteId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/account' | '/users' | '/' | '/jobs/$jobId' | '/sites/$siteId'
+  to:
+    | '/login'
+    | '/account'
+    | '/users'
+    | '/freigabe/$token'
+    | '/'
+    | '/jobs/$jobId'
+    | '/sites/$siteId'
   id:
     | '__root__'
     | '/_app'
     | '/login'
     | '/_app/account'
     | '/_app/users'
+    | '/freigabe/$token'
     | '/_app/'
     | '/_app/jobs/$jobId'
     | '/_app/sites/$siteId'
@@ -98,6 +121,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
+  FreigabeTokenRoute: typeof FreigabeTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -137,6 +161,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUsersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/freigabe/$token': {
+      id: '/freigabe/$token'
+      path: '/freigabe/$token'
+      fullPath: '/freigabe/$token'
+      preLoaderRoute: typeof FreigabeTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/jobs/$jobId': {
       id: '/_app/jobs/$jobId'
       path: '/jobs/$jobId'
@@ -175,6 +206,7 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
+  FreigabeTokenRoute: FreigabeTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

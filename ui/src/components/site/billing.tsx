@@ -16,7 +16,9 @@ import { formatDate, formatEuro, formatNumber, formatVolume } from "@/lib/format
 import { capturesQuery, statementQuery } from "@/lib/queries";
 import { m } from "@/paraglide/messages";
 import { Deliveries } from "./billing-deliveries";
+import { BillingLayers } from "./billing-layers";
 import { BillingSettingsForm } from "./billing-settings";
+import { ShareButton, Shares } from "./billing-shares";
 import { ChecksTable, PositionsTable } from "./billing-tables";
 
 export function Billing({ siteId, canEdit }: { siteId: number; canEdit: boolean }) {
@@ -40,13 +42,16 @@ export function Billing({ siteId, canEdit }: { siteId: number; canEdit: boolean 
       description={m.billing_text()}
       actions={
         s && period ? (
-          <a
-            href={statementPdfHref(siteId, period.from, period.to)}
-            className={buttonVariants({ variant: "primary" })}
-          >
-            <FileDown size={16} aria-hidden="true" />
-            {m.billing_pdf()}
-          </a>
+          <>
+            {canEdit ? <ShareButton siteId={siteId} period={period} /> : null}
+            <a
+              href={statementPdfHref(siteId, period.from, period.to)}
+              className={buttonVariants({ variant: "primary" })}
+            >
+              <FileDown size={16} aria-hidden="true" />
+              {m.billing_pdf()}
+            </a>
+          </>
         ) : null
       }
     >
@@ -104,6 +109,11 @@ export function Billing({ siteId, canEdit }: { siteId: number; canEdit: boolean 
                   {m.billing_unpriced({ count: s.unpriced })}
                 </p>
               ) : null}
+              {s.layersOutdated ? (
+                <p role="status" className="m-0 text-[13px] text-warn">
+                  {m.billing_layers_outdated()}
+                </p>
+              ) : null}
               {s.unconverted ? (
                 <p role="status" className="m-0 text-[13px] text-warn">
                   {m.billing_unconverted({ count: s.unconverted })}
@@ -114,8 +124,10 @@ export function Billing({ siteId, canEdit }: { siteId: number; canEdit: boolean 
           ) : null}
         </>
       )}
+      <BillingLayers siteId={siteId} canEdit={canEdit} />
       <BillingSettingsForm siteId={siteId} canEdit={canEdit} />
       <Deliveries siteId={siteId} canEdit={canEdit} />
+      <Shares siteId={siteId} canEdit={canEdit} />
     </Section>
   );
 }

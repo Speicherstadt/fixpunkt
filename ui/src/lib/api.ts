@@ -365,11 +365,23 @@ export type RegionTarget = {
 };
 
 /** Kennwerte je Material (Dichte t/m³ fest, Auflockerung lose/fest) und LKW-Nutzlast in t */
+/** Schicht (Homogenbereich): Unterkante in m unter dem Urgelände, die unterste ohne */
+export const Layer = z.object({
+  name: z.string(),
+  bottomM: z.number().nullable(),
+  lvPosition: z.string().nullable().optional(),
+  unitPrice: z.number().nullable().optional(),
+  priceUnit: z.enum(["m3", "m3_loose", "t"]).nullable().optional(),
+});
+export type Layer = z.infer<typeof Layer>;
+
 export const BillingSettings = z.object({
   truckT: z.number().nullable(),
   materials: z.array(
     z.object({ name: z.string(), density: z.number().nullable(), bulking: z.number().nullable() }),
   ),
+  /** fehlt beim Speichern: Schichten bleiben unverändert */
+  layers: z.array(Layer).optional(),
 });
 export type BillingSettings = z.infer<typeof BillingSettings>;
 
@@ -392,10 +404,12 @@ export const Statement = z.object({
   amount: z.number().nullable(),
   unpriced: z.number(),
   unconverted: z.number(),
+  layersOutdated: z.boolean(),
   positions: z.array(
     z.object({
       regionId: z.number(),
       name: z.string(),
+      layer: z.string().nullable(),
       lvPosition: z.string().nullable(),
       material: z.string().nullable(),
       kind: z.string(),
@@ -420,6 +434,47 @@ export const Statement = z.object({
   ),
 });
 export type Statement = z.infer<typeof Statement>;
+
+/** Entscheidung des Auftraggebers über eine Freigabe */
+export const ShareDecision = z.object({
+  decision: z.enum(["approved", "objected"]),
+  name: z.string(),
+  organization: z.string().nullable(),
+  comment: z.string().nullable(),
+  at: z.number(),
+});
+export type ShareDecision = z.infer<typeof ShareDecision>;
+
+/** Freigabe eines Aufmaßes in der Liste der Baustelle (ohne Token) */
+export const Share = z.object({
+  id: z.number(),
+  from: StatementCapture,
+  to: StatementCapture,
+  amount: z.number().nullable(),
+  note: z.string().nullable(),
+  createdAt: z.number(),
+  revokedAt: z.number().nullable(),
+  decision: ShareDecision.nullable(),
+  /** nur direkt nach dem Anlegen */
+  token: z.string().optional(),
+});
+export type Share = z.infer<typeof Share>;
+
+/** Was der Auftraggeber über den Link sieht */
+export const PublicShare = z.object({
+  site: z.string(),
+  statement: Statement,
+  note: z.string().nullable(),
+  createdAt: z.number(),
+  decision: ShareDecision.nullable(),
+});
+export type PublicShare = z.infer<typeof PublicShare>;
+export type DecisionInput = {
+  decision: "approved" | "objected";
+  name: string;
+  organization?: string;
+  comment?: string;
+};
 
 export const DeliveryUnit = z.enum(["t", "m3", "loads"]);
 export type DeliveryUnit = z.infer<typeof DeliveryUnit>;
@@ -644,6 +699,14 @@ export const api = {
   addDelivery: (siteId: number, d: NewDelivery) =>
     request("POST", `/sites/${siteId}/deliveries`, Delivery, d),
   deleteDelivery: (id: number) => request("DELETE", `/deliveries/${id}`, Empty),
+  shares: (siteId: number) => request("GET", `/sites/${siteId}/billing/shares`, z.array(Share)),
+  createShare: (siteId: number, s: { from: number; to: number; note?: string }) =>
+    request("POST", `/sites/${siteId}/billing/shares`, Share, s),
+  revokeShare: (id: number) => request("DELETE", `/billing/shares/${id}`, Empty),
+  publicShare: (token: string) =>
+    request("GET", `/public/shares/${encodeURIComponent(token)}`, PublicShare),
+  decideShare: (token: string, d: DecisionInput) =>
+    request("POST", `/public/shares/${encodeURIComponent(token)}/decision`, PublicShare, d),
   planGeometry: (id: number) => request("GET", `/plans/${id}/geometry`, PlanGeometry),
   deletePlan: (id: number) => request("DELETE", `/plans/${id}`, Empty),
   georefFit: (mode: string, points: unknown[]) =>
@@ -697,6 +760,13 @@ export const importDeliveries = (siteId: number, file: File) =>
     z.object({ imported: z.number() }),
     () => {},
   );
+
+/** Freigabe: Link für den Auftraggeber und Aufmaßblatt mit Entscheidung */
+export const shareLink = (token: string, origin = window.location.origin) =>
+  `${origin}/freigabe/${token}`;
+export const sharePdfHref = (id: number) => `/api/billing/shares/${id}/pdf`;
+export const publicSharePdfHref = (token: string) =>
+  `/api/public/shares/${encodeURIComponent(token)}/pdf`;
 
 /** Aufmaßblatt als PDF */
 export const statementPdfHref = (siteId: number, from: number, to: number) =>

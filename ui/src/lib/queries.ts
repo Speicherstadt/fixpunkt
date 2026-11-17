@@ -55,6 +55,11 @@ export const deliveriesQuery = (siteId: number) =>
     queryKey: ["billing", siteId, "deliveries"],
     queryFn: () => api.deliveries(siteId),
   });
+export const sharesQuery = (siteId: number) =>
+  queryOptions({
+    queryKey: ["billing", siteId, "shares"],
+    queryFn: () => api.shares(siteId),
+  });
 export const dashboardQuery = (siteId: number) =>
   queryOptions({ queryKey: ["dashboard", siteId], queryFn: () => api.dashboard(siteId) });
 export const markersQuery = (siteId: number) =>

@@ -1,6 +1,6 @@
 /** Abrechnung: Zeitraum vorschlagen, Einheiten benennen, Abweichung bewerten (reine Funktionen) */
-import type { Capture, DeliveryUnit, PriceUnit, Statement } from "@/lib/api";
-import { formatNumber } from "@/lib/format";
+import type { Capture, DeliveryUnit, PriceUnit, ShareDecision, Statement } from "@/lib/api";
+import { formatDate, formatNumber } from "@/lib/format";
 import { m } from "@/paraglide/messages";
 
 /** Geprüfte Aufnahmen in zeitlicher Reihenfolge */
@@ -39,3 +39,13 @@ export const signedPercent = (p: number) =>
 
 /** Heute als `2026-11-17` (Vorgabe für einen neuen Lieferschein) */
 export const today = (now = new Date()) => now.toISOString().slice(0, 10);
+
+/** Stand einer Freigabe in Worten */
+export const decisionText = (d: ShareDecision | null): string => {
+  if (!d) return m.share_open();
+  const name = d.organization ? `${d.name} (${d.organization})` : d.name;
+  const date = formatDate(d.at);
+  return d.decision === "approved"
+    ? m.share_approved({ name, date })
+    : m.share_objected({ name, date, comment: d.comment ?? "" });
+};

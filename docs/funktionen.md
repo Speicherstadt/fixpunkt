@@ -52,7 +52,9 @@ steht in der [Roadmap](roadmap.md).
 - **Aufmaß je Zeitraum** zwischen zwei Befliegungen, mit LV-Position, Einheitspreis und Betrag, als PDF
   ([Abrechnung](abrechnung.md))
 - **Umrechnung** in Tonnen, m³ lose und LKW-Fahrten über Dichte, Auflockerung und Nutzlast
+- **Schichten** (Homogenbereiche) nach Tiefe unter dem Urgelände, je Schicht Material und Preis
 - **Lieferscheine** einzeln oder als CSV, mit Abgleich gegen die gemessene Menge
+- **Freigabe** durch den Auftraggeber per Link ohne Anmeldung: anerkennen oder Einwand, im PDF festgehalten
 - rechtlicher Rahmen: [Abrechnung und Recht](recht.md)
 
 ## Soll/Ist

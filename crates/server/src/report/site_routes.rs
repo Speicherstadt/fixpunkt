@@ -176,6 +176,40 @@ pub async fn billing(
     ))
 }
 
+/// Aufmaßblatt einer Freigabe aus dem eingefrorenen Stand, mit der Entscheidung
+pub async fn share_pdf(row: &crate::billing::shares::ShareRow) -> ApiResult<Response> {
+    let snap = row.snapshot();
+    let site = snap["site"].as_str().unwrap_or("").to_string();
+    let materials: Vec<(String, Option<f64>, Option<f64>)> = snap["materials"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .map(|m| {
+            (
+                m[0].as_str().unwrap_or("").to_string(),
+                m[1].as_f64(),
+                m[2].as_f64(),
+            )
+        })
+        .collect();
+    let statement = &snap["statement"];
+    let ctx = SiteContext {
+        site: site.clone(),
+        epsg: snap["epsg"].as_i64().unwrap_or(25832),
+        now: row.created_at,
+        against: statement["to"]["name"].as_str().map(Into::into),
+    };
+    let doc = super::billing::with_decision(
+        super::billing::billing_doc(&ctx, statement, &materials),
+        row.created_at,
+        row.decision().as_ref(),
+    );
+    Ok(pdf_response(
+        render(doc).await?,
+        file_name("Aufmass-Freigabe", &site, row.id),
+    ))
+}
+
 pub async fn plan(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult<Response> {
     let (site, name): (i64, String) =
         sqlx::query_as("SELECT site_id, name FROM plans WHERE id = ?")

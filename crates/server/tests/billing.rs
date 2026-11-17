@@ -77,7 +77,7 @@ async fn statement_with_prices_and_deliveries() {
     let s = c.get(&settings).await.json();
     assert_eq!(
         s,
-        json!({"truckT": null, "materials": [{"name": "Lehm", "density": null, "bulking": null}]})
+        json!({"truckT": null, "materials": [{"name": "Lehm", "density": null, "bulking": null}], "layers": []})
     );
     let typo = json!({"truckT": 15.0, "materials": [{"name": "Lehm", "density": 2000.0, "bulking": 1.25}]});
     assert_eq!(
@@ -185,4 +185,226 @@ async fn statement_with_prices_and_deliveries() {
         c.delete(&format!("/api/deliveries/{id}")).await.status,
         StatusCode::NOT_FOUND
     );
+}
+
+/// Schichten: Grube 2 m tief, Oberboden bis 0,5 m → ein Viertel, Lehm darunter drei Viertel
+#[tokio::test]
+async fn statement_per_layer() {
+    let (mut c, sid, ids, rid) = pit_site("Schichten").await;
+    let volume = json!({"kind": "volume", "params": {"before": ids[0], "after": ids[1], "regionIds": [rid]}});
+    c.json(
+        Method::POST,
+        &format!("/api/sites/{sid}/jobs"),
+        volume.clone(),
+    )
+    .await;
+    jobs::run_pending(&c.app).await.unwrap();
+
+    let settings = format!("/api/sites/{sid}/billing/settings");
+    // die unterste Schicht hat keine Unterkante
+    let bad = json!({"truckT": null, "materials": [],
+        "layers": [{"name": "Oberboden", "bottomM": 0.5}, {"name": "Lehm", "bottomM": 3.0}]});
+    assert_eq!(
+        c.json(Method::PUT, &settings, bad).await.status,
+        StatusCode::BAD_REQUEST
+    );
+    let layers = json!({"truckT": null, "materials": [], "layers": [
+        {"name": "Oberboden", "bottomM": 0.5, "lvPosition": "02.01.0010", "unitPrice": 6.0, "priceUnit": "m3"},
+        {"name": "Lehm", "bottomM": null, "lvPosition": "02.01.0020", "unitPrice": 9.0, "priceUnit": "m3"}]});
+    let saved = c.json(Method::PUT, &settings, layers).await.json();
+    assert_eq!(saved["layers"][1]["name"], "Lehm");
+    // jede Schicht ist ein Material für die Kennwerte
+    let names: Vec<&str> = saved["materials"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|m| m["name"].as_str().unwrap())
+        .collect();
+    assert_eq!(names, ["Lehm", "Oberboden"]);
+
+    // die Berechnung ist älter als die Schichten
+    let url = format!("/api/sites/{sid}/billing?from={}&to={}", ids[0], ids[1]);
+    let s = c.get(&url).await.json();
+    assert_eq!(s["layersOutdated"], true);
+    assert_eq!(s["positions"].as_array().unwrap().len(), 1);
+
+    c.json(Method::POST, &format!("/api/sites/{sid}/jobs"), volume)
+        .await;
+    jobs::run_pending(&c.app).await.unwrap();
+    let s = c.get(&url).await.json();
+    assert_eq!(s["layersOutdated"], false);
+    let p = s["positions"].as_array().unwrap();
+    assert_eq!(p.len(), 2);
+    assert_eq!(
+        (&p[0]["layer"], &p[1]["layer"]),
+        (&json!("Oberboden"), &json!("Lehm"))
+    );
+    let top = p[0]["period"]["bankM3"].as_f64().unwrap();
+    let rest = p[1]["period"]["bankM3"].as_f64().unwrap();
+    // 400 m² × 0,5 m = 200 m³ und 400 m² × 1,5 m = 600 m³ (Randzellen ±1 %)
+    assert!((top - 200.0).abs() < 4.0, "{top}");
+    assert!((rest - 600.0).abs() < 8.0, "{rest}");
+    let amount = s["amount"].as_f64().unwrap();
+    assert!((amount - (top * 6.0 + rest * 9.0)).abs() < 0.02, "{amount}");
+}
+
+/// Baustelle mit Urgelände (2.1.1970) und Aushub (1.2.1970), Bereich „Grube“ 20 × 20 m um die 2 m tiefe Grube
+async fn pit_site(name: &str) -> (Client, i64, Vec<i64>, i64) {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": name}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let mut ids = Vec::new();
+    for (pit, name, at) in [(false, "Urgelände", DAY), (true, "Januar", 31 * DAY)] {
+        let r = c
+            .upload(
+                &format!("/api/sites/{sid}/captures?file={name}.xyz&capturedAt={at}"),
+                terrain_xyz(pit),
+            )
+            .await;
+        ids.push(r.json()["id"].as_i64().unwrap());
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    let fc = json!({"type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}},
+        "features": [common::rect("Grube", 10.0, 10.0, 30.0, 30.0)]});
+    let rid = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/regions"),
+            json!({"geojson": fc}),
+        )
+        .await
+        .json()[0]["id"]
+        .as_i64()
+        .unwrap();
+    (c, sid, ids, rid)
+}
+
+/// Freigabe: Link ohne Anmeldung, eingefrorenes Aufmaß, genau eine Entscheidung, zurückziehen
+#[tokio::test]
+async fn share_for_approval() {
+    let (mut c, sid, ids, rid) = pit_site("Freigabe").await;
+    c.json(
+        Method::POST,
+        &format!("/api/sites/{sid}/jobs"),
+        json!({"kind": "volume", "params": {"before": ids[0], "after": ids[1], "regionIds": [rid]}}),
+    )
+    .await;
+    jobs::run_pending(&c.app).await.unwrap();
+    c.json(
+        Method::PATCH,
+        &format!("/api/regions/{rid}"),
+        json!({"unitPrice": 10.0, "priceUnit": "m3"}),
+    )
+    .await;
+    let created = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/billing/shares"),
+            json!({"from": ids[0], "to": ids[1], "note": "Abschlag 1"}),
+        )
+        .await;
+    assert_eq!(created.status, StatusCode::CREATED, "{}", created.json());
+    let token = created.json()["token"].as_str().unwrap().to_string();
+    let amount = created.json()["amount"].as_f64().unwrap();
+    assert!((amount - 8000.0).abs() < 80.0, "{amount}");
+    // die Liste zeigt das Token nicht
+    let list = c
+        .get(&format!("/api/sites/{sid}/billing/shares"))
+        .await
+        .json();
+    assert_eq!(list[0]["note"], "Abschlag 1");
+    assert!(list[0].get("token").is_none());
+    assert_eq!(list[0]["decision"], json!(null));
+
+    // eingefroren: ein späterer Preis ändert die Freigabe nicht
+    c.json(
+        Method::PATCH,
+        &format!("/api/regions/{rid}"),
+        json!({"unitPrice": 99.0, "priceUnit": "m3"}),
+    )
+    .await;
+
+    // ohne Anmeldung
+    let mut guest = c.other();
+    let view = guest.get(&format!("/api/public/shares/{token}")).await;
+    assert_eq!(view.status, StatusCode::OK);
+    assert_eq!(view.json()["site"], "Freigabe");
+    assert_eq!(view.json()["statement"]["amount"], amount);
+    assert_eq!(
+        guest.get("/api/public/shares/falsch").await.status,
+        StatusCode::NOT_FOUND
+    );
+    // die Baustelle selbst bleibt geschützt
+    assert_eq!(
+        guest
+            .get(&format!("/api/sites/{sid}/billing/shares"))
+            .await
+            .status,
+        StatusCode::UNAUTHORIZED
+    );
+    let decide = format!("/api/public/shares/{token}/decision");
+    let no_reason = guest
+        .json(
+            Method::POST,
+            &decide,
+            json!({"decision": "objected", "name": "M. Muster"}),
+        )
+        .await;
+    assert_eq!(no_reason.status, StatusCode::BAD_REQUEST);
+    let ok = guest
+        .json(
+            Method::POST,
+            &decide,
+            json!({"decision": "approved", "name": " M. Muster ", "organization": "Bau GmbH"}),
+        )
+        .await;
+    assert_eq!(ok.status, StatusCode::OK, "{}", ok.json());
+    assert_eq!(ok.json()["decision"]["name"], "M. Muster");
+    let again = guest
+        .json(
+            Method::POST,
+            &decide,
+            json!({"decision": "objected", "name": "X", "comment": "doch nicht"}),
+        )
+        .await;
+    assert_eq!(again.status, StatusCode::CONFLICT);
+    assert_eq!(again.json()["error"], "shares.decided");
+    let pdf = guest.get(&format!("/api/public/shares/{token}/pdf")).await;
+    assert_eq!(pdf.headers["content-type"], "application/pdf");
+
+    let list = c
+        .get(&format!("/api/sites/{sid}/billing/shares"))
+        .await
+        .json();
+    assert_eq!(list[0]["decision"]["decision"], "approved");
+    assert_eq!(list[0]["decision"]["organization"], "Bau GmbH");
+    let id = list[0]["id"].as_i64().unwrap();
+    assert_eq!(
+        c.get(&format!("/api/billing/shares/{id}/pdf")).await.status,
+        StatusCode::OK
+    );
+    // zurückziehen: der Link öffnet nichts mehr, die Entscheidung bleibt
+    assert_eq!(
+        c.delete(&format!("/api/billing/shares/{id}")).await.status,
+        StatusCode::NO_CONTENT
+    );
+    assert_eq!(
+        guest
+            .get(&format!("/api/public/shares/{token}"))
+            .await
+            .status,
+        StatusCode::NOT_FOUND
+    );
+    let list = c
+        .get(&format!("/api/sites/{sid}/billing/shares"))
+        .await
+        .json();
+    assert!(list[0]["revokedAt"].is_number());
+    assert_eq!(list[0]["decision"]["decision"], "approved");
 }

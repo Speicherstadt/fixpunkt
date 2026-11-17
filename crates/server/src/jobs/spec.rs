@@ -321,7 +321,11 @@ pub async fn execute(app: &AppRef, site_id: i64, spec: JobSpec, out_dir: PathBuf
         JobSpec::Volume(v) => {
             let (a, b) = (file(app, s, v.before).await?, file(app, s, v.after).await?);
             let rs = regions(app, s, &v.region_ids).await?;
-            blocking(move || compute::volume::volume(&a, &b, &rs, &v.surface, epsg, &out_dir)).await
+            let layers = crate::billing::layers::for_job(app, s).await?;
+            blocking(move || {
+                compute::volume::volume(&a, &b, &rs, &v.surface, epsg, &out_dir, layers.as_ref())
+            })
+            .await
         }
         JobSpec::Stockpile(p) => {
             let c = file(app, s, p.capture_id).await?;

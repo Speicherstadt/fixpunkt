@@ -9,7 +9,11 @@ use fixpunkt::volume::{self, Base};
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
 
-/// Aushub/Auftrag zwischen zwei Aufnahmen, je Bereich; schreibt `diff.tif` nach `out_dir`.
+/// Schichten für den Abtrag: Namen (einer mehr als Grenzen) und Unterkanten in m unter `before`
+pub type Layers = (Vec<String>, Vec<f64>);
+
+/// Aushub/Auftrag zwischen zwei Aufnahmen, je Bereich; schreibt `diff.tif` nach `out_dir`. Mit Schichten steht
+/// je Bereich zusätzlich der Abtrag je Schicht unter `layers`.
 pub fn volume(
     before: &Path,
     after: &Path,
@@ -17,6 +21,7 @@ pub fn volume(
     p: &SurfaceParams,
     epsg: u16,
     out_dir: &Path,
+    layers: Option<&Layers>,
 ) -> Result<Value> {
     p.validate()?;
     let o = p.options();
@@ -32,6 +37,17 @@ pub fn volume(
     } else {
         volume::difference_regions(&g0, &g1, regions)?
     };
+    let mut per = serde_json::to_value(per)?;
+    if let (Some((names, bottoms)), Some(list)) = (layers, per.as_array_mut()) {
+        for (v, r) in list.iter_mut().zip(regions) {
+            let cut = volume::cut_by_layers(&g0, &g1, Some(&r.polygon), bottoms)?;
+            v["layers"] = names
+                .iter()
+                .zip(cut)
+                .map(|(n, c)| json!({"name": n, "cut_m3": c}))
+                .collect();
+        }
+    }
     Ok(json!({ "regions": per, "total": total, "cell": p.cell, "files": ["diff.tif"] }))
 }
 
@@ -121,10 +137,40 @@ mod tests {
         write_cloud(&a, false);
         write_cloud(&b, true);
         let out = dir.path().join("job");
-        let v = volume(&a, &b, &[grube()], &SurfaceParams::default(), 25832, &out).unwrap();
+        let v = volume(
+            &a,
+            &b,
+            &[grube()],
+            &SurfaceParams::default(),
+            25832,
+            &out,
+            None,
+        )
+        .unwrap();
         // 20 × 20 × 2 = 800 m³
         let cut = v["regions"][0]["cut_m3"].as_f64().unwrap();
         assert!((cut - 800.0).abs() < 8.0, "{v}");
+        assert!(v["regions"][0].get("layers").is_none());
+        // Schichten: bis 0,5 m und darunter → ein Viertel und drei Viertel
+        let layers = (vec!["Oberboden".to_string(), "Lehm".to_string()], vec![0.5]);
+        let l = volume(
+            &a,
+            &b,
+            &[grube()],
+            &SurfaceParams::default(),
+            25832,
+            &out,
+            Some(&layers),
+        )
+        .unwrap();
+        let l = &l["regions"][0]["layers"];
+        assert_eq!(l[0]["name"], "Oberboden");
+        let (top, rest) = (
+            l[0]["cut_m3"].as_f64().unwrap(),
+            l[1]["cut_m3"].as_f64().unwrap(),
+        );
+        assert!((top + rest - cut).abs() < 1e-6);
+        assert!((top / cut - 0.25).abs() < 0.01, "{l}");
         assert_eq!(
             geotiff::read(&out.join("diff.tif")).unwrap().epsg,
             Some(25832)
