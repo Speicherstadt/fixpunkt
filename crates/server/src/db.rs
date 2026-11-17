@@ -80,6 +80,10 @@ pub struct RegionRow {
     pub geojson: String,
     pub area_m2: f64,
     pub created_at: i64,
+    /// Massenziel: Material (frei), Soll-Menge in m³, `cut` (Abtrag) oder `fill` (Auftrag)
+    pub material: Option<String>,
+    pub target_m3: Option<f64>,
+    pub target_kind: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, FromRow)]

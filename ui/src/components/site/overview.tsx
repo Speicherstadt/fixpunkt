@@ -8,7 +8,7 @@ import { CircleAlert, TriangleAlert } from "lucide-react";
 import { Section } from "@/components/page";
 import { cm } from "@/components/report/compare-report";
 import { Kpis } from "@/components/report/kpis";
-import { formatDate, formatVolume } from "@/lib/format";
+import { formatDate, formatNumber, formatVolume } from "@/lib/format";
 import { dashboardQuery } from "@/lib/queries";
 import { m } from "@/paraglide/messages";
 
@@ -79,6 +79,52 @@ export function Overview({ siteId }: { siteId: number }) {
               </li>
             ))}
           </ol>
+        </div>
+      ) : null}
+      {d.targets.length ? (
+        <div className="flex flex-col gap-2">
+          <h3 className="m-0 text-[14px] font-semibold">{m.overview_targets()}</h3>
+          <ul className="m-0 flex list-none flex-col gap-2 p-0" aria-label={m.overview_targets()}>
+            {d.targets.map((t) => (
+              <li key={t.regionId} className="flex flex-col gap-1">
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-[13px]">
+                  <span>
+                    {t.name}
+                    {t.material ? <span className="text-muted"> · {t.material}</span> : null}
+                  </span>
+                  <span className="tabular">
+                    {t.done === null
+                      ? m.overview_target_none()
+                      : `${m.overview_target_row({
+                          done: formatNumber(t.done, 0),
+                          target: formatNumber(t.target, 0),
+                          kind: t.kind === "fill" ? m.target_fill() : m.target_cut(),
+                        })} · ${Math.round(t.percent ?? 0)} % · ${m.overview_target_open({
+                          open: formatNumber(t.open ?? 0, 0),
+                        })}`}
+                  </span>
+                </div>
+                <span aria-hidden="true" className="h-2 rounded-sm bg-subtle">
+                  <span
+                    className={`block h-2 rounded-sm ${t.kind === "fill" ? "bg-fill" : "bg-cut"}`}
+                    style={{ width: `${Math.min(100, t.percent ?? 0)}%` }}
+                  />
+                </span>
+              </li>
+            ))}
+          </ul>
+          {d.materials.length ? (
+            <p className="m-0 text-[12px] text-muted">
+              {m.overview_materials({
+                list: d.materials
+                  .map(
+                    (x) =>
+                      `${x.material} ${formatNumber(x.done, 0)} / ${formatNumber(x.target, 0)} m³`,
+                  )
+                  .join(" · "),
+              })}
+            </p>
+          ) : null}
         </div>
       ) : null}
       {k.violated.length || d.jobs.failed ? (

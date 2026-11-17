@@ -1,7 +1,7 @@
 //! Überblick einer Baustelle auf einen Blick: Aufnahmen, Aushub-Fortschritt gegen das Urgelände, letzter
 //! Soll/Ist-Vergleich, Aufträge, verletzte Zwangspunkte, Dokumentation und Pläne. `GET /api/sites/{id}/dashboard`.
 
-use crate::db::{self, status, Capture, Job};
+use crate::db::{self, status, Capture, Job, RegionRow};
 use crate::error::{ApiError, ApiResult};
 use crate::state::AppRef;
 use axum::extract::{Path, State};
@@ -31,6 +31,67 @@ pub struct Violation {
     pub title: String,
     /// Ist − Soll in m
     pub diff: f64,
+}
+
+/// Massenziel eines Bereichs mit Stand aus der neuesten Aushub-Berechnung gegen das Urgelände
+#[derive(Debug, Clone, Serialize, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct Target {
+    pub region_id: i64,
+    pub name: String,
+    pub material: Option<String>,
+    /// `cut` (Abtrag) oder `fill` (Auftrag)
+    pub kind: String,
+    pub target: f64,
+    /// bisher bewegt; `None`, wenn keine Berechnung den Bereich enthält
+    pub done: Option<f64>,
+    pub percent: Option<f64>,
+    pub open: Option<f64>,
+}
+
+/// Ziele aller Bereiche mit Soll-Menge; `latest` ist das Ergebnis der neuesten Aushub-Berechnung
+pub fn targets(regions: &[RegionRow], latest: Option<&Value>) -> Vec<Target> {
+    regions
+        .iter()
+        .filter_map(|r| {
+            let target = r.target_m3?;
+            let kind = r.target_kind.clone().unwrap_or_else(|| "cut".into());
+            let field = if kind == "fill" { "fill_m3" } else { "cut_m3" };
+            let done = latest
+                .and_then(|v| v["regions"].as_array())
+                .and_then(|rs| rs.iter().find(|x| x["name"] == r.name.as_str()))
+                .and_then(|x| x[field].as_f64());
+            Some(Target {
+                region_id: r.id,
+                name: r.name.clone(),
+                material: r.material.clone(),
+                kind,
+                target,
+                done,
+                percent: done.map(|d| d / target * 100.0),
+                open: done.map(|d| (target - d).max(0.0)),
+            })
+        })
+        .collect()
+}
+
+/// Summe je Material über die Ziele (ohne Material: nicht summiert)
+pub fn materials(ts: &[Target]) -> Vec<Value> {
+    let mut names: Vec<&str> = ts.iter().filter_map(|t| t.material.as_deref()).collect();
+    names.sort_unstable();
+    names.dedup();
+    names
+        .into_iter()
+        .map(|m| {
+            let of: Vec<&Target> = ts
+                .iter()
+                .filter(|t| t.material.as_deref() == Some(m))
+                .collect();
+            let target: f64 = of.iter().map(|t| t.target).sum();
+            let done: f64 = of.iter().filter_map(|t| t.done).sum();
+            serde_json::json!({"material": m, "target": target, "done": done})
+        })
+        .collect()
 }
 
 fn params(j: &Job) -> Value {
@@ -162,6 +223,17 @@ pub async fn dashboard(State(app): State<AppRef>, Path(site): Path<i64>) -> ApiR
     .bind(site)
     .fetch_one(&app.db)
     .await?;
+    let regions: Vec<RegionRow> =
+        sqlx::query_as("SELECT * FROM regions WHERE site_id = ? ORDER BY name COLLATE NOCASE")
+            .bind(site)
+            .fetch_all(&app.db)
+            .await?;
+    let progress = progress(&ready, &jobs);
+    let latest = progress
+        .last()
+        .and_then(|p| jobs.iter().find(|j| j.id == p.job_id))
+        .map(result);
+    let targets = targets(&regions, latest.as_ref());
     let plans: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM plans WHERE site_id = ?")
         .bind(site)
         .fetch_one(&app.db)
@@ -172,7 +244,9 @@ pub async fn dashboard(State(app): State<AppRef>, Path(site): Path<i64>) -> ApiR
             "ready": ready.len(),
             "last": last.map(|c| serde_json::json!({"id": c.id, "name": c.name, "at": c.captured_at})),
         },
-        "progress": progress(&ready, &jobs),
+        "progress": progress,
+        "materials": materials(&targets),
+        "targets": targets,
         "latestCompare": latest_compare(&jobs),
         "jobs": {
             "queued": count(status::QUEUED) + count(status::DRAFT),
@@ -253,6 +327,60 @@ mod tests {
         );
         assert_eq!(p[1].net, -799.0);
         assert!(progress(&[], &jobs).is_empty());
+    }
+
+    fn region(
+        id: i64,
+        name: &str,
+        material: Option<&str>,
+        target: Option<(f64, &str)>,
+    ) -> RegionRow {
+        RegionRow {
+            id,
+            site_id: 1,
+            name: name.into(),
+            geojson: "{}".into(),
+            area_m2: 1.0,
+            created_at: 0,
+            material: material.map(Into::into),
+            target_m3: target.map(|t| t.0),
+            target_kind: target.map(|t| t.1.into()),
+        }
+    }
+
+    #[test]
+    fn targets_from_the_latest_volume() {
+        let latest = json!({"regions": [
+            {"name": "Grube", "cut_m3": 800.0, "fill_m3": 2.0},
+            {"name": "Damm", "cut_m3": 1.0, "fill_m3": 150.0},
+        ]});
+        let regions = [
+            region(1, "Grube", Some("Boden 3–5"), Some((1000.0, "cut"))),
+            region(2, "Damm", Some("Boden 3–5"), Some((100.0, "fill"))),
+            region(3, "Rand", None, None),
+            region(4, "Neu", Some("Fels"), Some((50.0, "cut"))),
+        ];
+        let t = targets(&regions, Some(&latest));
+        assert_eq!(t.len(), 3, "Rand hat kein Ziel");
+        // Grube: 800 von 1000 m³ Abtrag = 80 %, 200 offen
+        assert_eq!(
+            (t[0].done, t[0].percent, t[0].open),
+            (Some(800.0), Some(80.0), Some(200.0))
+        );
+        // Damm: Auftrag zählt, mehr als geplant → 150 %, nichts offen
+        assert_eq!((t[1].percent, t[1].open), (Some(150.0), Some(0.0)));
+        // Neu: in keiner Berechnung
+        assert_eq!(t[2].done, None);
+        let m = materials(&t);
+        assert_eq!(
+            m[0],
+            json!({"material": "Boden 3–5", "target": 1100.0, "done": 950.0})
+        );
+        assert_eq!(
+            m[1],
+            json!({"material": "Fels", "target": 50.0, "done": 0.0})
+        );
+        assert!(targets(&regions, None).iter().all(|t| t.done.is_none()));
     }
 
     #[test]

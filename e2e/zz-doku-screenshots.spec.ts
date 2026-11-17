@@ -75,7 +75,14 @@ test.beforeAll(async ({ browser }) => {
     coloredTerrainXyz(true),
   );
   await api("POST", `/sites/${siteId}/regions`, { geojson: boundaries() });
-  const regions = (await api("GET", `/sites/${siteId}/regions`)) as { id: number }[];
+  const regions = (await api("GET", `/sites/${siteId}/regions`)) as { id: number; name: string }[];
+  // Massenziel für den Überblick: 1.000 m³ Boden Klasse 4 aus der Grube
+  const grube = regions.find((r) => r.name === "Grube")!;
+  await api("PATCH", `/regions/${grube.id}`, {
+    material: "Boden Klasse 4",
+    targetM3: 1000,
+    targetKind: "cut",
+  });
   await waitForJobs(siteId);
   const job = await api("POST", `/sites/${siteId}/jobs`, {
     kind: "volume",

@@ -41,7 +41,11 @@ Darunter der **Aushub je Befliegung** als Balken – jede Aushub-Berechnung gege
 neueste. Ein Klick öffnet die Berechnung. Verletzte Zwangspunkte und fehlgeschlagene Berechnungen stehen am Ende
 unter „Braucht Aufmerksamkeit“. Der Überblick aktualisiert sich von selbst, sobald eine Berechnung fertig ist.
 
-![Überblick mit Kennzahlen und Aushub je Befliegung](screenshot-ueberblick.png)
+Haben Bereiche ein [Massenziel](aushub.md#material-und-massenziel), stehen sie unter **Massenziele**: erledigt
+von Soll in m³, Prozent und offen, dazu die Summe je Material. Gezählt wird die neueste Aushub-Berechnung gegen
+das Urgelände, die den Bereich enthält.
+
+![Überblick mit Kennzahlen, Aushub je Befliegung und dem Massenziel der Grube](screenshot-ueberblick.png)
 
 Weiter geht es mit [Aushub berechnen](aushub.md).
 

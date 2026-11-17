@@ -36,6 +36,13 @@ Bereiche lassen sich direkt in der [Ansicht](ansicht.md#bereiche-zeichnen) zeich
 der Eigenschaft `name` (oder `Bezeichnung`, `id`). So lässt sich eine Baugrube in Abschnitte teilen, die einzeln
 abgerechnet werden. Ohne Bereich rechnet Fixpunkt über die ganze Überlappung der beiden Aufnahmen.
 
+### Material und Massenziel
+
+Das Zielscheiben-Symbol neben einem Bereich legt fest, **welches Material** dort ansteht (frei, mit Vorschlägen
+wie „Oberboden“ oder „Boden Klasse 4“) und **wie viel** bewegt werden soll – als Abtrag oder Auftrag in m³. Der
+[Überblick](erste-schritte.md#überblick-einer-baustelle) zeigt dann je Bereich, wie viel davon laut der neuesten
+Aushub-Berechnung gegen das Urgelände geschafft ist, was offen ist, und die Summen je Material.
+
 ## 3. Berechnen
 
 Unter **Berechnungen**:

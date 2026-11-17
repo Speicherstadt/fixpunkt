@@ -2,7 +2,7 @@
 
 mod common;
 
-use axum::http::Method;
+use axum::http::{Method, StatusCode};
 use common::{terrain_xyz, Client, X0, Y0};
 use fixpunkt_server::jobs;
 use serde_json::json;
@@ -88,4 +88,91 @@ async fn dashboard_of_a_pit() {
     assert_eq!(k["against"], "Aushub.xyz");
     assert_eq!(d["documentation"], json!({"photos": 0, "notes": 1}));
     assert_eq!(d["plans"], 0);
+}
+
+/// Massenziel: Bereich genau um die Grube (20 × 20 m, 2 m tief = 800 m³), Ziel 1000 m³ Abtrag → 80 %
+#[tokio::test]
+async fn region_targets() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": "Ziele"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let fc = json!({"type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}},
+        "features": [common::rect("Grube", 10.0, 10.0, 30.0, 30.0)]});
+    let created = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/regions"),
+            json!({"geojson": fc}),
+        )
+        .await;
+    assert_eq!(created.status, StatusCode::CREATED, "{}", created.json());
+    let rid = created.json()[0]["id"].as_i64().unwrap();
+    let url = format!("/api/regions/{rid}");
+    for bad in [
+        json!({"targetM3": -5.0}),
+        json!({"targetM3": 10.0, "targetKind": "weg"}),
+    ] {
+        assert_eq!(
+            c.json(Method::PATCH, &url, bad).await.status,
+            StatusCode::BAD_REQUEST
+        );
+    }
+    let r = c
+        .json(
+            Method::PATCH,
+            &url,
+            json!({"material": " Boden 3–5 ", "targetM3": 1000.0}),
+        )
+        .await
+        .json();
+    assert_eq!(
+        (&r["material"], &r["targetM3"], &r["targetKind"], &r["name"]),
+        (
+            &json!("Boden 3–5"),
+            &json!(1000.0),
+            &json!("cut"),
+            &json!("Grube")
+        )
+    );
+
+    let mut ids = Vec::new();
+    for (pit, at) in [(false, 1), (true, 2)] {
+        let r = c
+            .upload(
+                &format!("/api/sites/{sid}/captures?file={at}.xyz&capturedAt={at}"),
+                terrain_xyz(pit),
+            )
+            .await;
+        ids.push(r.json()["id"].as_i64().unwrap());
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    // vor der Berechnung: Ziel ohne Stand
+    let d = c.get(&format!("/api/sites/{sid}/dashboard")).await.json();
+    assert_eq!(d["targets"][0]["done"], json!(null));
+    c.json(
+        Method::POST,
+        &format!("/api/sites/{sid}/jobs"),
+        json!({"kind": "volume", "params": {"before": ids[0], "after": ids[1], "regionIds": [rid]}}),
+    )
+    .await;
+    jobs::run_pending(&c.app).await.unwrap();
+    let d = c.get(&format!("/api/sites/{sid}/dashboard")).await.json();
+    let t = &d["targets"][0];
+    assert_eq!(t["name"], "Grube");
+    let done = t["done"].as_f64().unwrap();
+    assert!((done - 800.0).abs() < 8.0, "{t}");
+    assert!((t["percent"].as_f64().unwrap() - done / 10.0).abs() < 1e-9);
+    assert!((t["open"].as_f64().unwrap() - (1000.0 - done)).abs() < 1e-9);
+    assert_eq!(d["materials"][0]["material"], "Boden 3–5");
+
+    // Ziel löschen: fehlt im Überblick
+    c.json(Method::PATCH, &url, json!({})).await;
+    let d = c.get(&format!("/api/sites/{sid}/dashboard")).await.json();
+    assert_eq!(d["targets"], json!([]));
 }

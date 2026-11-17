@@ -7,4 +7,6 @@ fn main() {
         let _ = std::fs::create_dir_all(&dist);
     }
     println!("cargo:rerun-if-changed=../../ui/dist");
+    // sqlx::migrate! bettet die Migrationen beim Kompilieren ein; neue Dateien bemerkt Cargo sonst nicht
+    println!("cargo:rerun-if-changed=migrations");
 }

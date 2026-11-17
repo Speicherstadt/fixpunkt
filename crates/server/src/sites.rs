@@ -216,6 +216,67 @@ pub async fn create_regions(
     Ok((StatusCode::CREATED, Json(out)))
 }
 
+/// Material und Massenziel eines Bereichs; was fehlt oder leer ist, wird gelöscht
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RegionPatch {
+    name: Option<String>,
+    material: Option<String>,
+    target_m3: Option<f64>,
+    target_kind: Option<String>,
+}
+
+pub fn validate_target(p: &RegionPatch) -> ApiResult<()> {
+    let bad = |d: &str| Err(ApiError::bad_request(code::INVALID_INPUT).with_detail(d.to_string()));
+    if p.target_m3
+        .is_some_and(|t| !t.is_finite() || t <= 0.0 || t > 1e8)
+    {
+        return bad("Soll-Menge");
+    }
+    match p.target_kind.as_deref() {
+        None | Some("cut") | Some("fill") => Ok(()),
+        _ => bad("Art: cut oder fill"),
+    }
+}
+
+pub async fn update_region(
+    State(app): State<AppRef>,
+    Path(id): Path<i64>,
+    Json(p): Json<RegionPatch>,
+) -> ApiResult<Json<RegionRow>> {
+    validate_target(&p)?;
+    let r: RegionRow = sqlx::query_as("SELECT * FROM regions WHERE id = ?")
+        .bind(id)
+        .fetch_optional(&app.db)
+        .await?
+        .ok_or_else(ApiError::not_found)?;
+    let name = clean_name(p.name).unwrap_or(r.name);
+    let material = p
+        .material
+        .map(|m| m.trim().to_string())
+        .filter(|m| !m.is_empty());
+    let kind = p
+        .target_m3
+        .map(|_| p.target_kind.unwrap_or_else(|| "cut".into()));
+    sqlx::query(
+        "UPDATE regions SET name = ?, material = ?, target_m3 = ?, target_kind = ? WHERE id = ?",
+    )
+    .bind(&name)
+    .bind(material)
+    .bind(p.target_m3)
+    .bind(kind)
+    .bind(id)
+    .execute(&app.db)
+    .await?;
+    app.events.changed(Topic::Regions, Some(r.site_id));
+    Ok(Json(
+        sqlx::query_as("SELECT * FROM regions WHERE id = ?")
+            .bind(id)
+            .fetch_one(&app.db)
+            .await?,
+    ))
+}
+
 pub async fn delete_region(
     State(app): State<AppRef>,
     Path(id): Path<i64>,

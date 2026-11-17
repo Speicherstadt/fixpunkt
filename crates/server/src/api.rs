@@ -37,7 +37,10 @@ pub fn router(app: AppRef) -> Router {
             "/sites/{id}/regions",
             get(sites::list_regions).post(sites::create_regions),
         )
-        .route("/regions/{id}", delete(sites::delete_region))
+        .route(
+            "/regions/{id}",
+            delete(sites::delete_region).patch(sites::update_region),
+        )
         .route("/sites/{id}/captures", get(captures::list))
         .route(
             "/sites/{id}/captures",

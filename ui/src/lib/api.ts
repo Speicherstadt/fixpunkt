@@ -241,6 +241,23 @@ export const Dashboard = z.object({
   }),
   documentation: z.object({ photos: z.number(), notes: z.number() }),
   plans: z.number(),
+  targets: z
+    .array(
+      z.object({
+        regionId: z.number(),
+        name: z.string(),
+        material: z.string().nullable(),
+        kind: z.enum(["cut", "fill"]),
+        target: z.number(),
+        done: z.number().nullable(),
+        percent: z.number().nullable(),
+        open: z.number().nullable(),
+      }),
+    )
+    .default([]),
+  materials: z
+    .array(z.object({ material: z.string(), target: z.number(), done: z.number() }))
+    .default([]),
 });
 export type Dashboard = z.infer<typeof Dashboard>;
 
@@ -296,8 +313,14 @@ export const Region = z.object({
   geojson: z.unknown(),
   areaM2: z.number(),
   createdAt: z.number(),
+  /** Massenziel: Material, Soll-Menge in m³, Abtrag (cut) oder Auftrag (fill) */
+  material: z.string().nullable().optional(),
+  targetM3: z.number().nullable().optional(),
+  targetKind: z.enum(["cut", "fill"]).nullable().optional(),
 });
 export type Region = z.infer<typeof Region>;
+
+export type RegionTarget = { material?: string; targetM3?: number; targetKind?: "cut" | "fill" };
 
 export const VolumeReport = z.object({
   area_m2: z.number(),
@@ -464,6 +487,7 @@ export const api = {
   addRegions: (siteId: number, geojson: unknown, name?: string) =>
     request("POST", `/sites/${siteId}/regions`, z.array(Region), { geojson, name }),
   deleteRegion: (id: number) => request("DELETE", `/regions/${id}`, Empty),
+  updateRegion: (id: number, t: RegionTarget) => request("PATCH", `/regions/${id}`, Region, t),
   jobs: (siteId: number) => request("GET", `/sites/${siteId}/jobs`, z.array(Job)),
   job: (id: number) => request("GET", `/jobs/${id}`, Job),
   createJob: (siteId: number, kind: string, params: Record<string, unknown>) =>
