@@ -153,7 +153,8 @@ pub async fn create(
     Ok((StatusCode::CREATED, Json(job)))
 }
 
-async fn draft(app: &AppRef, id: i64) -> ApiResult<Job> {
+/// Photogrammetrie-Auftrag, der noch Fotos annimmt
+pub async fn draft_job(app: &AppRef, id: i64) -> ApiResult<Job> {
     let job = db::get_job(&app.db, id)
         .await?
         .filter(|j| j.kind == KIND)
@@ -176,7 +177,7 @@ pub async fn upload_image(
     Query(q): Query<ImageQuery>,
     body: Body,
 ) -> ApiResult<Json<Value>> {
-    draft(&app, id).await?;
+    draft_job(&app, id).await?;
     let file = safe_file_name(&q.file).ok_or_else(|| ApiError::bad_request(code::INVALID_INPUT))?;
     if !is_image(&file) {
         return Err(ApiError::bad_request(code::ODM_UNSUPPORTED_IMAGE));
@@ -187,9 +188,26 @@ pub async fn upload_image(
     Ok(Json(json!({ "images": images })))
 }
 
+/// Foto aus einem fortsetzbaren Upload in den Entwurf übernehmen
+pub async fn accept_image(
+    app: &AppRef,
+    job_id: i64,
+    file: &str,
+    src: &std::path::Path,
+) -> ApiResult<()> {
+    draft_job(app, job_id).await?;
+    if !is_image(file) {
+        return Err(ApiError::bad_request(code::ODM_UNSUPPORTED_IMAGE));
+    }
+    let dir = images_dir(app, job_id);
+    tokio::fs::create_dir_all(&dir).await?;
+    tokio::fs::rename(src, dir.join(file)).await?;
+    Ok(())
+}
+
 /// `POST /api/jobs/{id}/start`: Entwurf einreihen
 pub async fn start(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult<Json<Job>> {
-    let job = draft(&app, id).await?;
+    let job = draft_job(&app, id).await?;
     if list_images(&images_dir(&app, id))?.len() < MIN_IMAGES {
         return Err(ApiError::bad_request(code::ODM_TOO_FEW_IMAGES));
     }

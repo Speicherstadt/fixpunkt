@@ -17,6 +17,7 @@ Alles liegt im Datenverzeichnis (`/data` im Container, `/var/lib/fixpunkt` ohne 
 | `jobs/<id>/` | Ergebnisse der Berechnungen (z. B. `diff.tif`), bei Drohnenfotos auch die Fotos |
 | `markers/<id>/` | Fotos der Dokumentation mit Vorschaubild |
 | `plans/<id>/` | DXF-Pläne (Original und aufbereitete Geometrie) |
+| `uploads/` | unfertige Uploads; muss nicht ins Backup |
 
 ## Backup
 

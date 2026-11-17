@@ -78,6 +78,18 @@ pub async fn attach(app: &AppRef, capture_id: i64) -> Result<()> {
     Ok(())
 }
 
+/// Orthofoto aus einem fortsetzbaren Upload übernehmen
+pub async fn accept(app: &AppRef, capture_id: i64, src: &FsPath) -> ApiResult<()> {
+    db::get_capture(&app.db, capture_id)
+        .await?
+        .ok_or_else(ApiError::not_found)?;
+    let target = app.cfg.capture_dir(capture_id).join(SOURCE);
+    tokio::fs::rename(src, &target).await?;
+    attach(app, capture_id)
+        .await
+        .map_err(|e| ApiError::bad_request(code::ORTHO_INVALID).with_detail(format!("{e:#}")))
+}
+
 #[derive(Deserialize)]
 pub struct UploadQuery {
     file: String,

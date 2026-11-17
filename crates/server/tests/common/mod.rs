@@ -68,7 +68,24 @@ impl Client {
         content_type: Option<&str>,
         csrf: bool,
     ) -> Res {
+        self.send_with(method, uri, body, content_type, csrf, &[])
+            .await
+    }
+
+    /// Wie [`send`](Self::send), mit eigenen Kopfzeilen (z. B. für tus)
+    pub async fn send_with(
+        &mut self,
+        method: Method,
+        uri: &str,
+        body: Body,
+        content_type: Option<&str>,
+        csrf: bool,
+        extra: &[(&str, String)],
+    ) -> Res {
         let mut req = Request::builder().method(method).uri(uri);
+        for (k, v) in extra {
+            req = req.header(*k, v);
+        }
         if let Some(ct) = content_type {
             req = req.header(header::CONTENT_TYPE, ct);
         }

@@ -16,6 +16,11 @@ Der Ablauf für eine Baugrube: **Urgelände fliegen → Aushub fliegen → beide
 **Aufnahme hochladen** nimmt eine oder mehrere Dateien: Punktwolken (LAS, LAZ, XYZ, CSV, TXT, PTS) oder
 Höhenmodelle (GeoTIFF, ASC). Der Name der Aufnahme kommt aus dem Dateinamen.
 
+Große Dateien laden in Stücken hoch. Reißt die Verbindung ab – Funkloch auf der Baustelle, WLAN gewechselt –,
+macht Fixpunkt von selbst weiter, wo es aufgehört hat. Wird die Seite zwischendurch geschlossen, dieselbe Datei
+einfach noch einmal wählen: der Upload setzt fort, statt von vorn zu beginnen. Unfertige Uploads verwirft der
+Server nach einer Woche.
+
 Nach dem Hochladen prüft Fixpunkt jede Datei im Hintergrund – Status **Wird geprüft**, dann **Bereit** mit Anzahl
 der Punkte. Eine Datei, die sich nicht lesen lässt, steht auf **Fehlgeschlagen** mit dem Grund. Die Liste
 aktualisiert sich von selbst, auch für Kolleginnen und Kollegen, die die Baustelle gerade offen haben.

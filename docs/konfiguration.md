@@ -45,7 +45,9 @@ fixpunkt.example.de {
 }
 ```
 
-Bei nginx: `proxy_buffering off;` für `/api/events` und `client_max_body_size` für große Punktwolken.
+Bei nginx: `proxy_buffering off;` für `/api/events` und `client_max_body_size` von mindestens `16m`. Große
+Dateien kommen in Stücken à 8 MB (fortsetzbarer Upload nach [tus](https://tus.io)), daher genügt das auch für
+Punktwolken mit vielen Gigabyte; Pläne und Fotos der Dokumentation kommen in einem Stück.
 
 ## Koordinatensystem
 

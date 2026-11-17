@@ -5,6 +5,7 @@
  */
 import { z } from "zod";
 import { FitReport } from "@/lib/georef";
+import { resumableUpload } from "@/lib/resumable";
 
 export class ApiError extends Error {
   constructor(
@@ -409,33 +410,6 @@ const putFile = <T>(
     xhr.send(file);
   });
 
-/** Aufnahme hochladen */
-export const uploadCapture = (
-  siteId: number,
-  file: File,
-  name: string,
-  onProgress: (fraction: number) => void,
-): Promise<Capture> =>
-  putFile(
-    `/api/sites/${siteId}/captures?${new URLSearchParams({ file: file.name, name })}`,
-    file,
-    Capture,
-    onProgress,
-  );
-
-/** Foto zu einem Photogrammetrie-Entwurf hochladen */
-export const uploadImage = (
-  jobId: number,
-  file: File,
-  onProgress: (fraction: number) => void,
-): Promise<{ images: number }> =>
-  putFile(
-    `/api/jobs/${jobId}/images?${new URLSearchParams({ file: file.name })}`,
-    file,
-    z.object({ images: z.number() }),
-    onProgress,
-  );
-
 /** Foto zur Dokumentation hochladen; Lage aus GPS, falls vorhanden */
 export const uploadPhoto = (
   siteId: number,
@@ -458,15 +432,26 @@ export const uploadPlan = (siteId: number, file: File): Promise<Plan> =>
     () => {},
   );
 
-/** Orthofoto (GeoTIFF) an eine Aufnahme hängen */
+/** Aufnahme fortsetzbar hochladen (tus) */
+export const uploadCapture = (
+  siteId: number,
+  file: File,
+  name: string,
+  onProgress: (fraction: number) => void,
+  capturedAt?: number,
+): Promise<void> =>
+  resumableUpload(file, { target: "capture", siteId, name, capturedAt }, onProgress);
+
+/** Foto zu einem Photogrammetrie-Entwurf fortsetzbar hochladen */
+export const uploadImage = (
+  jobId: number,
+  file: File,
+  onProgress: (fraction: number) => void,
+): Promise<void> => resumableUpload(file, { target: "image", jobId }, onProgress);
+
+/** Orthofoto (GeoTIFF) an eine Aufnahme hängen, fortsetzbar */
 export const uploadOrtho = (
   captureId: number,
   file: File,
   onProgress: (fraction: number) => void,
-): Promise<Capture> =>
-  putFile(
-    `/api/captures/${captureId}/ortho?${new URLSearchParams({ file: file.name })}`,
-    file,
-    Capture,
-    onProgress,
-  );
+): Promise<void> => resumableUpload(file, { target: "ortho", captureId }, onProgress);

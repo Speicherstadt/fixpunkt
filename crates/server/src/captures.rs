@@ -133,6 +133,25 @@ pub async fn finish(
     Ok(())
 }
 
+/// Aufnahme aus einer fertigen Datei (fortsetzbarer Upload): anlegen, Datei verschieben, Prüfung einreihen
+pub async fn create_from_file(
+    app: &AppRef,
+    site_id: i64,
+    name: &str,
+    file_name: &str,
+    captured_at: Option<i64>,
+    user: Option<i64>,
+    src: &std::path::Path,
+) -> ApiResult<i64> {
+    let id = insert(app, site_id, name, file_name, captured_at).await?;
+    let dir = app.cfg.capture_dir(id);
+    tokio::fs::create_dir_all(&dir).await?;
+    tokio::fs::rename(src, dir.join(file_name)).await?;
+    let size = tokio::fs::metadata(dir.join(file_name)).await?.len();
+    finish(app, id, site_id, size, user).await?;
+    Ok(id)
+}
+
 pub(crate) async fn write_body(path: &std::path::Path, body: Body, limit: u64) -> ApiResult<u64> {
     if let Some(dir) = path.parent() {
         tokio::fs::create_dir_all(dir).await?;

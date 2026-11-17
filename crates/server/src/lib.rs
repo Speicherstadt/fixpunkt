@@ -19,6 +19,7 @@ pub mod report;
 pub mod sites;
 pub mod state;
 pub mod ui;
+pub mod uploads;
 pub mod view;
 
 use anyhow::{Context, Result};
@@ -51,6 +52,10 @@ pub async fn init(cfg: Config) -> Result<AppRef> {
     let n = jobs::requeue_interrupted(&app).await?;
     if n > 0 {
         tracing::info!("{n} unterbrochene Aufträge wieder eingereiht");
+    }
+    let n = uploads::expire(&app).await?;
+    if n > 0 {
+        tracing::info!("{n} abgelaufene Teil-Uploads gelöscht");
     }
     auth::ensure_initial_user(&app).await?;
     Ok(app)
