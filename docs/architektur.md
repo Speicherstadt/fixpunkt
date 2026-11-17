@@ -23,7 +23,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 
 | Bereich | Ort | Technik |
 |---|---|---|
-| Rechenkern | `crates/processing` | Rust: LAS/LAZ, GeoTIFF, Raster, Bodenfilter, Volumen, Helmert, UTM/Geoid, Exporte |
+| Rechenkern | `crates/processing` | Rust: LAS/LAZ, E57, GeoTIFF, Orthofoto, Raster, Bodenfilter, Volumen, Helmert, UTM/Geoid, Exporte |
 | Server | `crates/server` | tokio, axum, sqlx (SQLite), Server-Sent Events, argon2id |
 | Web-UI | `ui` | Bun, Vite, React, TanStack Router + Query, Komponenten im shadcn/ui-Stil auf Radix, Tailwind 4, Paraglide (de/en); Karte mit Leaflet, 3D mit three.js (nachgeladen) |
 | E2E | `e2e` | Playwright gegen die echte Programmdatei |
@@ -45,6 +45,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `plans/` | DXF-Pläne: einmal gelesen (`dxf.rs`: Linienzüge, Bögen, Texte, Höhenpunkte, Zonenkennung) und als JSON für die Ansicht abgelegt |
 | `ortho.rs` | Orthofoto je Aufnahme: GeoTIFF stückweise verkleinert (Rechenkern `ortho.rs`), als PNG mit Ecken in der Zone der Baustelle |
 | `uploads.rs` | Fortsetzbarer Upload nach tus 1.0 (Kern, creation, termination): Stücke nach `uploads/`, fertige Dateien an ihr Ziel (Aufnahme, Drohnenfoto, Orthofoto) |
+| `points.rs` | Punktwolke für 3D: höchstens 1 Mio. Punkte, Float32 relativ zum Ursprung plus RGB, als `punkte.bin` zwischengespeichert |
 | `location.rs` | Lage der Baustellen für die Karte: Mitte der geprüften Aufnahmen (sonst der Bereiche), UTM → Breite/Länge |
 | `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer) |
 | `ui.rs` | eingebettete UI mit ETag, Weiterleitung auf Vite in der Entwicklung |

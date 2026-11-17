@@ -80,5 +80,14 @@ einen Blick, wo an der Sohle noch zu viel steht oder ob Böschungen sauber laufe
 | Verschieben | rechte Maustaste ziehen | Pfeiltasten (Ansicht vorher anklicken oder mit Tab wählen) |
 | Zoomen | Rad | – |
 
+### Punktwolke
+
+Bei Punktwolken zeigt **Darstellung in 3D → Punktwolke** die gemessenen Punkte selbst statt des daraus gerechneten
+Geländes – mit den Farben aus der Datei (Drohnen-Punktwolken aus ODM, farbige LAS/LAZ, E57 mit RGB), sonst nach
+Höhe eingefärbt. So sieht man, was der Bodenfilter herausrechnet: Bagger, Container, Bewuchs stehen als Punkte
+über dem Gelände. Große Wolken zeigt die Ansicht gleichmäßig ausgedünnt mit höchstens einer Million Punkten.
+
+![Punktwolke der Baugrube in Farbe: Schotter, dunklere Grubensohle, der Bagger gelb über dem Gelände](screenshot-punktwolke.png){ width="982" height="591" loading="lazy" }
+
 Messen und Zeichnen bleiben in 2D, wo Strecken und Flächen sich genau setzen lassen. Große Raster werden für 3D
 ausgedünnt (höchstens 400 Stützpunkte je Seite); die 3D-Bibliothek (three.js) lädt erst beim Umschalten.

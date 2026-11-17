@@ -67,7 +67,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 <td width="50%" valign="top">
 
 ### 🛰️ Daten
-- Punktwolken: LAS, LAZ, XYZ, CSV
+- Punktwolken: LAS, LAZ, E57 (Laserscanner wie Leica BLK2GO), XYZ, CSV
 - Höhenmodelle: GeoTIFF (OpenDroneMap), ASC
 - Drohnenfotos direkt auswerten über NodeODM
 - Abrechnungsgrenzen als GeoJSON aus QGIS, mehrere Bereiche je Datei
@@ -80,7 +80,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 
 ### 🗺️ Ansicht und Messen
 - Höhenbild oder Orthofoto jeder Aufnahme, Differenz oder Abweichung darübergelegt
-- Gelände in 3D mit Überhöhung
+- Gelände oder Punktwolke in 3D, in Farbe, mit Überhöhung
 - Messen: Punkt, Strecke, Gefälle, Fläche, Profil
 - Abrechnungsbereiche direkt im Browser zeichnen
 - Karte aller Baustellen

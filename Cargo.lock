@@ -751,6 +751,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "e57"
+version = "0.11.13"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcfee41a50fbd70278c70cc477b8671ffe03951cba028cc2c057777a9ee6a3cc"
+dependencies = [
+ "roxmltree",
+]
+
+[[package]]
 name = "ecb"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -860,6 +869,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "e57",
  "las",
  "nalgebra",
  "rayon",
@@ -878,6 +888,7 @@ dependencies = [
  "axum-extra",
  "base64 0.23.1",
  "dxf",
+ "e57",
  "fixpunkt-processing",
  "flate2",
  "futures",
@@ -2197,6 +2208,15 @@ dependencies = [
  "libc",
  "untrusted",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "roxmltree"
+version = "0.21.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9da7f59328b09405b181fee1018925fad50f157afb43c0c0f5c522c256dd5907"
+dependencies = [
+ "memchr",
 ]
 
 [[package]]

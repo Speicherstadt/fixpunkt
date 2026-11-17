@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { mkdirSync, readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import { type Api, apiFor } from "./api";
-import { boundaries, terrainXyz, X0, Y0 } from "./fixtures";
+import { boundaries, coloredTerrainXyz, terrainXyz, X0, Y0 } from "./fixtures";
 
 /**
  * Die Bilder in README und Doku (docs/screenshot-*.png, hell und dunkel) und das Vorschaubild
@@ -66,7 +66,7 @@ test.beforeAll(async ({ browser }) => {
     "flug-2026-11-17.xyz",
     "Aushub fertig",
     START + 14 * DAY,
-    terrainXyz(true),
+    coloredTerrainXyz(true),
   );
   await api("POST", `/sites/${siteId}/regions`, { geojson: boundaries() });
   const regions = (await api("GET", `/sites/${siteId}/regions`)) as { id: number }[];
@@ -256,6 +256,10 @@ test("3D-Ansicht @screenshots", async () => {
   await page.waitForTimeout(500);
   await view.scrollIntoViewIfNeeded();
   await view.screenshot({ path: `${DOCS}/screenshot-3d.png` });
+  await view.getByRole("group", { name: "Darstellung in 3D" }).getByText("Punktwolke").click();
+  await expect(terrain).toHaveAttribute("data-points", /\d+/);
+  await page.waitForTimeout(500);
+  await terrain.screenshot({ path: `${DOCS}/screenshot-punktwolke.png` });
 });
 
 test("Mengenbericht und Vorschaubild @screenshots", async () => {

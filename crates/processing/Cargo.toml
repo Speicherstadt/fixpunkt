@@ -17,6 +17,7 @@ path = "src/main.rs"
 [dependencies]
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }
+e57 = "0.11.13"
 las = { version = "0.11", features = ["laz"] }
 nalgebra = "0.35.0"
 rayon = "1.12.0"

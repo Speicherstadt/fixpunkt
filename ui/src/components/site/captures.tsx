@@ -14,7 +14,7 @@ import { m } from "@/paraglide/messages";
 /** Dateiname ohne Endung als Vorschlag für den Namen der Aufnahme */
 export const captureName = (fileName: string): string => fileName.replace(/\.[^.]+$/, "");
 
-const ACCEPT = ".las,.laz,.xyz,.txt,.csv,.pts,.tif,.tiff,.asc";
+const ACCEPT = ".las,.laz,.e57,.xyz,.txt,.csv,.pts,.tif,.tiff,.asc";
 
 type PendingUpload = { name: string; progress: number };
 

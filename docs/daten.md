@@ -1,6 +1,7 @@
 ---
 description: >-
-  Daten für Fixpunkt vorbereiten: Punktwolken und Höhenmodelle aus OpenDroneMap, Koordinatensystem ETRS89/UTM32,
+  Daten für Fixpunkt vorbereiten: Punktwolken (LAS, LAZ, E57) und Höhenmodelle aus OpenDroneMap und Laserscannern,
+  Koordinatensystem ETRS89/UTM32,
   Höhen DHHN2016, Abrechnungsgrenzen als GeoJSON aus QGIS.
 ---
 
@@ -11,7 +12,8 @@ description: >-
 | Art | Formate | Hinweise |
 |---|---|---|
 | Punktwolke | `.las`, `.laz` | auch klassifiziert (Klasse 2 = Boden); Farben und Attribute bleiben erhalten |
-| Punktwolke als Text | `.xyz`, `.txt`, `.csv`, `.pts` | Spalten `x y z`, Trenner Leerzeichen, Tab, Komma oder Semikolon; Kopfzeile erlaubt |
+| Laserscan | `.e57` | z. B. Leica BLK2GO; alle Scans, Standpunkte (Pose) angewandt, Farben für die 3D-Ansicht. Scans im lokalen System mit [Passpunkten](berechnungen.md#passpunkte) ins Bezugssystem bringen |
+| Punktwolke als Text | `.xyz`, `.txt`, `.csv`, `.pts` | Spalten `x y z`, optional `r g b` (0–255 oder 0–1); Trenner Leerzeichen, Tab, Komma oder Semikolon; Kopfzeile erlaubt |
 | Höhenmodell | `.tif`, `.tiff` (GeoTIFF), `.asc` | einkanalig, quadratische Zellen; LZW/Deflate und Kacheln werden gelesen |
 
 ## Aus OpenDroneMap

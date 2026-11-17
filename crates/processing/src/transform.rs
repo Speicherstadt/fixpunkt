@@ -210,7 +210,11 @@ pub fn apply_to_file(t: &Transform, input: &Path, output: &Path) -> Result<u64> 
             true
         });
     }
-    let mut c = crate::pointcloud::PointCloud::read(input, Default::default())?;
+    // Text oder E57: Farben mitnehmen, wenn die Ausgabe LAS/LAZ ist
+    let crate::colored::Colored {
+        cloud: mut c,
+        colors,
+    } = crate::colored::read_colored(input, Default::default())?;
     c.map(|p| {
         let q = t.apply([p.x, p.y, p.z]);
         crate::pointcloud::Point3 {
@@ -219,7 +223,12 @@ pub fn apply_to_file(t: &Transform, input: &Path, output: &Path) -> Result<u64> 
             z: q[2],
         }
     });
-    c.write(output, None)?;
+    match colors {
+        Some(rgb) if crate::pointcloud::is_las(output) => {
+            crate::colored::write_las_colored(&c, &rgb, output, None)?
+        }
+        _ => c.write(output, None)?,
+    }
     Ok(c.len() as u64)
 }
 

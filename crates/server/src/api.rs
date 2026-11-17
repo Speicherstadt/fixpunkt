@@ -2,7 +2,7 @@
 
 use crate::state::AppRef;
 use crate::{
-    auth, captures, compute, jobs, markers, odm, ortho, plans, report, sites, uploads, view,
+    auth, captures, compute, jobs, markers, odm, ortho, plans, points, report, sites, uploads, view,
 };
 use axum::extract::{DefaultBodyLimit, State};
 use axum::middleware;
@@ -41,6 +41,7 @@ pub fn router(app: AppRef) -> Router {
         )
         .route("/captures/{id}/file", get(captures::download))
         .route("/captures/{id}/grid", get(view::capture_grid))
+        .route("/captures/{id}/points", get(points::capture_points))
         .route(
             "/captures/{id}/ortho",
             get(ortho::image)

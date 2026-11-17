@@ -15,6 +15,7 @@ pub mod markers;
 pub mod odm;
 pub mod ortho;
 pub mod plans;
+pub mod points;
 pub mod report;
 pub mod sites;
 pub mod state;

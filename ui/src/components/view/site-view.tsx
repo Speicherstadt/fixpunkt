@@ -28,9 +28,11 @@ import { deviationColor, deviationLimit, heightColor, terrainColor } from "@/lib
 import { type Pt, polygonGeojson, ringOf } from "@/lib/view/geometry";
 import { fetchGrid, robustRange, sampleAt } from "@/lib/view/grid";
 import { buildMesh } from "@/lib/view/mesh";
+import { fetchPoints, pointScene } from "@/lib/view/points";
 import { m } from "@/paraglide/messages";
 import { MapCanvas } from "./map-canvas";
 import { MeasurePanel, type Tool } from "./measure-panel";
+import type { Content } from "./terrain-3d";
 
 /** three.js nur laden, wenn jemand auf 3D schaltet */
 const Terrain3D = lazy(() => import("./terrain-3d"));
@@ -99,13 +101,26 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
         : null,
     [overlay.data, overlayJob, limit],
   );
-  const mesh = useMemo(
-    () =>
-      mode === "3d" && grid.data && range
-        ? buildMesh(grid.data, terrainColor(range, overlayProp), exaggeration)
-        : null,
-    [mode, grid.data, range, overlayProp, exaggeration],
-  );
+  const [shape3d, setShape3d] = useState<"mesh" | "points">("mesh");
+  const isCloud = ready.find((c) => c.id === captureId)?.info?.type === "pointcloud";
+  const showPoints = mode === "3d" && shape3d === "points" && isCloud;
+  const cloud = useQuery({
+    queryKey: ["points", captureId],
+    queryFn: () => fetchPoints(`/api/captures/${captureId}/points`),
+    enabled: showPoints && captureId !== undefined,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  const content = useMemo((): Content | null => {
+    if (mode !== "3d") return null;
+    if (showPoints)
+      return cloud.data ? { kind: "points", cloud: pointScene(cloud.data, exaggeration) } : null;
+    return grid.data && range
+      ? {
+          kind: "mesh",
+          mesh: buildMesh(grid.data, terrainColor(range, overlayProp), exaggeration),
+        }
+      : null;
+  }, [mode, showPoints, cloud.data, grid.data, range, overlayProp, exaggeration]);
   const capture = ready.find((c) => c.id === captureId);
   const orthoMeta = capture?.ortho ?? null;
   const orthoImage = useQuery({
@@ -234,26 +249,40 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
             onChange={chooseTool}
           />
         ) : (
-          <Label className="flex-row items-center gap-2">
-            {m.view3d_exaggeration()}
-            <Select
-              className="h-8 w-24"
-              value={String(exaggeration)}
-              onChange={(e) => setExaggeration(Number(e.target.value))}
-            >
-              {[1, 2, 5].map((x) => (
-                <option key={x} value={x}>
-                  {x} ×
-                </option>
-              ))}
-            </Select>
-          </Label>
+          <>
+            {isCloud ? (
+              <Segmented
+                name="shape3d"
+                legend={m.view3d_shape()}
+                options={[
+                  { id: "mesh", text: m.view3d_mesh() },
+                  { id: "points", text: m.view3d_points() },
+                ]}
+                value={shape3d}
+                onChange={setShape3d}
+              />
+            ) : null}
+            <Label className="flex-row items-center gap-2">
+              {m.view3d_exaggeration()}
+              <Select
+                className="h-8 w-24"
+                value={String(exaggeration)}
+                onChange={(e) => setExaggeration(Number(e.target.value))}
+              >
+                {[1, 2, 5].map((x) => (
+                  <option key={x} value={x}>
+                    {x} ×
+                  </option>
+                ))}
+              </Select>
+            </Label>
+          </>
         )}
       </div>
       {grid.error ? <ErrorText>{errorText(grid.error)}</ErrorText> : null}
       {grid.data && range && mode === "3d" ? (
         <Suspense fallback={<PlaceholderRows count={2} />}>
-          {mesh ? <Terrain3D mesh={mesh} label={m.view3d_label()} /> : null}
+          {content ? <Terrain3D content={content} label={m.view3d_label()} /> : null}
         </Suspense>
       ) : null}
       {grid.data && range && mode === "2d" ? (

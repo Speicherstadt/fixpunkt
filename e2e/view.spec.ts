@@ -86,4 +86,9 @@ test("Ansicht: messen, zeichnen, überlagern", async ({ page }) => {
     .toBe(false);
   await view.getByLabel("Überhöhung").selectOption("5");
   await expect(terrain).toBeVisible();
+
+  // Punktwolke statt Gelände: alle 40 000 Punkte der Aufnahme, gezeichnet
+  await view.getByRole("group", { name: "Darstellung in 3D" }).getByText("Punktwolke").click();
+  await expect(terrain).toHaveAttribute("data-points", "40000");
+  await expect.poll(colours).toBeGreaterThan(20);
 });

@@ -65,3 +65,32 @@ export const writeFixtures = (dir: string) => {
   writeFileSync(files.regions, JSON.stringify(boundaries()));
   return files;
 };
+
+/**
+ * Wie [terrainXyz], mit Farben je Punkt wie aus einer Drohnen-Punktwolke: Schotter mit Rauschen, Grubensohle
+ * dunkler, Bagger gelb. Nur für die Bilder der Doku.
+ */
+export const coloredTerrainXyz = (after: boolean): string => {
+  let seed = 7;
+  const noise = () => {
+    seed = (seed * 1103515245 + 12345) % 2147483648;
+    return (seed / 2147483648 - 0.5) * 28;
+  };
+  return terrainXyz(after)
+    .split("\n")
+    .map((line, i) => {
+      if (i === 0) return "x y z r g b";
+      const [x, y] = line.split(" ").map(Number) as [number, number];
+      const dx = x - X0;
+      const dy = y - Y0;
+      const n = noise();
+      const base: [number, number, number] =
+        after && onExcavator(dx, dy)
+          ? [230, 180, 30]
+          : after && inPit(dx, dy)
+            ? [112 + n, 92 + n, 72 + n]
+            : [158 + n, 148 + n, 112 + n];
+      return `${line} ${base.map((c) => Math.round(Math.min(255, Math.max(0, c)))).join(" ")}`;
+    })
+    .join("\n");
+};

@@ -13,7 +13,7 @@ Der Ablauf für eine Baugrube: **Urgelände fliegen → Aushub fliegen → beide
 
 ## 1. Aufnahmen hochladen
 
-**Aufnahme hochladen** nimmt eine oder mehrere Dateien: Punktwolken (LAS, LAZ, XYZ, CSV, TXT, PTS) oder
+**Aufnahme hochladen** nimmt eine oder mehrere Dateien: Punktwolken (LAS, LAZ, E57, XYZ, CSV, TXT, PTS) oder
 Höhenmodelle (GeoTIFF, ASC). Der Name der Aufnahme kommt aus dem Dateinamen.
 
 Große Dateien laden in Stücken hoch. Reißt die Verbindung ab – Funkloch auf der Baustelle, WLAN gewechselt –,

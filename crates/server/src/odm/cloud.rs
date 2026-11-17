@@ -3,8 +3,9 @@
 //! der Baustelle; ein Höhenversatz (z. B. die Höhenanomalie aus GCG2016) wird abgezogen.
 
 use anyhow::{bail, Result};
+use fixpunkt::colored::{read_colored, Colored};
 use fixpunkt::crs::{utm_zone, Utm};
-use fixpunkt::pointcloud::{las_epsg, Point3, PointCloud, ReadOptions};
+use fixpunkt::pointcloud::{las_epsg, Point3, ReadOptions};
 use std::path::Path;
 
 /// Was mit der Wolke geschehen ist
@@ -46,7 +47,8 @@ pub fn prepare(src: &Path, dest: &Path, target_epsg: u32, offset: f64) -> Result
             converted: false,
         });
     };
-    let mut cloud = PointCloud::read(src, ReadOptions::default())?;
+    // ODM-Punktwolken haben Farben aus den Fotos: mitnehmen
+    let Colored { mut cloud, colors } = read_colored(src, ReadOptions::default())?;
     cloud.map(|p| {
         let (x, y) = from.to_zone(&to, p.x, p.y);
         Point3 {
@@ -55,7 +57,12 @@ pub fn prepare(src: &Path, dest: &Path, target_epsg: u32, offset: f64) -> Result
             z: p.z - offset,
         }
     });
-    cloud.write_las_georef(dest, None, u16::try_from(target_epsg).ok())?;
+    cloud.write_las_with(
+        dest,
+        None,
+        u16::try_from(target_epsg).ok(),
+        colors.as_deref(),
+    )?;
     std::fs::remove_file(src)?;
     Ok(Prepared {
         source_epsg,
@@ -66,6 +73,7 @@ pub fn prepare(src: &Path, dest: &Path, target_epsg: u32, offset: f64) -> Result
 #[cfg(test)]
 mod tests {
     use super::*;
+    use fixpunkt::pointcloud::PointCloud;
 
     fn cloud_at(zone: &Utm) -> PointCloud {
         // Raster um 50° N, 12,001° O (gerade in Zone 33), Höhe 350 m ellipsoidisch

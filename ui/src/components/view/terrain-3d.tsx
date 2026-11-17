@@ -1,6 +1,6 @@
 /**
- * 3D-Ansicht der Baustelle (three.js, nur bei Bedarf geladen): Geländenetz aus dem Höhenraster, Farben wie die
- * 2D-Ansicht, Licht aus Nordwesten. Maus: ziehen dreht, rechts ziehen verschiebt, Rad zoomt. Tastatur: Pfeile
+ * 3D-Ansicht der Baustelle (three.js, nur bei Bedarf geladen): Geländenetz aus dem Höhenraster (Farben wie die
+ * 2D-Ansicht, Licht aus Nordwesten) oder die Punktwolke selbst (Farben aus der Datei oder nach Höhe). Maus: ziehen dreht, rechts ziehen verschiebt, Rad zoomt. Tastatur: Pfeile
  * verschieben die Ansicht. Ohne WebGL ein Hinweis.
  */
 import { useEffect, useRef, useState } from "react";
@@ -13,17 +13,25 @@ import {
   Mesh,
   MeshLambertMaterial,
   PerspectiveCamera,
+  Points,
+  PointsMaterial,
   Scene,
   WebGLRenderer,
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import type { TerrainMesh } from "@/lib/view/mesh";
+import type { PointCloudScene } from "@/lib/view/points";
+
+export type Content =
+  | { kind: "mesh"; mesh: TerrainMesh }
+  | { kind: "points"; cloud: PointCloudScene };
+
 import { m } from "@/paraglide/messages";
 
 const cssVar = (name: string) =>
   getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 
-export default function Terrain3D({ mesh, label }: { mesh: TerrainMesh; label: string }) {
+export default function Terrain3D({ content, label }: { content: Content; label: string }) {
   const wrap = useRef<HTMLDivElement>(null);
   const [failed, setFailed] = useState(false);
 
@@ -46,16 +54,24 @@ export default function Terrain3D({ mesh, label }: { mesh: TerrainMesh; label: s
 
     const scene = new Scene();
     scene.background = new Color(cssVar("--subtle"));
+    const data = content.kind === "mesh" ? content.mesh : content.cloud;
     const geometry = new BufferGeometry();
-    geometry.setAttribute("position", new BufferAttribute(mesh.positions, 3));
-    geometry.setAttribute("color", new BufferAttribute(mesh.colors, 3));
-    geometry.setIndex(new BufferAttribute(mesh.indices, 1));
-    geometry.computeVertexNormals();
-    const material = new MeshLambertMaterial({ vertexColors: true });
-    scene.add(new Mesh(geometry, material));
+    geometry.setAttribute("position", new BufferAttribute(data.positions, 3));
+    geometry.setAttribute("color", new BufferAttribute(data.colors, 3));
+    let material: MeshLambertMaterial | PointsMaterial;
+    if (content.kind === "mesh") {
+      geometry.setIndex(new BufferAttribute(content.mesh.indices, 1));
+      geometry.computeVertexNormals();
+      material = new MeshLambertMaterial({ vertexColors: true });
+      scene.add(new Mesh(geometry, material));
+    } else {
+      // Punkte immer 2 Pixel groß, unabhängig vom Abstand
+      material = new PointsMaterial({ size: 2, sizeAttenuation: false, vertexColors: true });
+      scene.add(new Points(geometry, material));
+    }
     scene.add(new AmbientLight(0xffffff, 1.2));
     const sun = new DirectionalLight(0xffffff, 2);
-    const [w, d, h] = mesh.size;
+    const [w, d, h] = data.size;
     const span = Math.max(w, d, h, 1);
     sun.position.set(-span, span, -span); // Nordwesten, wie die Schummerung in 2D
     scene.add(sun);
@@ -92,7 +108,7 @@ export default function Terrain3D({ mesh, label }: { mesh: TerrainMesh; label: s
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [mesh]);
+  }, [content]);
 
   if (failed) return <p className="m-0 text-[13px] text-muted">{m.view3d_no_webgl()}</p>;
   return (
@@ -103,7 +119,8 @@ export default function Terrain3D({ mesh, label }: { mesh: TerrainMesh; label: s
       role="application"
       aria-label={label}
       aria-roledescription={m.view3d_role()}
-      data-triangles={mesh.triangles}
+      data-triangles={content.kind === "mesh" ? content.mesh.triangles : undefined}
+      data-points={content.kind === "points" ? content.cloud.positions.length / 3 : undefined}
       className="w-full overflow-hidden rounded-lg border border-border bg-subtle"
     />
   );

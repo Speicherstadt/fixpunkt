@@ -475,7 +475,7 @@ Wie in allen Projekten (`firsttris/workflows`):
 - [x] Doku mit Zensical (GitHub Pages), Startseite als Rundgang, Screenshots aus Playwright, README nach Vorlage
 - [x] Release bereit: Docker-Image, statische musl-Programmdateien (mit mimalloc so schnell wie glibc), install.sh
 - [x] Upload großer Fotomengen fortsetzbar (tus) für die Drohnenbilder
-- [ ] Browser-Kacheln (3D Tiles/Potree) aus dem Rechenkern, E57 vom BLK2GO
+- [ ] Browser-Kacheln (3D Tiles/Potree) aus dem Rechenkern – E57 vom BLK2GO ✅, Punktwolke in 3D bis 1 Mio. Punkte ✅
 - [ ] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung
 - [ ] Mit öffentlichen OpenDroneMap-Datensätzen arbeiten, bis eigene Flüge da sind
 

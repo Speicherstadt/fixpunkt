@@ -23,7 +23,7 @@ use std::path::Path;
 
 /// Dateiendungen, die der Rechenkern lesen kann
 pub const SUPPORTED: &[&str] = &[
-    "las", "laz", "xyz", "txt", "csv", "pts", "tif", "tiff", "asc",
+    "las", "laz", "e57", "xyz", "txt", "csv", "pts", "tif", "tiff", "asc",
 ];
 
 pub fn is_supported(file_name: &str) -> bool {
