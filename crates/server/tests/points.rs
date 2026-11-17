@@ -56,8 +56,8 @@ async fn points_with_and_without_colors() {
     assert_eq!(r.status, StatusCode::OK);
     assert_eq!(r.headers["x-points-count"], "40000");
     assert_eq!(r.headers["x-points-colors"], "1");
-    let (n, colored, origin) = points::header(&r.body).unwrap();
-    assert_eq!((n, colored), (40_000, true));
+    let (n, flags, origin) = points::header(&r.body).unwrap();
+    assert_eq!((n, flags), (40_000, points::HAS_RGB));
     // Mitte des Geländes (0,1 … 39,9 m), Unterkante = tiefster Punkt der Sohle (300 + 0,01 · 10,1 − 2)
     assert!((origin[0] - (X0 + 20.0)).abs() < 1e-9 && (origin[1] - (Y0 + 20.0)).abs() < 1e-9);
     assert!((origin[2] - 298.101).abs() < 1e-6, "{origin:?}");
@@ -74,7 +74,7 @@ async fn points_with_and_without_colors() {
         c.get(&format!("/api/captures/{b}/points")).await.body,
         r.body
     );
-    assert!(c.app.cfg.capture_dir(b).join("punkte.bin").exists());
+    assert!(c.app.cfg.capture_dir(b).join("punkte-2.bin").exists());
     assert_eq!(
         c.get("/api/captures/999/points").await.status,
         StatusCode::NOT_FOUND
@@ -140,4 +140,50 @@ async fn e57_scan_as_capture() {
     let r = c.get(&format!("/api/captures/{id}/points")).await;
     assert_eq!(r.headers["x-points-colors"], "1");
     assert_eq!(&r.body[29 + 400 * 12..][..3], &[10, 200, 10]);
+}
+
+/// Intensität aus `x y z i`: in der Grube 10, außen 50 → gestreckt 0 und 65535, hinter der Lage als u16
+#[tokio::test]
+async fn intensity_from_text() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": "Intensität"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let mut text = String::new();
+    for line in String::from_utf8(terrain_xyz(true))
+        .unwrap()
+        .lines()
+        .skip(1)
+    {
+        let z: f64 = line.split(' ').nth(2).unwrap().parse().unwrap();
+        text += &format!("{line} {}\n", if z < 299.0 { 10 } else { 50 });
+    }
+    let id = c
+        .upload(
+            &format!("/api/sites/{sid}/captures?file=scan.xyz&capturedAt=1"),
+            text.into_bytes(),
+        )
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    jobs::run_pending(&c.app).await.unwrap();
+    let r = c.get(&format!("/api/captures/{id}/points")).await;
+    let (n, flags, _) = points::header(&r.body).unwrap();
+    assert_eq!(flags, points::HAS_INTENSITY);
+    let values: Vec<u16> = r.body[29 + n * 12..]
+        .chunks(2)
+        .map(|b| u16::from_le_bytes([b[0], b[1]]))
+        .collect();
+    assert_eq!(values.len(), n);
+    assert_eq!(
+        values.iter().filter(|v| **v == 0).count(),
+        10_000,
+        "Grube 100 × 100"
+    );
+    assert!(values.iter().all(|v| *v == 0 || *v == 65535));
 }

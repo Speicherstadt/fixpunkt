@@ -82,7 +82,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 
 ### 🗺️ Ansicht und Messen
 - Höhenbild oder Orthofoto jeder Aufnahme, Differenz oder Abweichung darübergelegt
-- Gelände oder Punktwolke in 3D, in Farbe, mit Überhöhung
+- Gelände oder Punktwolke in 3D, in Farbe oder nach Intensität, mit Überhöhung
 - Messen: Punkt, Strecke, Gefälle, Fläche, Profil
 - Abrechnungsbereiche direkt im Browser zeichnen
 - Karte aller Baustellen

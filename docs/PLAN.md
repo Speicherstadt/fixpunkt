@@ -64,7 +64,7 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 
 ### Ansichten
 - [x] 2D (Draufsicht, Orthofoto), 3D (Punktwolke, Mesh), Karte
-- [ ] Einfärbung nach RGB, Höhe, Intensität, Abweichung – RGB, Höhe und Abweichung ✅, Intensität offen
+- [x] Einfärbung nach RGB, Höhe, Intensität, Abweichung
 
 ### Export
 - [x] LAS/LAZ (Punktwolke), DXF (Linien/Punkte), LandXML (Flächen), CSV (Punkte), OBJ/PLY (Mesh), GeoTIFF (DGM) – Orthofoto offen

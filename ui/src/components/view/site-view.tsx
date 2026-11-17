@@ -28,7 +28,7 @@ import { deviationColor, deviationLimit, heightColor, terrainColor } from "@/lib
 import { type Pt, ringOf } from "@/lib/view/geometry";
 import { fetchGrid, robustRange, sampleAt } from "@/lib/view/grid";
 import { buildMesh } from "@/lib/view/mesh";
-import { fetchPoints, pointScene } from "@/lib/view/points";
+import { type ColorBy, colorModes, fetchPoints, pointScene } from "@/lib/view/points";
 import { m } from "@/paraglide/messages";
 import { MapCanvas } from "./map-canvas";
 import { MeasurePanel, type Tool } from "./measure-panel";
@@ -37,6 +37,12 @@ import type { Content } from "./terrain-3d";
 
 /** three.js nur laden, wenn jemand auf 3D schaltet */
 const Terrain3D = lazy(() => import("./terrain-3d"));
+
+const COLOR_TEXT: Record<ColorBy, () => string> = {
+  file: m.view3d_color_file,
+  intensity: m.view3d_color_intensity,
+  height: m.view3d_color_height,
+};
 
 const TOOLS: { id: Tool; text: () => string }[] = [
   { id: "pan", text: m.tool_pan },
@@ -110,17 +116,22 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
     enabled: showPoints && captureId !== undefined,
     staleTime: Number.POSITIVE_INFINITY,
   });
+  const modes = cloud.data ? colorModes(cloud.data) : [];
+  const [pickedColor, setColorBy] = useState<ColorBy | null>(null);
+  const colorBy = pickedColor && modes.includes(pickedColor) ? pickedColor : modes[0];
   const content = useMemo((): Content | null => {
     if (mode !== "3d") return null;
     if (showPoints)
-      return cloud.data ? { kind: "points", cloud: pointScene(cloud.data, exaggeration) } : null;
+      return cloud.data
+        ? { kind: "points", cloud: pointScene(cloud.data, exaggeration, colorBy) }
+        : null;
     return grid.data && range
       ? {
           kind: "mesh",
           mesh: buildMesh(grid.data, terrainColor(range, overlayProp), exaggeration),
         }
       : null;
-  }, [mode, showPoints, cloud.data, grid.data, range, overlayProp, exaggeration]);
+  }, [mode, showPoints, cloud.data, grid.data, range, overlayProp, exaggeration, colorBy]);
   const capture = ready.find((c) => c.id === captureId);
   const orthoMeta = capture?.ortho ?? null;
   const orthoImage = useQuery({
@@ -252,6 +263,15 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
                 ]}
                 value={shape3d}
                 onChange={setShape3d}
+              />
+            ) : null}
+            {showPoints && modes.length > 1 && colorBy ? (
+              <Segmented
+                name="colorBy"
+                legend={m.view3d_color()}
+                options={modes.map((id) => ({ id, text: COLOR_TEXT[id]() }))}
+                value={colorBy}
+                onChange={setColorBy}
               />
             ) : null}
             <Label className="flex-row items-center gap-2">

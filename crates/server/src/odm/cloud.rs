@@ -48,7 +48,9 @@ pub fn prepare(src: &Path, dest: &Path, target_epsg: u32, offset: f64) -> Result
         });
     };
     // ODM-Punktwolken haben Farben aus den Fotos: mitnehmen
-    let Colored { mut cloud, colors } = read_colored(src, ReadOptions::default())?;
+    let Colored {
+        mut cloud, colors, ..
+    } = read_colored(src, ReadOptions::default())?;
     cloud.map(|p| {
         let (x, y) = from.to_zone(&to, p.x, p.y);
         Point3 {

@@ -79,7 +79,7 @@ Geländes der gezeigten Aufnahme.
 einen Blick, wo an der Sohle noch zu viel steht oder ob Böschungen sauber laufen. **Überhöhung** streckt die Höhen
 (1×, 2×, 5×), damit flache Mulden und Zentimeter-Abweichungen sichtbar werden.
 
-![3D-Ansicht der Baugrube: Gelände zweifach überhöht, Soll/Ist-Abweichung der Sohle farbig, der Bagger als Block](screenshot-3d.png){ width="1024" height="832" loading="lazy" }
+![3D-Ansicht der Baugrube: Gelände zweifach überhöht, Soll/Ist-Abweichung der Sohle farbig, der Bagger als Block](screenshot-3d.png){ width="1024" height="913" loading="lazy" }
 
 | Bedienung | Maus | Tastatur |
 |---|---|---|
@@ -91,7 +91,9 @@ einen Blick, wo an der Sohle noch zu viel steht oder ob Böschungen sauber laufe
 
 Bei Punktwolken zeigt **Darstellung in 3D → Punktwolke** die gemessenen Punkte selbst statt des daraus gerechneten
 Geländes – mit den Farben aus der Datei (Drohnen-Punktwolken aus ODM, farbige LAS/LAZ, E57 mit RGB), sonst nach
-Höhe eingefärbt. So sieht man, was der Bodenfilter herausrechnet: Bagger, Container, Bewuchs stehen als Punkte
+Höhe eingefärbt. Hat die Datei eine **Intensität** (Laserscanner: LAS, E57, PTS), schaltet **Färbung** zwischen
+Farbe, Intensität (grau, die hellsten und dunkelsten 2 % abgeschnitten) und Höhe um – bei Scans ohne Kamera
+zeigt die Intensität Markierungen, Kanten und Material oft besser als die Höhe. So sieht man, was der Bodenfilter herausrechnet: Bagger, Container, Bewuchs stehen als Punkte
 über dem Gelände. Große Wolken zeigt die Ansicht gleichmäßig ausgedünnt mit höchstens einer Million Punkten.
 
 ![Punktwolke der Baugrube in Farbe: Schotter, dunklere Grubensohle, der Bagger gelb über dem Gelände](screenshot-punktwolke.png){ width="982" height="591" loading="lazy" }

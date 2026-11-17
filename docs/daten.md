@@ -13,7 +13,7 @@ description: >-
 |---|---|---|
 | Punktwolke | `.las`, `.laz` | auch klassifiziert (Klasse 2 = Boden); Farben und Attribute bleiben erhalten |
 | Laserscan | `.e57` | z. B. Leica BLK2GO; alle Scans, Standpunkte (Pose) angewandt, Farben für die 3D-Ansicht. Scans im lokalen System mit [Passpunkten](berechnungen.md#passpunkte) ins Bezugssystem bringen |
-| Punktwolke als Text | `.xyz`, `.txt`, `.csv`, `.pts` | Spalten `x y z`, optional `r g b` (0–255 oder 0–1); Trenner Leerzeichen, Tab, Komma oder Semikolon; Kopfzeile erlaubt |
+| Punktwolke als Text | `.xyz`, `.txt`, `.csv`, `.pts` | Spalten `x y z`, `x y z i` (Intensität), `x y z r g b` (0–255 oder 0–1) oder wie PTS `x y z i r g b`; Trenner Leerzeichen, Tab, Komma oder Semikolon; Kopfzeile und PTS-Punktzahl erlaubt |
 | Höhenmodell | `.tif`, `.tiff` (GeoTIFF), `.asc` | einkanalig, quadratische Zellen; LZW/Deflate und Kacheln werden gelesen |
 
 ## Aus OpenDroneMap

@@ -214,6 +214,7 @@ pub fn apply_to_file(t: &Transform, input: &Path, output: &Path) -> Result<u64> 
     let crate::colored::Colored {
         cloud: mut c,
         colors,
+        ..
     } = crate::colored::read_colored(input, Default::default())?;
     c.map(|p| {
         let q = t.apply([p.x, p.y, p.z]);
