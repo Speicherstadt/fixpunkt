@@ -9,7 +9,7 @@ use crate::auth::CurrentUser;
 use crate::db::{self, now_ms, status, Job};
 use crate::error::{code, ApiError, ApiResult};
 use crate::events::{Event, Topic};
-use crate::state::AppRef;
+use crate::state::{App, AppRef};
 use anyhow::{Context, Result};
 use axum::body::Body;
 use axum::extract::{Path, State};
@@ -66,16 +66,35 @@ pub async fn requeue_interrupted(app: &AppRef) -> Result<u64> {
     )
 }
 
+/// Warteschlangen: Rechnen im Prozess und Photogrammetrie in NodeODM (wartet nur, rechnet nicht)
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Lane {
+    Compute,
+    Photogrammetry,
+}
+
+impl Lane {
+    fn wakeup(self, app: &App) -> &tokio::sync::Notify {
+        match self {
+            Lane::Compute => &app.jobs_wakeup,
+            Lane::Photogrammetry => &app.odm_wakeup,
+        }
+    }
+}
+
+/// `FIXPUNKT_MAX_JOBS` Rechen-Worker und ein Photogrammetrie-Worker
 pub fn spawn_workers(app: &AppRef) {
-    for _ in 0..app.cfg.max_jobs {
+    let lanes = std::iter::repeat_n(Lane::Compute, app.cfg.max_jobs)
+        .chain(std::iter::once(Lane::Photogrammetry));
+    for lane in lanes {
         let app = app.clone();
         tokio::spawn(async move {
             loop {
-                match run_next(&app).await {
+                match run_next(&app, lane).await {
                     Ok(true) => {}
                     Ok(false) => {
                         tokio::select! {
-                            _ = app.jobs_wakeup.notified() => {}
+                            _ = lane.wakeup(&app).notified() => {}
                             _ = tokio::time::sleep(Duration::from_secs(10)) => {}
                         }
                     }
@@ -89,32 +108,47 @@ pub fn spawn_workers(app: &AppRef) {
     }
 }
 
-/// Alle wartenden Aufträge nacheinander abarbeiten (Tests, Kommandozeile)
+/// Alle wartenden Aufträge beider Warteschlangen abarbeiten (Tests, Kommandozeile)
 pub async fn run_pending(app: &AppRef) -> Result<usize> {
     let mut n = 0;
-    while run_next(app).await? {
-        n += 1;
+    loop {
+        let mut any = false;
+        for lane in [Lane::Photogrammetry, Lane::Compute] {
+            while run_next(app, lane).await? {
+                n += 1;
+                any = true;
+            }
+        }
+        if !any {
+            return Ok(n);
+        }
     }
-    Ok(n)
 }
 
-/// Nächsten Auftrag übernehmen und ausführen; `false`, wenn keiner wartet.
-pub async fn run_next(app: &AppRef) -> Result<bool> {
+/// Nächsten Auftrag der Warteschlange übernehmen und ausführen; `false`, wenn keiner wartet.
+pub async fn run_next(app: &AppRef, lane: Lane) -> Result<bool> {
     let job: Option<Job> = sqlx::query_as(
         "UPDATE jobs SET status = ?, started_at = ?
-         WHERE id = (SELECT id FROM jobs WHERE status = ? ORDER BY id LIMIT 1) RETURNING *",
+         WHERE id = (SELECT id FROM jobs WHERE status = ? AND (kind = ?) = ? ORDER BY id LIMIT 1)
+         RETURNING *",
     )
     .bind(status::RUNNING)
     .bind(now_ms())
     .bind(status::QUEUED)
+    .bind(crate::odm::KIND)
+    .bind(lane == Lane::Photogrammetry)
     .fetch_optional(&app.db)
     .await?;
     let Some(job) = job else { return Ok(false) };
     notify(app, job.id, job.site_id, status::RUNNING);
     tracing::info!("Auftrag {} ({}) gestartet", job.id, job.kind);
-    let outcome = match spec::JobSpec::parse(&job.kind, &serde_json::from_str(&job.params)?) {
-        Ok(spec) => spec::execute(app, job.site_id, spec, app.cfg.job_dir(job.id)).await,
-        Err(e) => Err(e),
+    let outcome = if job.kind == crate::odm::KIND {
+        crate::odm::run::run(app, &job).await
+    } else {
+        match spec::JobSpec::parse(&job.kind, &serde_json::from_str(&job.params)?) {
+            Ok(spec) => spec::execute(app, job.site_id, spec, app.cfg.job_dir(job.id)).await,
+            Err(e) => Err(e),
+        }
     };
     let (st, result, error) = match &outcome {
         Ok(v) => (status::DONE, Some(v.to_string()), None),

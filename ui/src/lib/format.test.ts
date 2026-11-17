@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { formatArea, formatBytes, formatCount, formatHeight, formatVolume } from "@/lib/format";
+import {
+  formatArea,
+  formatBytes,
+  formatCount,
+  formatDuration,
+  formatHeight,
+  formatVolume,
+} from "@/lib/format";
 
 describe("format (deutsch)", () => {
   it("Mengen mit einer Nachkommastelle und Tausenderpunkt", () => {
@@ -8,6 +15,12 @@ describe("format (deutsch)", () => {
     expect(formatArea(900)).toBe("900,0 m²");
     expect(formatHeight(312.456)).toBe("312,46 m");
     expect(formatCount(4000000)).toBe("4.000.000");
+  });
+
+  it("Dauer auf Minuten", () => {
+    expect(formatDuration(61_000)).toBe("1 min");
+    expect(formatDuration(65 * 60_000)).toBe("1 h 05 min");
+    expect(formatDuration(0)).toBe("0 min");
   });
 
   it("Dateigrößen in 1000er-Schritten", () => {

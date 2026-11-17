@@ -10,8 +10,10 @@ pub struct App {
     pub db: Db,
     pub cfg: Config,
     pub events: Events,
-    /// weckt die Job-Worker, sobald ein Auftrag dazukommt
+    /// weckt die Rechen-Worker, sobald ein Auftrag dazukommt
     pub jobs_wakeup: Notify,
+    /// weckt den Photogrammetrie-Worker (NodeODM-Aufträge laufen Stunden und dürfen Rechnungen nicht blockieren)
+    pub odm_wakeup: Notify,
 }
 
 pub type AppRef = Arc<App>;

@@ -26,6 +26,10 @@ pub mod code {
     pub const INVALID_GEOJSON: &str = "regions.invalidGeojson";
     pub const WRONG_SITE: &str = "jobs.wrongSite";
     pub const UNKNOWN_JOB: &str = "jobs.unknownKind";
+    pub const ODM_NOT_CONFIGURED: &str = "odm.notConfigured";
+    pub const ODM_NOT_DRAFT: &str = "odm.notDraft";
+    pub const ODM_TOO_FEW_IMAGES: &str = "odm.tooFewImages";
+    pub const ODM_UNSUPPORTED_IMAGE: &str = "odm.unsupportedImage";
 
     pub const ALL: &[&str] = &[
         NOT_LOGGED_IN,
@@ -47,6 +51,10 @@ pub mod code {
         INVALID_GEOJSON,
         WRONG_SITE,
         UNKNOWN_JOB,
+        ODM_NOT_CONFIGURED,
+        ODM_NOT_DRAFT,
+        ODM_TOO_FEW_IMAGES,
+        ODM_UNSUPPORTED_IMAGE,
     ];
 }
 

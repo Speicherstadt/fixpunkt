@@ -95,6 +95,8 @@ pub struct Job {
     pub created_at: i64,
     pub started_at: Option<i64>,
     pub finished_at: Option<i64>,
+    /// 0–100 bei langen Aufträgen (Photogrammetrie), sonst leer
+    pub progress: Option<f64>,
 }
 
 /// Gespeichertes JSON als Objekt ausgeben, nicht als String.
@@ -117,6 +119,8 @@ pub mod status {
     pub const QUEUED: &str = "queued";
     pub const RUNNING: &str = "running";
     pub const DONE: &str = "done";
+    /// Photogrammetrie: Fotos werden noch hochgeladen
+    pub const DRAFT: &str = "draft";
 }
 
 pub async fn get_site(db: &Db, id: i64) -> Result<Option<Site>> {

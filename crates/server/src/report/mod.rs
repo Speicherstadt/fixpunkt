@@ -84,7 +84,9 @@ async fn inputs(app: &AppRef, id: i64) -> ApiResult<Inputs> {
     let site = db::get_site(&app.db, job.site_id)
         .await?
         .ok_or_else(ApiError::not_found)?;
-    let spec = JobSpec::parse(&job.kind, &serde_json::from_str(&job.params)?)?;
+    // Arten ohne Bericht (z. B. Photogrammetrie) haben keine JobSpec
+    let spec = JobSpec::parse(&job.kind, &serde_json::from_str(&job.params)?)
+        .map_err(|_| ApiError::not_found())?;
     let result: Value = serde_json::from_str(job.result.as_deref().unwrap_or("null"))?;
     let mut names = Vec::new();
     for c in spec.captures() {

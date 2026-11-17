@@ -6,6 +6,8 @@ import { defineConfig, devices } from "@playwright/test";
  * Vorbild: firsttris/kontext playwright.config.ts
  */
 const PORT = 28080;
+/** NodeODM-Nachbau (e2e/nodeodm-stub.ts) für die Drohnenfotos */
+const ODM_PORT = 28081;
 const DATA = ".e2e-data";
 
 const launchOptions = process.env.PW_CHROMIUM_PATH
@@ -50,7 +52,14 @@ export default defineConfig({
       name: "screenshots",
       dependencies: ["setup"],
       testMatch: /zz-doku-screenshots\.spec\.ts/,
-      use: { ...devices["Desktop Chrome"], launchOptions },
+      // Datumsfelder formatiert Chromium nach der Sprache des Prozesses (LANG), nicht nach der Seite
+      use: {
+        ...devices["Desktop Chrome"],
+        launchOptions: {
+          ...launchOptions,
+          env: { ...process.env, LANG: "de_DE.UTF-8", LANGUAGE: "de" },
+        },
+      },
     },
     {
       name: "phone",
@@ -65,11 +74,19 @@ export default defineConfig({
       testIgnore: /setup\.spec\.ts|zz-doku-screenshots\.spec\.ts/,
     },
   ],
-  webServer: {
-    command: `rm -rf ${DATA} && FIXPUNKT_DATA_DIR=${DATA} FIXPUNKT_LISTEN=127.0.0.1:${PORT} ./target/debug/fixpunkt`,
-    url: `http://127.0.0.1:${PORT}/api/health`,
-    reuseExistingServer: false,
-    timeout: 60_000,
-    stdout: "pipe",
-  },
+  webServer: [
+    {
+      command: `bun e2e/nodeodm-stub.ts ${ODM_PORT}`,
+      url: `http://127.0.0.1:${ODM_PORT}/info`,
+      reuseExistingServer: false,
+      timeout: 60_000,
+    },
+    {
+      command: `rm -rf ${DATA} && FIXPUNKT_DATA_DIR=${DATA} FIXPUNKT_LISTEN=127.0.0.1:${PORT} FIXPUNKT_NODEODM_URL=http://127.0.0.1:${ODM_PORT} FIXPUNKT_NODEODM_POLL_SECS=0.3 ./target/debug/fixpunkt`,
+      url: `http://127.0.0.1:${PORT}/api/health`,
+      reuseExistingServer: false,
+      timeout: 60_000,
+      stdout: "pipe",
+    },
+  ],
 });

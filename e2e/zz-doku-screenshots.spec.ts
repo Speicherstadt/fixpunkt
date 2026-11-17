@@ -221,6 +221,23 @@ test("PDF-Bericht @screenshots", async () => {
   if (render.error) console.warn("pdftoppm fehlt, Vorschaubild nicht erneuert");
 });
 
+test("Drohnenfotos @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const section = page.getByRole("region", { name: "Drohnenfotos auswerten" });
+  await expect(section.getByText(/NodeODM 2\.5\.2/)).toBeVisible();
+  // Platzhalter statt echter Fotos; nur Anzahl und Größe erscheinen im Bild
+  const photos = Array.from({ length: 40 }, (_, i) => ({
+    name: `DJI_${String(i + 1).padStart(4, "0")}.JPG`,
+    mimeType: "image/jpeg",
+    buffer: Buffer.alloc(250_000),
+  }));
+  await section.getByLabel("Fotos", { exact: true }).setInputFiles(photos);
+  await section.getByLabel("Name der Aufnahme").fill("Befliegung 4");
+  await section.scrollIntoViewIfNeeded();
+  await section.screenshot({ path: `${DOCS}/screenshot-drohnenfotos.png` });
+  await page.reload();
+});
+
 test("Soll/Ist @screenshots", async () => {
   await go(`/jobs/${compareJob}`);
   await expect(page.getByRole("list", { name: "Verteilung der Abweichung" })).toBeVisible();

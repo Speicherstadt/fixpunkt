@@ -62,29 +62,10 @@ pub async fn upload(
         .name
         .filter(|n| !n.trim().is_empty())
         .unwrap_or_else(|| file_name.clone());
-    let now = now_ms();
-    let id = sqlx::query(
-        "INSERT INTO captures(site_id, name, file_name, file_size, captured_at, status, created_at) VALUES(?, ?, ?, 0, ?, ?, ?)",
-    )
-    .bind(site_id)
-    .bind(name.trim())
-    .bind(&file_name)
-    .bind(q.captured_at.unwrap_or(now))
-    .bind(status::UPLOADED)
-    .bind(now)
-    .execute(&app.db)
-    .await?
-    .last_insert_rowid();
-
+    let id = insert(&app, site_id, name.trim(), &file_name, q.captured_at).await?;
     let dir = app.cfg.capture_dir(id);
     match write_body(&dir.join(&file_name), body, app.cfg.max_upload).await {
-        Ok(size) => {
-            sqlx::query("UPDATE captures SET file_size = ? WHERE id = ?")
-                .bind(size as i64)
-                .bind(id)
-                .execute(&app.db)
-                .await?;
-        }
+        Ok(size) => finish(&app, id, site_id, size, Some(me.id)).await?,
         Err(e) => {
             sqlx::query("DELETE FROM captures WHERE id = ?")
                 .bind(id)
@@ -94,15 +75,6 @@ pub async fn upload(
             return Err(e);
         }
     }
-    jobs::enqueue(
-        &app,
-        site_id,
-        jobs::INSPECT,
-        &json!({ "captureId": id }),
-        Some(me.id),
-    )
-    .await?;
-    app.events.changed(Topic::Captures, Some(site_id));
     Ok((
         StatusCode::CREATED,
         Json(
@@ -113,7 +85,55 @@ pub async fn upload(
     ))
 }
 
-async fn write_body(path: &std::path::Path, body: Body, limit: u64) -> ApiResult<u64> {
+/// Neue Aufnahme ohne Datei; die Datei gehört nach `capture_dir(id)/file_name`, dann [`finish`]
+pub async fn insert(
+    app: &AppRef,
+    site_id: i64,
+    name: &str,
+    file_name: &str,
+    captured_at: Option<i64>,
+) -> anyhow::Result<i64> {
+    let now = now_ms();
+    Ok(sqlx::query(
+        "INSERT INTO captures(site_id, name, file_name, file_size, captured_at, status, created_at) VALUES(?, ?, ?, 0, ?, ?, ?)",
+    )
+    .bind(site_id)
+    .bind(name)
+    .bind(file_name)
+    .bind(captured_at.unwrap_or(now))
+    .bind(status::UPLOADED)
+    .bind(now)
+    .execute(&app.db)
+    .await?
+    .last_insert_rowid())
+}
+
+/// Datei liegt bereit: Größe eintragen und die Prüfung einreihen
+pub async fn finish(
+    app: &AppRef,
+    id: i64,
+    site_id: i64,
+    size: u64,
+    user: Option<i64>,
+) -> anyhow::Result<()> {
+    sqlx::query("UPDATE captures SET file_size = ? WHERE id = ?")
+        .bind(size as i64)
+        .bind(id)
+        .execute(&app.db)
+        .await?;
+    jobs::enqueue(
+        app,
+        site_id,
+        jobs::INSPECT,
+        &json!({ "captureId": id }),
+        user,
+    )
+    .await?;
+    app.events.changed(Topic::Captures, Some(site_id));
+    Ok(())
+}
+
+pub(crate) async fn write_body(path: &std::path::Path, body: Body, limit: u64) -> ApiResult<u64> {
     if let Some(dir) = path.parent() {
         tokio::fs::create_dir_all(dir).await?;
     }

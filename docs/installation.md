@@ -93,7 +93,6 @@ Installation ohne Klicken lässt er sich auch vorgeben: `FIXPUNKT_USER` und `FIX
 
 ## Drohnenbilder auswerten
 
-Fixpunkt rechnet mit fertigen Punktwolken und Höhenmodellen. Die Fotos der Drohne macht
-[OpenDroneMap](https://opendronemap.org/) daraus, z. B. mit WebODM auf demselben Server oder einem Rechner im
-Büro. Die direkte Anbindung (Fotos hochladen, NodeODM rechnet, Ergebnis landet als Aufnahme) ist in Arbeit, siehe
-[Projektplan](PLAN.md).
+Die Fotos der Drohne rechnet [OpenDroneMap](https://opendronemap.org/) zur Punktwolke. Mit einem NodeODM neben
+Fixpunkt und `FIXPUNKT_NODEODM_URL` lädt man die Fotos direkt in Fixpunkt hoch, das Ergebnis landet als Aufnahme:
+[Drohnenfotos auswerten](drohnenfotos.md). Ohne NodeODM lädt man die Punktwolke aus WebODM hoch.

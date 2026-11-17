@@ -19,6 +19,11 @@ pub struct Config {
     pub dev_ui: Option<String>,
     /// Sitzungs-Cookie nur über HTTPS (hinter einem Reverse-Proxy mit TLS: an)
     pub secure_cookies: bool,
+    /// NodeODM für Drohnenfotos → Punktwolke, z. B. `http://nodeodm:3000`
+    pub nodeodm_url: Option<String>,
+    pub nodeodm_token: Option<String>,
+    /// Abstand der Statusabfragen bei NodeODM
+    pub nodeodm_poll: std::time::Duration,
 }
 
 impl Config {
@@ -46,6 +51,10 @@ impl Config {
             var("FIXPUNKT_SECURE_COOKIES").as_deref(),
             Some("1" | "true")
         );
+        let nodeodm_poll = match var("FIXPUNKT_NODEODM_POLL_SECS") {
+            Some(v) => v.parse::<f64>().context("FIXPUNKT_NODEODM_POLL_SECS")?,
+            None => 10.0,
+        };
         Ok(Config {
             listen,
             data_dir,
@@ -54,6 +63,9 @@ impl Config {
             max_upload,
             dev_ui: var("FIXPUNKT_DEV_UI"),
             secure_cookies,
+            nodeodm_url: var("FIXPUNKT_NODEODM_URL").map(|u| u.trim_end_matches('/').to_string()),
+            nodeodm_token: var("FIXPUNKT_NODEODM_TOKEN"),
+            nodeodm_poll: std::time::Duration::from_secs_f64(nodeodm_poll.max(0.01)),
         })
     }
 
@@ -79,6 +91,9 @@ impl Config {
             max_upload: 20_000_000_000,
             dev_ui: None,
             secure_cookies: false,
+            nodeodm_url: None,
+            nodeodm_token: None,
+            nodeodm_poll: std::time::Duration::from_millis(20),
         }
     }
 }
@@ -93,12 +108,16 @@ mod tests {
         assert_eq!(c.listen.port(), 8080);
         assert_eq!(c.data_dir, PathBuf::from("/data"));
         assert!(c.initial_user.is_none());
+        assert!(c.nodeodm_url.is_none());
+        assert_eq!(c.nodeodm_poll.as_secs(), 10);
         let c = Config::from_vars(|k| match k {
             "FIXPUNKT_LISTEN" => Some("127.0.0.1:9000".into()),
             "FIXPUNKT_USER" => Some("admin".into()),
             "FIXPUNKT_PASSWORD" => Some("geheim123".into()),
             "FIXPUNKT_MAX_JOBS" => Some("0".into()),
             "FIXPUNKT_MAX_UPLOAD_GB" => Some("1.5".into()),
+            "FIXPUNKT_NODEODM_URL" => Some("http://nodeodm:3000/".into()),
+            "FIXPUNKT_NODEODM_POLL_SECS" => Some("2.5".into()),
             _ => None,
         })
         .unwrap();
@@ -106,6 +125,8 @@ mod tests {
         assert_eq!(c.initial_user, Some(("admin".into(), "geheim123".into())));
         assert_eq!(c.max_jobs, 1);
         assert_eq!(c.max_upload, 1_500_000_000);
+        assert_eq!(c.nodeodm_url.as_deref(), Some("http://nodeodm:3000"));
+        assert_eq!(c.nodeodm_poll.as_millis(), 2500);
         assert!(Config::from_vars(|k| (k == "FIXPUNKT_LISTEN").then(|| "x".into())).is_err());
     }
 }

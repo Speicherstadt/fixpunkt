@@ -6,13 +6,21 @@ import { ErrorText, PageHeader, Section } from "@/components/page";
 import { CompareReport } from "@/components/report/compare-report";
 import { FilesReport } from "@/components/report/files-report";
 import { fileHref } from "@/components/report/kpis";
+import { OdmReport } from "@/components/report/odm-report";
 import { SeriesReport } from "@/components/report/series-report";
 import { VolumeReport } from "@/components/report/volume-report";
 import { nameOf } from "@/components/site/calculations";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { PlaceholderRows } from "@/components/ui/placeholder";
 import { StatusBadge } from "@/components/ui/status";
-import { CompareResult, FilesResult, type Job, SeriesResult, VolumeResult } from "@/lib/api";
+import {
+  CompareResult,
+  FilesResult,
+  type Job,
+  OdmResult,
+  SeriesResult,
+  VolumeResult,
+} from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatDateTime } from "@/lib/format";
 import { jobTitle, reportHref } from "@/lib/jobs";
@@ -39,6 +47,10 @@ function resultView(job: Job): ReactNode {
     case "series": {
       const r = SeriesResult.safeParse(job.result);
       return r.success ? <SeriesReport result={r.data} /> : null;
+    }
+    case "odm": {
+      const r = OdmResult.safeParse(job.result);
+      return r.success ? <OdmReport result={r.data} siteId={job.siteId} /> : null;
     }
     default: {
       const r = FilesResult.safeParse(job.result);
@@ -128,6 +140,14 @@ function JobPage() {
           {j.error ? <ErrorText>{j.error}</ErrorText> : null}
           {j.status === "queued" || j.status === "running" ? (
             <p className="m-0 text-[13px] text-muted">{m.report_wait()}</p>
+          ) : null}
+          {j.status === "running" && j.progress != null ? (
+            <progress
+              value={j.progress}
+              max={100}
+              aria-label={m.job_progress({ percent: Math.round(j.progress) })}
+              className="h-1.5 w-full accent-fg"
+            />
           ) : null}
         </Section>
       </>

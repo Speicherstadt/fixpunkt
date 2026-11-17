@@ -85,4 +85,25 @@ describe("jobs", () => {
     expect(reportHref({ id: 7, kind: "export", status: "done" })).toBeNull();
     expect(reportHref({ id: 7, kind: "dem", status: "done" })).toBeNull();
   });
+
+  it("Drohnenfotos: Titel, Fortschritt während der Rechnung, danach die Fotozahl", () => {
+    const odm = (status: string, progress: number | null, result: unknown = null): Job => ({
+      ...job("odm", { name: "Flug Ost" }, result),
+      status,
+      progress,
+    });
+    expect(jobTitle(odm("draft", null), names)).toBe("Drohnenfotos „Flug Ost“");
+    expect(jobSummary(odm("running", 42.6))).toBe("43 %");
+    expect(jobSummary(odm("queued", 0))).toBeNull();
+    const done = {
+      captureId: 3,
+      images: 120,
+      processingMs: 1000,
+      sourceEpsg: 32632,
+      converted: false,
+      heightOffset: 0,
+    };
+    expect(jobSummary(odm("done", 100, done))).toBe("120 Fotos");
+    expect(reportHref({ id: 1, kind: "odm", status: "done" })).toBeNull();
+  });
 });

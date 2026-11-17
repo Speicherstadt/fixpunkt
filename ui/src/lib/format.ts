@@ -36,3 +36,11 @@ export const formatDateTime = (ms: number): string =>
   new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium", timeStyle: "short" }).format(
     new Date(ms),
   );
+
+/** Dauer auf Minuten: „12 min“, „1 h 05 min“ */
+export const formatDuration = (ms: number): string => {
+  const min = Math.round(ms / 60_000);
+  return min >= 60
+    ? `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, "0")} min`
+    : `${min} min`;
+};

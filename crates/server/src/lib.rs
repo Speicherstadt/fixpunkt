@@ -10,6 +10,7 @@ pub mod db;
 pub mod error;
 pub mod events;
 pub mod jobs;
+pub mod odm;
 pub mod report;
 pub mod sites;
 pub mod state;
@@ -41,6 +42,7 @@ pub async fn init(cfg: Config) -> Result<AppRef> {
         cfg,
         events: Default::default(),
         jobs_wakeup: Default::default(),
+        odm_wakeup: Default::default(),
     });
     let n = jobs::requeue_interrupted(&app).await?;
     if n > 0 {

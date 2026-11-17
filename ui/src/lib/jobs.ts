@@ -2,7 +2,14 @@
  * Was die UI über einen Rechenauftrag zeigt: Titel und Kurzinfo je Art. Reine Funktionen, damit Liste und
  * Ergebnisseite dieselben Worte nutzen.
  */
-import { CompareResult, FilesResult, type Job, SeriesResult, VolumeResult } from "@/lib/api";
+import {
+  CompareResult,
+  FilesResult,
+  type Job,
+  OdmResult,
+  SeriesResult,
+  VolumeResult,
+} from "@/lib/api";
 import { formatVolume } from "@/lib/format";
 import { m } from "@/paraglide/messages";
 
@@ -36,6 +43,8 @@ export const jobTitle = (job: Job, names: Names): string => {
       const ids = Array.isArray(p.captureIds) ? p.captureIds : [];
       return m.job_title_series({ count: ids.length });
     }
+    case "odm":
+      return m.job_title_odm({ name: String(p.name ?? "") });
     case "stockpile":
     case "compare":
     case "export":
@@ -48,7 +57,13 @@ export const jobTitle = (job: Job, names: Names): string => {
 
 /** Kurzinfo zum Ergebnis für die Liste; null, solange es keins gibt */
 export const jobSummary = (job: Job): string | null => {
+  if (job.status === "running" && job.progress != null)
+    return m.job_progress({ percent: Math.round(job.progress) });
   switch (job.kind) {
+    case "odm": {
+      const r = OdmResult.safeParse(job.result);
+      return r.success ? m.job_summary_odm({ count: r.data.images }) : null;
+    }
     case "volume": {
       const r = VolumeResult.safeParse(job.result);
       return r.success ? m.calc_cut_short({ value: formatVolume(r.data.total.cut_m3) }) : null;

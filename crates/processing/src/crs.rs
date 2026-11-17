@@ -136,6 +136,27 @@ impl Utm {
     }
 }
 
+/// UTM-Zone eines EPSG-Codes für UTM Nord: ETRS89 (258zz) oder WGS84 (326zz); sonst `None`.
+/// ETRS89 und WGS84 trennen in Europa einige Dezimeter; RTK-Korrekturen (SAPOS) liefern ETRS89, daher
+/// werden beide hier gleich behandelt.
+pub fn utm_zone(epsg: u32) -> Option<u8> {
+    match epsg {
+        25801..=25860 | 32601..=32660 => Some((epsg % 100) as u8),
+        _ => None,
+    }
+}
+
+impl Utm {
+    /// Ost-/Nordwert aus dieser Zone in die Zone `to` (über Breite/Länge, mm-genau)
+    pub fn to_zone(&self, to: &Utm, easting: f64, northing: f64) -> (f64, f64) {
+        if self.zone == to.zone {
+            return (easting, northing);
+        }
+        let (lat, lon) = self.inverse(easting, northing);
+        to.forward(lat, lon)
+    }
+}
+
 /// Quasigeoid-/Geoidraster (z. B. GCG2016 des BKG): Höhenanomalie N je Breite/Länge.
 /// Normalhöhe DHHN2016 = ellipsoidische Höhe (ETRS89) − N.
 #[derive(Debug, Clone)]
@@ -407,5 +428,31 @@ mod tests {
         std::fs::remove_dir_all(&dir).ok();
         let g2 = Geoid::from_columns(cols).unwrap();
         assert!((g2.undulation(48.9, 9.1).unwrap() - f(48.9, 9.1)).abs() < 1e-9);
+    }
+
+    #[test]
+    fn zones_from_epsg() {
+        assert_eq!(utm_zone(25832), Some(32));
+        assert_eq!(utm_zone(32633), Some(33));
+        assert_eq!(utm_zone(4326), None);
+        assert_eq!(utm_zone(31467), None);
+    }
+
+    #[test]
+    fn zone_change_is_symmetric_at_12_degrees() {
+        // 12° Ost liegt je 3° von den Mittelmeridianen 9° (Zone 32) und 15° (Zone 33): Ostwerte spiegeln sich
+        // um 500 000 m, Nordwerte sind gleich
+        let (z32, z33) = (Utm::new(32).unwrap(), Utm::new(33).unwrap());
+        let (e33, n33) = z33.forward(50.0, 12.0);
+        let (e32, n32) = z33.to_zone(&z32, e33, n33);
+        assert!(
+            (e32 - 500_000.0 - (500_000.0 - e33)).abs() < 1e-6,
+            "{e32} {e33}"
+        );
+        assert!((n32 - n33).abs() < 1e-6);
+        // hin und zurück
+        let (e, n) = z32.to_zone(&z33, e32, n32);
+        assert!((e - e33).abs() < 1e-6 && (n - n33).abs() < 1e-6);
+        assert_eq!(z32.to_zone(&z32, 1.0, 2.0), (1.0, 2.0));
     }
 }

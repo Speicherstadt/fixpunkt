@@ -480,7 +480,7 @@ Wie in allen Projekten (`firsttris/workflows`):
 - [ ] Mit öffentlichen OpenDroneMap-Datensätzen arbeiten, bis eigene Flüge da sind
 
 ### Phase 2 – Drohne + Aushubberechnung (2–3 Wochen)
-- [ ] NodeODM anbinden (Fotos mit RTK-Position aus EXIF/XMP)
+- [x] NodeODM anbinden (Fotos mit RTK-Position aus EXIF/XMP)
 - [ ] Orthofoto, DGM, Punktwolke im Viewer
 - [ ] **Aushub: Differenz zweier Flüge (Urgelände ↔ Baugrube)**, Ergebnis in m³ + Höhendifferenz-Karte
 - [ ] Volumen Haufwerk gegen Basisfläche
@@ -527,7 +527,7 @@ Was im Vergleich zu SDX-Cloud/PocketScan noch fehlt, geordnet nach Nutzen für d
 1. [x] Haufwerk, Soll/Ist, Zeitreihe und Exporte in der Web-UI
 2. [x] 2D-Ansicht der Baustelle: Höhenbild, Abweichungs-Heatmap, Bereiche zeichnen, messen (Punkt, Strecke, Fläche, Profil)
 3. [x] PDF-Bericht (Aushub, Haufwerk, Soll/Ist, Zeitreihe; mit Karte)
-4. [ ] NodeODM-Anbindung: Drohnenfotos → Punktwolke in Fixpunkt
+4. [x] NodeODM-Anbindung: Drohnenfotos → Punktwolke in Fixpunkt (Zone und Höhenversatz, eigene Warteschlange)
 5. [ ] Karte aller Baustellen
 6. [ ] 3D-Ansicht
 7. [ ] Passpunkte und Georeferenzierung in der UI

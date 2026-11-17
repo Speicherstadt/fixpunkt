@@ -210,8 +210,41 @@ export const Job = z.object({
   createdAt: z.number(),
   startedAt: z.number().nullable(),
   finishedAt: z.number().nullable(),
+  /** 0–100 bei Photogrammetrie, sonst leer */
+  progress: z.number().nullable().optional(),
 });
 export type Job = z.infer<typeof Job>;
+
+/** NodeODM: eingerichtet, erreichbar, Version und Warteschlange */
+export const OdmStatus = z.object({
+  configured: z.boolean(),
+  reachable: z.boolean().optional(),
+  version: z.string().optional(),
+  queue: z.number().optional(),
+  error: z.string().optional(),
+});
+export type OdmStatus = z.infer<typeof OdmStatus>;
+
+export const OdmQuality = z.enum(["fast", "standard", "high"]);
+export type OdmQuality = z.infer<typeof OdmQuality>;
+
+export type OdmParams = {
+  name: string;
+  capturedAt: number;
+  quality: OdmQuality;
+  heightOffset: number;
+};
+
+/** Ergebnis der Photogrammetrie */
+export const OdmResult = z.object({
+  captureId: z.number(),
+  images: z.number(),
+  processingMs: z.number(),
+  sourceEpsg: z.number().nullable(),
+  converted: z.boolean(),
+  heightOffset: z.number(),
+});
+export type OdmResult = z.infer<typeof OdmResult>;
 
 const Empty = z.undefined();
 
@@ -246,28 +279,58 @@ export const api = {
   createJob: (siteId: number, kind: string, params: Record<string, unknown>) =>
     request("POST", `/sites/${siteId}/jobs`, Job, { kind, params }),
   deleteJob: (id: number) => request("DELETE", `/jobs/${id}`, Empty),
+  odmStatus: () => request("GET", "/odm", OdmStatus),
+  createOdm: (siteId: number, params: OdmParams) =>
+    request("POST", `/sites/${siteId}/odm`, Job, params),
+  startOdm: (jobId: number) => request("POST", `/jobs/${jobId}/start`, Job, {}),
 };
 
-/** Datei hochladen, mit Fortschritt (fetch kennt keinen Upload-Fortschritt) */
-export const uploadCapture = (
-  siteId: number,
+/** Datei als Body per PUT, mit Fortschritt (fetch kennt keinen Upload-Fortschritt) */
+const putFile = <T>(
+  url: string,
   file: File,
-  name: string,
+  schema: z.ZodType<T>,
   onProgress: (fraction: number) => void,
-): Promise<Capture> =>
+): Promise<T> =>
   new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    const query = new URLSearchParams({ file: file.name, name });
-    xhr.open("PUT", `/api/sites/${siteId}/captures?${query}`);
+    xhr.open("PUT", url);
     for (const [k, v] of Object.entries(requestHeaders("PUT", false))) xhr.setRequestHeader(k, v);
     xhr.setRequestHeader("content-type", "application/octet-stream");
     xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
     xhr.onload = () => {
       const res = new Response(xhr.responseText, { status: xhr.status });
       if (xhr.status >= 200 && xhr.status < 300)
-        res.json().then((j) => resolve(Capture.parse(j)), reject);
+        res.json().then((j) => resolve(schema.parse(j)), reject);
       else errorOf(res).then(reject, reject);
     };
     xhr.onerror = () => reject(new ApiError(0, "http.0"));
     xhr.send(file);
   });
+
+/** Aufnahme hochladen */
+export const uploadCapture = (
+  siteId: number,
+  file: File,
+  name: string,
+  onProgress: (fraction: number) => void,
+): Promise<Capture> =>
+  putFile(
+    `/api/sites/${siteId}/captures?${new URLSearchParams({ file: file.name, name })}`,
+    file,
+    Capture,
+    onProgress,
+  );
+
+/** Foto zu einem Photogrammetrie-Entwurf hochladen */
+export const uploadImage = (
+  jobId: number,
+  file: File,
+  onProgress: (fraction: number) => void,
+): Promise<{ images: number }> =>
+  putFile(
+    `/api/jobs/${jobId}/images?${new URLSearchParams({ file: file.name })}`,
+    file,
+    z.object({ images: z.number() }),
+    onProgress,
+  );

@@ -1,14 +1,15 @@
-import { CircleAlert, CircleCheck, Clock, LoaderCircle } from "lucide-react";
+import { CircleAlert, CircleCheck, Clock, FilePen, LoaderCircle } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { m } from "@/paraglide/messages";
 
-export type Status = "uploaded" | "queued" | "running" | "ready" | "done" | "failed";
+export type Status = "uploaded" | "draft" | "queued" | "running" | "ready" | "done" | "failed";
 
 const LOOK: Record<
   Status,
   { icon: typeof Clock; className: string; text: () => string; spin?: boolean }
 > = {
   uploaded: { icon: LoaderCircle, className: "text-muted", text: m.status_checking, spin: true },
+  draft: { icon: FilePen, className: "text-muted", text: m.status_draft },
   queued: { icon: Clock, className: "text-muted", text: m.status_queued },
   running: { icon: LoaderCircle, className: "text-accent", text: m.status_running, spin: true },
   ready: { icon: CircleCheck, className: "text-ok", text: m.status_ready },

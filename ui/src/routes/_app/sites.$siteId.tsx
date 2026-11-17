@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ErrorText, PageHeader } from "@/components/page";
 import { Calculations } from "@/components/site/calculations";
 import { Captures } from "@/components/site/captures";
+import { DronePhotos } from "@/components/site/drone-photos";
 import { Regions } from "@/components/site/regions";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -46,6 +47,7 @@ function SitePage() {
       />
       <div className="flex flex-col gap-6">
         <Captures siteId={siteId} canEdit={canEdit} />
+        {canEdit ? <DronePhotos siteId={siteId} /> : null}
         <SiteView siteId={siteId} canEdit={canEdit} />
         <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
           <Regions siteId={siteId} canEdit={canEdit} />

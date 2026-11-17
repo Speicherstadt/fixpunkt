@@ -48,7 +48,7 @@ was fehlt, ist der Schritt von der Punktwolke zur abrechenbaren Menge.
 - **Amtliche Koordinaten:** ETRS89/UTM32 (EPSG:25832), Höhen in DHHN2016 über das Quasigeoid GCG2016.
 
 Läuft auf jedem Linux-Server, NAS oder Mini-PC – mit Docker, Podman oder als systemd-Dienst. Die Fotos der Drohne
-wertet [OpenDroneMap](https://opendronemap.org/) aus.
+wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixpunkt über NodeODM.
 
 ## ✨ Funktionen
 
@@ -69,6 +69,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus.
 ### 🛰️ Daten
 - Punktwolken: LAS, LAZ, XYZ, CSV
 - Höhenmodelle: GeoTIFF (OpenDroneMap), ASC
+- Drohnenfotos direkt auswerten über NodeODM
 - Abrechnungsgrenzen als GeoJSON aus QGIS, mehrere Bereiche je Datei
 - Grenzen in Länge/Breite werden nach UTM32 umgerechnet
 
@@ -151,8 +152,10 @@ Nein. Fixpunkt rechnet mit Punktwolken und Höhenmodellen, egal woher. Für Erge
 Drohne RTK (z. B. DJI Matrice 4E mit SAPOS). Auch Laserscanner (LAS/LAZ) und iPhone-LiDAR-Scans passen.
 
 **Rechnet Fixpunkt die Drohnenfotos selbst?**<br>
-Noch nicht. Die Photogrammetrie macht [OpenDroneMap](https://opendronemap.org/)/WebODM; deren Punktwolke oder
-Geländemodell lädt man hoch. Die direkte Anbindung ist geplant.
+Über [NodeODM](https://github.com/OpenDroneMap/NodeODM): Fotos in Fixpunkt hochladen, NodeODM rechnet die
+Punktwolke, sie erscheint als Aufnahme – in der Zone der Baustelle
+([Drohnenfotos auswerten](https://firsttris.github.io/fixpunkt/drohnenfotos.html)). Ohne NodeODM lädt man die
+Punktwolke aus WebODM hoch.
 
 **Ist Fixpunkt eine Alternative zu SDX-Cloud, Propeller oder DroneDeploy?**<br>
 Für die Massenermittlung von Baugruben und Haufwerken: ja, selbst gehostet und ohne Abo. Viewer, Messungen im 3D

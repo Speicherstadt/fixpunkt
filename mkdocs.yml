@@ -31,6 +31,7 @@ nav:
       - Aushub berechnen: aushub.md
       - Haufwerk, Soll/Ist, Zeitreihe, Export: berechnungen.md
       - Ansicht und Messen: ansicht.md
+      - Drohnenfotos auswerten: drohnenfotos.md
       - Daten vorbereiten: daten.md
       - Benutzer und Rollen: benutzer.md
   - Hintergrund:
