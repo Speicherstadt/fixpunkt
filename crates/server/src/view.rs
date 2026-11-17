@@ -71,8 +71,10 @@ pub fn decode(spec: GridSpec, bytes: &[u8]) -> Result<Grid> {
         "Rasterdatei passt nicht zur Größe"
     );
     let data = bytes
-        .chunks_exact(4)
-        .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
+        .as_chunks::<4>()
+        .0
+        .iter()
+        .map(|c| f32::from_le_bytes(*c))
         .collect();
     Ok(Grid { spec, data })
 }

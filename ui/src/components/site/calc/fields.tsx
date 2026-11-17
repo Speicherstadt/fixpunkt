@@ -41,7 +41,10 @@ export const SurfaceFields = ({
   <>
     <Label>
       {m.calc_cell()}
-      <Select value={String(value.cell)} onChange={(e) => onChange({ ...value, cell: Number(e.target.value) })}>
+      <Select
+        value={String(value.cell)}
+        onChange={(e) => onChange({ ...value, cell: Number(e.target.value) })}
+      >
         {CELL_SIZES.map((s) => (
           <option key={s} value={String(s)}>
             {m.calc_cell_option({ cm: Math.round(s * 100) })}
@@ -82,7 +85,9 @@ export const RegionChecks = ({
             type="checkbox"
             className="size-5 accent-fg"
             checked={value.includes(r.id)}
-            onChange={() => onChange(value.includes(r.id) ? value.filter((x) => x !== r.id) : [...value, r.id])}
+            onChange={() =>
+              onChange(value.includes(r.id) ? value.filter((x) => x !== r.id) : [...value, r.id])
+            }
           />
           {r.name}
         </label>
@@ -104,7 +109,10 @@ export const RegionSelect = ({
 }) => (
   <Label>
     {m.calc_region_one()}
-    <Select value={value ?? ""} onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}>
+    <Select
+      value={value ?? ""}
+      onChange={(e) => onChange(e.target.value ? Number(e.target.value) : null)}
+    >
       <option value="">{m.calc_region_none()}</option>
       {regions.map((r) => (
         <option key={r.id} value={r.id}>

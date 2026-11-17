@@ -12,7 +12,14 @@ import { formatDateTime } from "@/lib/format";
 import { JOB_KINDS, type JobKind, jobSummary, jobTitle, KIND_TEXT } from "@/lib/jobs";
 import { capturesQuery, jobsQuery, regionsQuery } from "@/lib/queries";
 import { m } from "@/paraglide/messages";
-import { CompareForm, ExportForm, type FormProps, SeriesForm, StockpileForm, VolumeForm } from "./calc/forms";
+import {
+  CompareForm,
+  ExportForm,
+  type FormProps,
+  SeriesForm,
+  StockpileForm,
+  VolumeForm,
+} from "./calc/forms";
 
 export { defaultPair } from "./calc/forms";
 
@@ -97,7 +104,11 @@ export function Calculations({ siteId, canEdit }: { siteId: number; canEdit: boo
                 <ErrorText>{start.error ? errorText(start.error) : null}</ErrorText>
                 <div className="flex items-center justify-end gap-3">
                   {reason ? <span className="text-[13px] text-muted">{reason}</span> : null}
-                  <Button type="submit" variant="primary" disabled={start.isPending || reason !== null}>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={start.isPending || reason !== null}
+                  >
                     <Calculator size={16} aria-hidden="true" />
                     {START[kind]()}
                   </Button>
@@ -122,7 +133,9 @@ export function Calculations({ siteId, canEdit }: { siteId: number; canEdit: boo
                     <span className="truncate font-medium">{jobTitle(j, names)}</span>
                     <span className="text-[12px] text-muted">{formatDateTime(j.createdAt)}</span>
                   </div>
-                  {summary ? <span className="tabular hidden text-[14px] sm:inline">{summary}</span> : null}
+                  {summary ? (
+                    <span className="tabular hidden text-[14px] sm:inline">{summary}</span>
+                  ) : null}
                   <StatusBadge status={j.status} />
                   <ChevronRight size={16} aria-hidden="true" className="text-muted" />
                 </Link>

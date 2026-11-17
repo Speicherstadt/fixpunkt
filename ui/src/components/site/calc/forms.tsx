@@ -7,7 +7,13 @@ import { Input, Label, Select } from "@/components/ui/input";
 import type { Capture, Region } from "@/lib/api";
 import { chronological } from "@/lib/jobs";
 import { m } from "@/paraglide/messages";
-import { CaptureSelect, RegionChecks, RegionSelect, type SurfaceInput, SurfaceFields } from "./fields";
+import {
+  CaptureSelect,
+  RegionChecks,
+  RegionSelect,
+  SurfaceFields,
+  type SurfaceInput,
+} from "./fields";
 
 export type FormProps = {
   ready: Capture[];
@@ -30,10 +36,11 @@ const latest = (ready: Capture[]) => chronological(ready).at(-1)?.id;
 
 const grid = "grid gap-4 md:grid-cols-2";
 
-const submitWith = (onSubmit: FormProps["onSubmit"], build: () => Record<string, unknown>) => (e: FormEvent) => {
-  e.preventDefault();
-  onSubmit(build());
-};
+const submitWith =
+  (onSubmit: FormProps["onSubmit"], build: () => Record<string, unknown>) => (e: FormEvent) => {
+    e.preventDefault();
+    onSubmit(build());
+  };
 
 export function VolumeForm({ ready, regions, onSubmit, footer }: FormProps) {
   const [first, last] = defaultPair(ready);
@@ -46,13 +53,21 @@ export function VolumeForm({ ready, regions, onSubmit, footer }: FormProps) {
   const b = before ?? first;
   const a = after ?? last;
   return (
-    <form onSubmit={submitWith(onSubmit, () => ({ before: b, after: a, regionIds, surface }))} className="flex flex-col gap-4">
+    <form
+      onSubmit={submitWith(onSubmit, () => ({ before: b, after: a, regionIds, surface }))}
+      className="flex flex-col gap-4"
+    >
       <div className={grid}>
         <CaptureSelect label={m.calc_before()} captures={ready} value={b} onChange={setBefore} />
         <CaptureSelect label={m.calc_after()} captures={ready} value={a} onChange={setAfter} />
         <SurfaceFields value={surface} onChange={setSurface} />
       </div>
-      <RegionChecks regions={regions} value={regionIds} onChange={setRegionIds} emptyText={m.calc_no_regions()} />
+      <RegionChecks
+        regions={regions}
+        value={regionIds}
+        onChange={setRegionIds}
+        emptyText={m.calc_no_regions()}
+      />
       {footer(ready.length < 2 ? m.calc_need_two() : b === a ? m.calc_same() : null)}
     </form>
   );
@@ -89,14 +104,26 @@ export function StockpileForm({ ready, regions, onSubmit, footer }: FormProps) {
         {base === "height" ? (
           <Label>
             {m.calc_base_height_value()}
-            <Input inputMode="decimal" value={height} onChange={(e) => setHeight(e.target.value)} required />
+            <Input
+              inputMode="decimal"
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+              required
+            />
           </Label>
         ) : null}
         <SurfaceFields value={surface} onChange={setSurface} />
       </div>
       <p className="m-0 max-w-prose text-[13px] text-muted">{m.calc_stockpile_hint()}</p>
-      <RegionChecks regions={regions} value={regionIds} onChange={setRegionIds} emptyText={m.calc_need_region()} />
-      {footer(ready.length < 1 ? m.calc_need_one() : regionIds.length === 0 ? m.calc_need_region() : null)}
+      <RegionChecks
+        regions={regions}
+        value={regionIds}
+        onChange={setRegionIds}
+        emptyText={m.calc_need_region()}
+      />
+      {footer(
+        ready.length < 1 ? m.calc_need_one() : regionIds.length === 0 ? m.calc_need_region() : null,
+      )}
     </form>
   );
 }
@@ -117,7 +144,14 @@ export function CompareForm({ ready, regions, onSubmit, footer }: FormProps) {
   const design = () => {
     if (type === "height") return { type, height: num(height) };
     if (type === "slope")
-      return { type, x: num(slope.x), y: num(slope.y), z: num(slope.z), percent: num(slope.percent), azimuth: num(slope.azimuth) };
+      return {
+        type,
+        x: num(slope.x),
+        y: num(slope.y),
+        z: num(slope.z),
+        percent: num(slope.percent),
+        azimuth: num(slope.azimuth),
+      };
     return { type, captureId: designCapture ?? others[0]?.id };
   };
   return (
@@ -144,22 +178,39 @@ export function CompareForm({ ready, regions, onSubmit, footer }: FormProps) {
         {type === "height" ? (
           <Label>
             {m.calc_design_height_value()}
-            <Input inputMode="decimal" value={height} onChange={(e) => setHeight(e.target.value)} required />
+            <Input
+              inputMode="decimal"
+              value={height}
+              onChange={(e) => setHeight(e.target.value)}
+              required
+            />
           </Label>
         ) : null}
         {type === "surface" ? (
-          <CaptureSelect label={m.calc_design_surface()} captures={others} value={designCapture ?? others[0]?.id} onChange={setDesignCapture} />
+          <CaptureSelect
+            label={m.calc_design_surface()}
+            captures={others}
+            value={designCapture ?? others[0]?.id}
+            onChange={setDesignCapture}
+          />
         ) : null}
         <RegionSelect regions={regions} value={regionId} onChange={setRegionId} />
         <Label>
           {m.calc_tolerance()}
-          <Input inputMode="decimal" value={tolerance} onChange={(e) => setTolerance(e.target.value)} required />
+          <Input
+            inputMode="decimal"
+            value={tolerance}
+            onChange={(e) => setTolerance(e.target.value)}
+            required
+          />
         </Label>
         <SurfaceFields value={surface} onChange={setSurface} />
       </div>
       {type === "slope" ? (
         <fieldset className="m-0 grid gap-4 border-0 p-0 md:grid-cols-3">
-          <legend className="mb-2 p-0 text-[13px] text-muted">{m.calc_design_slope_legend()}</legend>
+          <legend className="mb-2 p-0 text-[13px] text-muted">
+            {m.calc_design_slope_legend()}
+          </legend>
           {(
             [
               ["x", m.calc_slope_x()],
@@ -171,12 +222,23 @@ export function CompareForm({ ready, regions, onSubmit, footer }: FormProps) {
           ).map(([key, label]) => (
             <Label key={key}>
               {label}
-              <Input inputMode="decimal" value={slope[key]} onChange={(e) => setSlope({ ...slope, [key]: e.target.value })} required />
+              <Input
+                inputMode="decimal"
+                value={slope[key]}
+                onChange={(e) => setSlope({ ...slope, [key]: e.target.value })}
+                required
+              />
             </Label>
           ))}
         </fieldset>
       ) : null}
-      {footer(ready.length < 1 ? m.calc_need_one() : type === "surface" && others.length === 0 ? m.calc_need_two() : null)}
+      {footer(
+        ready.length < 1
+          ? m.calc_need_one()
+          : type === "surface" && others.length === 0
+            ? m.calc_need_two()
+            : null,
+      )}
     </form>
   );
 }
@@ -190,7 +252,10 @@ export function SeriesForm({ ready, regions, onSubmit, footer }: FormProps) {
   const [surface, setSurface] = useState(defaultSurface);
   const chosen = ordered.filter((c) => ids.includes(c.id)).map((c) => c.id);
   return (
-    <form onSubmit={submitWith(onSubmit, () => ({ captureIds: chosen, regionId, surface }))} className="flex flex-col gap-4">
+    <form
+      onSubmit={submitWith(onSubmit, () => ({ captureIds: chosen, regionId, surface }))}
+      className="flex flex-col gap-4"
+    >
       <fieldset className="m-0 flex flex-col gap-2 border-0 p-0">
         <legend className="mb-2 p-0 text-[13px] text-muted">{m.calc_series_captures()}</legend>
         {ordered.map((c) => (
@@ -199,7 +264,9 @@ export function SeriesForm({ ready, regions, onSubmit, footer }: FormProps) {
               type="checkbox"
               className="size-5 accent-fg"
               checked={ids.includes(c.id)}
-              onChange={() => setIds(ids.includes(c.id) ? ids.filter((x) => x !== c.id) : [...ids, c.id])}
+              onChange={() =>
+                setIds(ids.includes(c.id) ? ids.filter((x) => x !== c.id) : [...ids, c.id])
+              }
             />
             {c.name}
           </label>
@@ -263,14 +330,23 @@ export function ExportForm({ ready, regions, onSubmit, footer }: FormProps) {
               type="checkbox"
               className="size-5 accent-fg"
               checked={formats.includes(f)}
-              onChange={() => setFormats(formats.includes(f) ? formats.filter((x) => x !== f) : [...formats, f])}
+              onChange={() =>
+                setFormats(formats.includes(f) ? formats.filter((x) => x !== f) : [...formats, f])
+              }
             />
             {text[f]()}
           </label>
         ))}
       </fieldset>
-      <RegionChecks regions={regions} value={regionIds} onChange={setRegionIds} emptyText={m.calc_no_regions_export()} />
-      {footer(ready.length < 1 ? m.calc_need_one() : formats.length === 0 ? m.calc_need_format() : null)}
+      <RegionChecks
+        regions={regions}
+        value={regionIds}
+        onChange={setRegionIds}
+        emptyText={m.calc_no_regions_export()}
+      />
+      {footer(
+        ready.length < 1 ? m.calc_need_one() : formats.length === 0 ? m.calc_need_format() : null,
+      )}
     </form>
   );
 }
