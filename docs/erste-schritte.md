@@ -57,6 +57,20 @@ wieder her.
 
 ![Überblick anpassen: Abschnitte mit Häkchen und Pfeilen](screenshot-ueberblick-anpassen.png)
 
+### Bericht zusammenstellen
+
+**Bericht** oben im Überblick stellt einen eigenen PDF-Bericht der Baustelle zusammen: Titel (z. B.
+„Wochenbericht KW 47“), optional die Firma, die ihn erstellt, und die Bausteine in beliebiger Reihenfolge –
+Kennzahlen, Aushub je Befliegung, Massenziele, Lagerbestand und Verlauf je Material, letzter Soll/Ist-Vergleich,
+was Aufmerksamkeit braucht, Zwangspunkte, Leitungen, Notizen und Fotos. Der Bericht zeigt den Stand beim
+Herunterladen; die Auswahl merkt sich der Browser für das nächste Mal.
+
+![Bericht zusammenstellen: Titel, Firma, Bausteine mit Häkchen und Pfeilen](screenshot-bericht-zusammenstellen.png)
+
+[![Seite 1 eines eigenen Berichts: Kennzahlen, Aushub je Befliegung, Massenziele, Soll/Ist, Zwangspunkte, Notizen](screenshot-pdf-baustellenbericht.png){ width="910" height="1287" loading="lazy" }](beispiel-baustellenbericht.pdf)
+
+[Beispiel herunterladen (PDF)](beispiel-baustellenbericht.pdf)
+
 Weiter geht es mit [Aushub berechnen](aushub.md).
 
 ## Sprache und Farbschema

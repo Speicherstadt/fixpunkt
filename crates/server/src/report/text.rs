@@ -133,6 +133,13 @@ pub fn percent(p: f64) -> String {
     format!("{} %", number(p, 1))
 }
 
+/// Datum (UTC) aus Millisekunden seit 1970, „17.11.2026“
+pub fn date(ms: i64) -> String {
+    let t = time::OffsetDateTime::from_unix_timestamp(ms / 1000)
+        .unwrap_or(time::OffsetDateTime::UNIX_EPOCH);
+    format!("{:02}.{:02}.{}", t.day(), u8::from(t.month()), t.year())
+}
+
 /// Datum und Uhrzeit (UTC) aus Millisekunden seit 1970, „17.11.2026, 09:00 UTC“
 pub fn date_time(ms: i64) -> String {
     let t = time::OffsetDateTime::from_unix_timestamp(ms / 1000)

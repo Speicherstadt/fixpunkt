@@ -50,7 +50,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `layouts.rs` | eigener Überblick je Benutzer und Baustelle (`/api/me/layouts/{site}`): Reihenfolge und Sichtbarkeit der Abschnitte, unbekannte fallen weg, neue kommen hinten dazu |
 | `points.rs` | Punktwolke für 3D: höchstens 1 Mio. Punkte, Float32 relativ zum Ursprung plus RGB, als `punkte.bin` zwischengespeichert |
 | `location.rs` | Lage der Baustellen für die Karte: Mitte der geprüften Aufnahmen (sonst der Bereiche), UTM → Breite/Länge |
-| `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer, Fotos als JPEG); Dokumentation und Plan/Ist der Baustelle (`site.rs`, Abruf in `site_routes.rs`) |
+| `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer, Fotos als JPEG); Dokumentation und Plan/Ist der Baustelle (`site.rs`, Abruf in `site_routes.rs`); eigener Bericht aus Bausteinen (`custom.rs`) aus Überblick (`overview.rs`) und Dokumentation (`entries.rs`) |
 | `ui.rs` | eingebettete UI mit ETag, Weiterleitung auf Vite in der Entwicklung |
 | `error.rs` | Fehler als Schlüssel; die UI zeigt den Text in der gewählten Sprache |
 

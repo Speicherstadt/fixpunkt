@@ -55,4 +55,5 @@ jobs:
             docs/social-preview.png
             docs/beispiel-mengenbericht.pdf
             docs/beispiel-dokumentation.pdf
+            docs/beispiel-baustellenbericht.pdf
           message: Screenshots erneuert

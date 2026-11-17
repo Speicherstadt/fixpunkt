@@ -2,9 +2,12 @@
 //! Zeitreihe; der Inhalt entsteht in `build` (reine Funktionen), das Layout in `pdf`.
 
 pub mod build;
+pub mod custom;
 pub mod doc;
+pub mod entries;
 pub mod map;
 mod metrics;
+pub mod overview;
 pub mod pdf;
 pub mod site;
 pub mod site_routes;

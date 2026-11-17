@@ -124,6 +124,11 @@ pub fn violations(
 }
 
 pub async fn dashboard(State(app): State<AppRef>, Path(site): Path<i64>) -> ApiResult<Json<Value>> {
+    Ok(Json(data(&app, site).await?))
+}
+
+/// Alles für den Überblick als JSON (auch Grundlage des eigenen Berichts)
+pub async fn data(app: &AppRef, site: i64) -> ApiResult<Value> {
     db::get_site(&app.db, site)
         .await?
         .ok_or_else(ApiError::not_found)?;
@@ -153,7 +158,7 @@ pub async fn dashboard(State(app): State<AppRef>, Path(site): Path<i64>) -> ApiR
     .await?;
     let (checked, violated) = match (last, constraints.is_empty()) {
         (Some(c), false) => {
-            let g = crate::view::capture_view(&app, c).await?;
+            let g = crate::view::capture_view(app, c).await?;
             violations(&constraints, |x, y| g.sample(x, y))
         }
         _ => (0, Vec::new()),
@@ -180,7 +185,7 @@ pub async fn dashboard(State(app): State<AppRef>, Path(site): Path<i64>) -> ApiR
         .bind(site)
         .fetch_one(&app.db)
         .await?;
-    Ok(Json(serde_json::json!({
+    Ok(serde_json::json!({
         "captures": {
             "count": captures.len(),
             "ready": ready.len(),
@@ -205,7 +210,7 @@ pub async fn dashboard(State(app): State<AppRef>, Path(site): Path<i64>) -> ApiR
         },
         "documentation": {"photos": photos, "notes": notes},
         "plans": plans,
-    })))
+    }))
 }
 
 #[cfg(test)]

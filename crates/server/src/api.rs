@@ -110,6 +110,7 @@ pub fn router(app: AppRef) -> Router {
         .route("/plans/{id}", delete(plans::delete))
         .route("/plans/{id}/geometry", get(plans::geometry))
         .route("/plans/{id}/report", get(report::site_routes::plan))
+        .route("/sites/{id}/report", get(report::site_routes::custom))
         .route(
             "/sites/{id}/documentation/report",
             get(report::site_routes::documentation),

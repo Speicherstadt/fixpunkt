@@ -58,10 +58,8 @@ async fn render(doc: super::doc::Doc) -> ApiResult<Vec<u8>> {
         .map_err(anyhow::Error::from)?)
 }
 
-pub async fn documentation(
-    State(app): State<AppRef>,
-    Path(site): Path<i64>,
-) -> ApiResult<Response> {
+/// Einträge der Dokumentation mit Gelände an Zwangspunkten und Vorschaubildern; dazu Kopf des Berichts
+async fn collect(app: &AppRef, site: i64) -> ApiResult<(SiteContext, Vec<Entry>)> {
     let s = db::get_site(&app.db, site)
         .await?
         .ok_or_else(ApiError::not_found)?;
@@ -71,7 +69,7 @@ pub async fn documentation(
     .bind(site)
     .fetch_all(&app.db)
     .await?;
-    let last = latest(&app, site).await?;
+    let last = latest(app, site).await?;
     let entries: Vec<Entry> = list
         .into_iter()
         .map(|m| {
@@ -82,7 +80,7 @@ pub async fn documentation(
             let photo = m
                 .photo
                 .as_ref()
-                .and_then(|_| thumb(&markers::dir(&app, m.id).join("thumb.jpg")));
+                .and_then(|_| thumb(&markers::dir(app, m.id).join("thumb.jpg")));
             let line = (m.kind == "line").then(|| {
                 let pts = m.line();
                 (markers::line_length(&pts), pts.len())
@@ -103,16 +101,53 @@ pub async fn documentation(
         })
         .collect();
     let ctx = SiteContext {
-        site: s.name.clone(),
+        site: s.name,
         epsg: s.epsg,
         now: now_ms(),
         against: last.map(|(c, _)| c.name),
     };
+    Ok((ctx, entries))
+}
+
+pub async fn documentation(
+    State(app): State<AppRef>,
+    Path(site): Path<i64>,
+) -> ApiResult<Response> {
+    let (ctx, entries) = collect(&app, site).await?;
+    let name = file_name("Dokumentation", &ctx.site, site);
     let bytes = render(documentation_doc(&ctx, &entries)).await?;
-    Ok(pdf_response(
-        bytes,
-        file_name("Dokumentation", &s.name, site),
-    ))
+    Ok(pdf_response(bytes, name))
+}
+
+#[derive(serde::Deserialize)]
+pub struct CustomQuery {
+    parts: String,
+    #[serde(default)]
+    title: String,
+    company: Option<String>,
+}
+
+/// Eigener Bericht aus Bausteinen: `GET /api/sites/{id}/report?parts=kpis,progress,…&title=…&company=…`
+pub async fn custom(
+    State(app): State<AppRef>,
+    Path(site): Path<i64>,
+    axum::extract::Query(q): axum::extract::Query<CustomQuery>,
+) -> ApiResult<Response> {
+    let parts = super::custom::parse_parts(&q.parts).map_err(|e| {
+        ApiError::bad_request(crate::error::code::INVALID_INPUT).with_detail(e.to_string())
+    })?;
+    let (ctx, entries) = collect(&app, site).await?;
+    let data = crate::dashboard::data(&app, site).await?;
+    let name = file_name("Bericht", &ctx.site, site);
+    let doc = super::custom::custom_doc(
+        &ctx,
+        &q.title,
+        q.company.as_deref(),
+        &parts,
+        &data,
+        &entries,
+    );
+    Ok(pdf_response(render(doc).await?, name))
 }
 
 pub async fn plan(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult<Response> {

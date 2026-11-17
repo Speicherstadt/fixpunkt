@@ -137,3 +137,105 @@ async fn documentation_and_plan_reports() {
         StatusCode::NOT_FOUND
     );
 }
+
+/// Eigener Bericht: Bausteine in gewählter Reihenfolge, Titel und Firma; Aushub 800 m³ gegen ein Ziel von 1.000 m³
+#[tokio::test]
+async fn custom_report_from_parts() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(
+            Method::POST,
+            "/api/sites",
+            json!({"name": "Kirchstrasse 12"}),
+        )
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let fc = json!({"type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}},
+        "features": [common::rect("Grube", 10.0, 10.0, 30.0, 30.0)]});
+    let rid = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/regions"),
+            json!({"geojson": fc}),
+        )
+        .await
+        .json()[0]["id"]
+        .as_i64()
+        .unwrap();
+    c.json(
+        Method::PATCH,
+        &format!("/api/regions/{rid}"),
+        json!({"material": "Boden Klasse 4", "targetM3": 1000.0}),
+    )
+    .await;
+    let mut ids = Vec::new();
+    for (pit, at) in [(false, 1), (true, 2)] {
+        let r = c
+            .upload(
+                &format!("/api/sites/{sid}/captures?file={at}.xyz&capturedAt={at}"),
+                terrain_xyz(pit),
+            )
+            .await;
+        ids.push(r.json()["id"].as_i64().unwrap());
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    c.json(
+        Method::POST,
+        &format!("/api/sites/{sid}/jobs"),
+        json!({"kind": "volume", "params": {"before": ids[0], "after": ids[1], "regionIds": [rid]}}),
+    )
+    .await;
+    jobs::run_pending(&c.app).await.unwrap();
+    c.upload(
+        &format!("/api/sites/{sid}/photos?file=Schacht.jpg"),
+        PHOTO.to_vec(),
+    )
+    .await;
+
+    let r = c
+        .get(&format!(
+            "/api/sites/{sid}/report?parts=photos,kpis,targets&title=Wochenbericht%20KW%2047&company=Muster%20Tiefbau"
+        ))
+        .await;
+    assert_eq!(r.status, StatusCode::OK);
+    assert_eq!(
+        r.headers[header::CONTENT_DISPOSITION],
+        format!("attachment; filename=\"Bericht-Kirchstrasse-12-{sid}.pdf\"")
+    );
+    let (doc, text) = pdf(&r.body);
+    for s in [
+        "Wochenbericht KW 47",
+        "Muster Tiefbau",
+        "Massenziele",
+        "Boden Klasse 4",
+        "1.000 m³",
+        "Aufnahmen",
+        "Schacht",
+    ] {
+        assert!(text.contains(s), "{s} fehlt in {text}");
+    }
+    // Aushub 800 m³: Anteil 80 %
+    assert!(text.contains("80 %"), "{text}");
+    // gewählte Reihenfolge: Fotos vor Massenzielen
+    assert!(text.find("Fotos").unwrap() < text.find("Massenziele").unwrap());
+    let jpegs = doc
+        .objects
+        .values()
+        .filter_map(|o| o.as_stream().ok())
+        .filter(|s| s.dict.get(b"Filter").and_then(|f| f.as_name()).ok() == Some(b"DCTDecode"))
+        .count();
+    assert_eq!(jpegs, 1);
+
+    let bad = c
+        .get(&format!("/api/sites/{sid}/report?parts=kpis,quatsch"))
+        .await;
+    assert_eq!(bad.status, StatusCode::BAD_REQUEST);
+    assert_eq!(
+        c.get("/api/sites/999/report?parts=kpis").await.status,
+        StatusCode::NOT_FOUND
+    );
+}

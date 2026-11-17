@@ -309,6 +309,37 @@ test("Überblick anpassen @screenshots", async () => {
   await overview.getByRole("button", { name: "Fertig" }).click();
 });
 
+test("Bericht zusammenstellen @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  await page
+    .getByRole("region", { name: "Überblick" })
+    .getByRole("button", { name: "Bericht" })
+    .click();
+  const dialog = page.getByRole("dialog", { name: "Bericht zusammenstellen" });
+  await dialog.getByLabel("Titel").fill("Wochenbericht KW 47");
+  await dialog.getByLabel("Erstellt von (Firma)").fill("Muster Tiefbau GmbH");
+  // Fotos und Notizen ans Ende, Leitungen raus
+  const parts = dialog.getByRole("list", { name: "Bausteine" });
+  const lines = parts.getByLabel("Leitungen", { exact: true });
+  await lines.click();
+  await expect(lines).not.toBeChecked();
+  await dialog.screenshot({ path: `${DOCS}/screenshot-bericht-zusammenstellen.png` });
+  const pdf = page.waitForEvent("download");
+  await dialog.getByRole("link", { name: "PDF herunterladen" }).click();
+  const file = `${DOCS}/beispiel-baustellenbericht.pdf`;
+  await (await pdf).saveAs(file);
+  const render = spawnSync("pdftoppm", [
+    "-png",
+    "-singlefile",
+    "-r",
+    "110",
+    file,
+    `${DOCS}/screenshot-pdf-baustellenbericht`,
+  ]);
+  if (render.error) console.warn("pdftoppm fehlt, Vorschaubild nicht erneuert");
+  await page.keyboard.press("Escape");
+});
+
 test("Orthofoto @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const view = page.getByRole("region", { name: "Ansicht" });
