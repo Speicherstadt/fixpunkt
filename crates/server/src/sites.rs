@@ -234,8 +234,8 @@ pub fn validate_target(p: &RegionPatch) -> ApiResult<()> {
         return bad("Soll-Menge");
     }
     match p.target_kind.as_deref() {
-        None | Some("cut") | Some("fill") => Ok(()),
-        _ => bad("Art: cut oder fill"),
+        None | Some("cut") | Some("fill") | Some("stock") => Ok(()),
+        _ => bad("Art: cut, fill oder stock"),
     }
 }
 
@@ -255,15 +255,21 @@ pub async fn update_region(
         .material
         .map(|m| m.trim().to_string())
         .filter(|m| !m.is_empty());
-    let kind = p
-        .target_m3
-        .map(|_| p.target_kind.unwrap_or_else(|| "cut".into()));
+    // Lager (Haufwerk) braucht keine Soll-Menge; Abtrag/Auftrag nur mit einer
+    let (kind, target) = match p.target_kind.as_deref() {
+        Some("stock") => (Some("stock".to_string()), None),
+        _ => (
+            p.target_m3
+                .map(|_| p.target_kind.unwrap_or_else(|| "cut".into())),
+            p.target_m3,
+        ),
+    };
     sqlx::query(
         "UPDATE regions SET name = ?, material = ?, target_m3 = ?, target_kind = ? WHERE id = ?",
     )
     .bind(&name)
     .bind(material)
-    .bind(p.target_m3)
+    .bind(target)
     .bind(kind)
     .bind(id)
     .execute(&app.db)

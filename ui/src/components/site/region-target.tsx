@@ -4,7 +4,7 @@ import { type FormEvent, useState } from "react";
 import { ErrorText } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
-import { api, type Region } from "@/lib/api";
+import { api, type Region, type TargetKind } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatNumber } from "@/lib/format";
 import { m } from "@/paraglide/messages";
@@ -20,11 +20,12 @@ export const MATERIALS = [
   "Recycling",
 ];
 
-/** „Boden Klasse 4 · Ziel 1.000 m³ Abtrag“ */
+/** „Boden Klasse 4 · Ziel 1.000 m³ Abtrag“ oder „Oberboden · Lager“ */
 export const targetText = (r: Region) =>
   [
     r.material ?? null,
-    r.targetM3
+    r.targetKind === "stock" ? m.target_stock() : null,
+    r.targetM3 && r.targetKind !== "stock"
       ? m.target_summary({
           m3: formatNumber(r.targetM3, 0),
           kind: r.targetKind === "fill" ? m.target_fill() : m.target_cut(),
@@ -43,12 +44,12 @@ export function TargetForm({ region, onDone }: { region: Region; onDone: () => v
   const qc = useQueryClient();
   const [material, setMaterial] = useState(region.material ?? "");
   const [target, setTarget] = useState(region.targetM3 ? String(region.targetM3) : "");
-  const [kind, setKind] = useState<"cut" | "fill">(region.targetKind ?? "cut");
+  const [kind, setKind] = useState<TargetKind>(region.targetKind ?? "cut");
   const save = useMutation({
     mutationFn: () =>
       api.updateRegion(region.id, {
         material: material.trim() || undefined,
-        targetM3: parse(target),
+        targetM3: kind === "stock" ? undefined : parse(target),
         targetKind: kind,
       }),
     onSuccess: async () => {
@@ -79,16 +80,21 @@ export function TargetForm({ region, onDone }: { region: Region; onDone: () => v
           </datalist>
         </Label>
         <Label>
-          {m.target_m3()}
-          <Input inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} />
-        </Label>
-        <Label>
           {m.target_kind()}
-          <Select value={kind} onChange={(e) => setKind(e.target.value as "cut" | "fill")}>
+          <Select value={kind} onChange={(e) => setKind(e.target.value as TargetKind)}>
             <option value="cut">{m.target_cut()}</option>
             <option value="fill">{m.target_fill()}</option>
+            <option value="stock">{m.target_stock_option()}</option>
           </Select>
         </Label>
+        {kind === "stock" ? (
+          <p className="m-0 self-end pb-2.5 text-[13px] text-muted">{m.target_stock_hint()}</p>
+        ) : (
+          <Label>
+            {m.target_m3()}
+            <Input inputMode="decimal" value={target} onChange={(e) => setTarget(e.target.value)} />
+          </Label>
+        )}
       </div>
       <ErrorText>{save.error ? errorText(save.error) : null}</ErrorText>
       <div className="flex justify-end gap-2">

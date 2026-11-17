@@ -43,6 +43,12 @@ wie „Oberboden“ oder „Boden Klasse 4“) und **wie viel** bewegt werden so
 [Überblick](erste-schritte.md#überblick-einer-baustelle) zeigt dann je Bereich, wie viel davon laut der neuesten
 Aushub-Berechnung gegen das Urgelände geschafft ist, was offen ist, und die Summen je Material.
 
+Ein Bereich um eine Halde wird mit **Zählt → Lager (Haufwerk)** zum Lager für sein Material, ohne Soll-Menge. Der
+Bestand kommt aus der [Haufwerk-Berechnung](berechnungen.md#haufwerk) je Befliegung (je Aufnahme die neueste). Der
+Überblick zeigt unter **Bestand je Material** die Summe der Lager, die Änderung zur Befliegung davor und den Stand
+– etwa „Oberboden 420 m³, +40 m³“. Abtrag in der Grube und Bestand auf der Halde werden bewusst nicht
+gegeneinander gerechnet: gelöster Boden nimmt auf der Halde etwa 10–30 % mehr Raum ein.
+
 ## 3. Berechnen
 
 Unter **Berechnungen**:

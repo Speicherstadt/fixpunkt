@@ -42,3 +42,49 @@ test("Massenziel je Bereich im Überblick", async ({ page }) => {
   );
   await expect(overview).toContainText(/Je Material: Boden Klasse 4 (799|800|801) \/ 1\.000 m³/);
 });
+
+/**
+ * Lager: „Grube“ (30 × 30 m) als Haufwerk-Bereich, Basis 299 m. Vorher 900 m² · 1,2 m = 1.080 m³; nachher fehlen in
+ * der Grube 400 m² · 1,2 m = 480 m³ über der Basis → 600 m³, −480 m³.
+ */
+test("Bestand je Material im Überblick", async ({ page }) => {
+  const api = await apiFor(page);
+  const site = await api.call("POST", "/sites", { name: "Lagerbestand" });
+  const day = 86_400_000;
+  const caps = [
+    await api.upload(site.id, "u.xyz", "Woche 1", day, terrainXyz(false)),
+    await api.upload(site.id, "a.xyz", "Woche 2", 8 * day, terrainXyz(true)),
+  ];
+  await api.call("POST", `/sites/${site.id}/regions`, { geojson: boundaries() });
+  await api.settled(site.id);
+  await page.goto(`/sites/${site.id}`);
+
+  const regions = page.getByRole("region", { name: "Bereiche" });
+  await regions.getByRole("button", { name: "Material und Massenziel für Grube" }).click();
+  const form = regions.getByRole("form", { name: "Massenziel für Grube" });
+  await form.getByLabel("Material").fill("Boden Klasse 4");
+  await form.getByLabel("Zählt").selectOption({ label: "Lager (Haufwerk)" });
+  await expect(form.getByLabel("Soll-Menge in m³")).toHaveCount(0);
+  await form.getByRole("button", { name: "Ziel speichern" }).click();
+  await expect(regions.getByRole("listitem").filter({ hasText: "Grube" })).toContainText(
+    "Boden Klasse 4 · Lager",
+  );
+  const overview = page.getByRole("region", { name: "Überblick" });
+  await expect(overview).toContainText("Noch keine Haufwerk-Berechnung für die Lager.");
+
+  const grube = (
+    (await api.call("GET", `/sites/${site.id}/regions`)) as { id: number; name: string }[]
+  ).find((r) => r.name === "Grube")!;
+  for (const captureId of caps)
+    await api.call("POST", `/sites/${site.id}/jobs`, {
+      kind: "stockpile",
+      params: { captureId, regionIds: [grube.id], base: 299 },
+    });
+  await api.settled(site.id);
+  const row = overview.getByRole("table", { name: "Bestand je Material" }).getByRole("row", {
+    name: /Boden Klasse 4/,
+  });
+  await expect(row).toContainText(/(59\d|60\d) m³/);
+  await expect(row).toContainText(/−(47\d|48\d) m³/);
+  await expect(row).toContainText("09.01.1970");
+});

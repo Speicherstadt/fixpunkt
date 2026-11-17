@@ -11,6 +11,7 @@ import { Kpis } from "@/components/report/kpis";
 import { formatDate, formatNumber, formatVolume } from "@/lib/format";
 import { dashboardQuery } from "@/lib/queries";
 import { m } from "@/paraglide/messages";
+import { StockTable } from "./overview-stock";
 
 export function Overview({ siteId }: { siteId: number }) {
   const { data: d } = useQuery(dashboardQuery(siteId));
@@ -127,6 +128,7 @@ export function Overview({ siteId }: { siteId: number }) {
           ) : null}
         </div>
       ) : null}
+      {d.stock.length ? <StockTable stock={d.stock} /> : null}
       {k.violated.length || d.jobs.failed ? (
         <ul className="m-0 flex list-none flex-col gap-1.5 p-0" aria-label={m.overview_attention()}>
           {k.violated.map((v) => (

@@ -258,6 +258,20 @@ export const Dashboard = z.object({
   materials: z
     .array(z.object({ material: z.string(), target: z.number(), done: z.number() }))
     .default([]),
+  /** Bestand je Material in den Lagern (Haufwerk-Bereichen) */
+  stock: z
+    .array(
+      z.object({
+        material: z.string(),
+        stockpiles: z.number(),
+        measured: z.number(),
+        current: z.number().nullable(),
+        previous: z.number().nullable(),
+        change: z.number().nullable(),
+        at: z.number().nullable(),
+      }),
+    )
+    .default([]),
 });
 export type Dashboard = z.infer<typeof Dashboard>;
 
@@ -316,11 +330,12 @@ export const Region = z.object({
   /** Massenziel: Material, Soll-Menge in m³, Abtrag (cut) oder Auftrag (fill) */
   material: z.string().nullable().optional(),
   targetM3: z.number().nullable().optional(),
-  targetKind: z.enum(["cut", "fill"]).nullable().optional(),
+  targetKind: z.enum(["cut", "fill", "stock"]).nullable().optional(),
 });
 export type Region = z.infer<typeof Region>;
 
-export type RegionTarget = { material?: string; targetM3?: number; targetKind?: "cut" | "fill" };
+export type TargetKind = "cut" | "fill" | "stock";
+export type RegionTarget = { material?: string; targetM3?: number; targetKind?: TargetKind };
 
 export const VolumeReport = z.object({
   area_m2: z.number(),

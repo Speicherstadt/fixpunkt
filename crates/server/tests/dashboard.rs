@@ -176,3 +176,82 @@ async fn region_targets() {
     let d = c.get(&format!("/api/sites/{sid}/dashboard")).await.json();
     assert_eq!(d["targets"], json!([]));
 }
+
+/// Lager: Bereich 30 × 30 m, Basis 299 m. Woche 1 ohne Grube: Gelände im Mittel 300,2 m → 900 m² · 1,2 m =
+/// 1.080 m³. Woche 2 mit Grube (20 × 20 m, Sohle unter der Basis): dort fehlen die 400 m² · 1,2 m = 480 m³ über
+/// 299 m – was unter der Basis liegt, zählt nicht negativ → 600 m³, Änderung −480 m³.
+#[tokio::test]
+async fn stock_per_material() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": "Lager"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let fc = json!({"type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}},
+        "features": [common::rect("Halde", 5.0, 5.0, 35.0, 35.0)]});
+    let rid = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/regions"),
+            json!({"geojson": fc}),
+        )
+        .await
+        .json()[0]["id"]
+        .as_i64()
+        .unwrap();
+    // Lager ohne Soll-Menge; eine mitgeschickte wird nicht gespeichert
+    let r = c
+        .json(
+            Method::PATCH,
+            &format!("/api/regions/{rid}"),
+            json!({"material": "Boden Klasse 4", "targetKind": "stock", "targetM3": 5.0}),
+        )
+        .await
+        .json();
+    assert_eq!(
+        (&r["targetKind"], &r["targetM3"]),
+        (&json!("stock"), &json!(null))
+    );
+
+    let mut caps = Vec::new();
+    for (pit, at) in [(false, 1), (true, 2)] {
+        let r = c
+            .upload(
+                &format!("/api/sites/{sid}/captures?file={at}.xyz&capturedAt={at}"),
+                terrain_xyz(pit),
+            )
+            .await;
+        caps.push(r.json()["id"].as_i64().unwrap());
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    let d = c.get(&format!("/api/sites/{sid}/dashboard")).await.json();
+    assert_eq!(
+        d["stock"][0]["current"],
+        json!(null),
+        "noch nicht berechnet"
+    );
+    assert_eq!(d["targets"], json!([]), "ein Lager ist kein Ziel");
+    for cap in &caps {
+        c.json(
+            Method::POST,
+            &format!("/api/sites/{sid}/jobs"),
+            json!({"kind": "stockpile", "params": {"captureId": cap, "regionIds": [rid], "base": 299.0}}),
+        )
+        .await;
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    let s = &c.get(&format!("/api/sites/{sid}/dashboard")).await.json()["stock"][0];
+    assert_eq!(s["material"], "Boden Klasse 4");
+    let (now, before) = (
+        s["current"].as_f64().unwrap(),
+        s["previous"].as_f64().unwrap(),
+    );
+    assert!((before - 1080.0).abs() < 10.0, "{s}");
+    assert!((now - 600.0).abs() < 10.0, "{s}");
+    assert!((s["change"].as_f64().unwrap() - (now - before)).abs() < 1e-9);
+    assert!((now - before + 480.0).abs() < 5.0, "{s}");
+}

@@ -53,6 +53,7 @@ pub struct Target {
 pub fn targets(regions: &[RegionRow], latest: Option<&Value>) -> Vec<Target> {
     regions
         .iter()
+        .filter(|r| r.target_kind.as_deref() != Some("stock"))
         .filter_map(|r| {
             let target = r.target_m3?;
             let kind = r.target_kind.clone().unwrap_or_else(|| "cut".into());
@@ -70,6 +71,81 @@ pub fn targets(regions: &[RegionRow], latest: Option<&Value>) -> Vec<Target> {
                 done,
                 percent: done.map(|d| d / target * 100.0),
                 open: done.map(|d| (target - d).max(0.0)),
+            })
+        })
+        .collect()
+}
+
+/// Bestand eines Lagers (Haufwerk-Bereich) je Aufnahme: (Aufnahmezeit, m³), zeitlich geordnet, je Aufnahme die
+/// neueste Haufwerk-Berechnung
+pub fn stock_series(region: &str, captures: &[Capture], jobs: &[Job]) -> Vec<(i64, f64)> {
+    let mut done: Vec<&Job> = jobs
+        .iter()
+        .filter(|j| j.kind == "stockpile" && j.status == status::DONE)
+        .collect();
+    done.sort_by_key(|j| std::cmp::Reverse(j.id));
+    let mut out: Vec<(i64, i64, f64)> = Vec::new();
+    for j in done {
+        let Some(cap) = params(j)["captureId"].as_i64() else {
+            continue;
+        };
+        if out.iter().any(|o| o.1 == cap) {
+            continue;
+        }
+        let Some(c) = captures.iter().find(|c| c.id == cap) else {
+            continue;
+        };
+        let r = result(j);
+        let Some(v) = r["regions"]
+            .as_array()
+            .and_then(|rs| rs.iter().find(|x| x["name"] == region))
+            .and_then(|x| x["fill_m3"].as_f64())
+        else {
+            continue;
+        };
+        out.push((c.captured_at, cap, v));
+    }
+    out.sort_by_key(|o| (o.0, o.1));
+    out.into_iter().map(|(at, _, v)| (at, v)).collect()
+}
+
+/// Bestand je Material über alle Lager: aktuell (je Lager die neueste Messung), vorher (die davor), Änderung
+pub fn stock(regions: &[RegionRow], captures: &[Capture], jobs: &[Job]) -> Vec<Value> {
+    let lagers: Vec<(&str, Vec<(i64, f64)>)> = regions
+        .iter()
+        .filter(|r| r.target_kind.as_deref() == Some("stock"))
+        .map(|r| {
+            (
+                r.material.as_deref().unwrap_or("ohne Material"),
+                stock_series(&r.name, captures, jobs),
+            )
+        })
+        .collect();
+    let mut names: Vec<&str> = lagers.iter().map(|l| l.0).collect();
+    names.sort_unstable();
+    names.dedup();
+    names
+        .into_iter()
+        .map(|m| {
+            let of: Vec<&Vec<(i64, f64)>> =
+                lagers.iter().filter(|l| l.0 == m).map(|l| &l.1).collect();
+            let measured: Vec<&Vec<(i64, f64)>> =
+                of.iter().copied().filter(|s| !s.is_empty()).collect();
+            let current: f64 = measured.iter().filter_map(|s| s.last()).map(|p| p.1).sum();
+            let at = measured.iter().filter_map(|s| s.last()).map(|p| p.0).max();
+            // Änderung nur, wenn jedes gemessene Lager eine Messung davor hat
+            let before: Option<f64> = measured
+                .iter()
+                .map(|s| s.len().checked_sub(2).map(|i| s[i].1))
+                .sum();
+            serde_json::json!({
+                "material": m,
+                "stockpiles": of.len(),
+                "measured": measured.len(),
+                "current": (!measured.is_empty()).then_some(current),
+                "previous": before.filter(|_| !measured.is_empty()),
+                "change": before.filter(|_| !measured.is_empty()).map(|b| current - b),
+                "at": at,
             })
         })
         .collect()
@@ -246,6 +322,7 @@ pub async fn dashboard(State(app): State<AppRef>, Path(site): Path<i64>) -> ApiR
         },
         "progress": progress,
         "materials": materials(&targets),
+        "stock": stock(&regions, &ready, &jobs),
         "targets": targets,
         "latestCompare": latest_compare(&jobs),
         "jobs": {
@@ -381,6 +458,68 @@ mod tests {
             json!({"material": "Fels", "target": 50.0, "done": 0.0})
         );
         assert!(targets(&regions, None).iter().all(|t| t.done.is_none()));
+    }
+
+    fn stockpile_job(id: i64, capture: i64, values: &[(&str, f64)]) -> Job {
+        let regions: Vec<Value> = values
+            .iter()
+            .map(|(n, v)| json!({"name": n, "fill_m3": v, "cut_m3": 0.0}))
+            .collect();
+        Job {
+            kind: "stockpile".into(),
+            params: json!({"captureId": capture, "regionIds": []}).to_string(),
+            result: Some(json!({"regions": regions}).to_string()),
+            ..volume(id, 0, 0, 0.0, status::DONE)
+        }
+    }
+
+    #[test]
+    fn stock_per_material() {
+        let caps = [
+            capture(1, "Urgelände", 100),
+            capture(2, "Woche 1", 200),
+            capture(3, "Woche 2", 300),
+        ];
+        let stock_region = |id, name: &str, m: &str| RegionRow {
+            target_kind: Some("stock".into()),
+            ..region(id, name, Some(m), None)
+        };
+        let regions = [
+            stock_region(1, "Halde Nord", "Oberboden"),
+            stock_region(2, "Halde Süd", "Boden Klasse 4"),
+            stock_region(3, "Halde West", "Oberboden"),
+            region(4, "Grube", Some("Boden Klasse 4"), Some((1000.0, "cut"))),
+        ];
+        let jobs = [
+            stockpile_job(10, 2, &[("Halde Nord", 380.0), ("Halde Süd", 1600.0)]),
+            stockpile_job(11, 3, &[("Halde Nord", 999.0)]),
+            // neuere Rechnung für Woche 2 gewinnt
+            stockpile_job(12, 3, &[("Halde Nord", 420.0), ("Halde Süd", 1150.0)]),
+        ];
+        assert_eq!(
+            stock_series("Halde Nord", &caps, &jobs),
+            [(200, 380.0), (300, 420.0)]
+        );
+        let s = stock(&regions, &caps, &jobs);
+        assert_eq!(
+            s[0],
+            json!({"material": "Boden Klasse 4", "stockpiles": 1, "measured": 1, "current": 1150.0,
+                   "previous": 1600.0, "change": -450.0, "at": 300})
+        );
+        // Halde West ist noch nicht gemessen: zählt als Lager, nicht im Bestand
+        assert_eq!(
+            s[1],
+            json!({"material": "Oberboden", "stockpiles": 2, "measured": 1, "current": 420.0,
+                   "previous": 380.0, "change": 40.0, "at": 300})
+        );
+        // ein Lager ist kein Massenziel
+        assert_eq!(targets(&regions, None).len(), 1);
+        // nur eine Messung: keine Änderung
+        let one = stock(&regions[..1], &caps, &jobs[..1]);
+        assert_eq!(
+            (&one[0]["current"], &one[0]["change"]),
+            (&json!(380.0), &json!(null))
+        );
     }
 
     #[test]

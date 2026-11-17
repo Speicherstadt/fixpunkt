@@ -49,7 +49,7 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 - [x] **Aushub-/Auftragsmassen** (Differenz zweier Aufnahmen: Urgelände ↔ Aushub)
 - [x] Volumen innerhalb frei gezeichneter Bereiche (Geofences) – im Browser gezeichnet oder als GeoJSON
 - [x] Fortlaufende Aktualisierung über die Bauphase (Zeitreihe)
-- [x] Material und Massenziele je Bereich (erledigt/offen im Überblick, Summe je Material)
+- [x] Material und Massenziele je Bereich (erledigt/offen im Überblick, Summe je Material), Lagerbestand je Material
 
 ### Vergleichen
 - [x] Plan/Ist-Vergleich mit hinterlegten DXF-Plänen (Höhenpunkte und Koten, Plan als Hintergrund, Bericht als PDF)
