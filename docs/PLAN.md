@@ -58,7 +58,8 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 ### Dokumentieren
 - [ ] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte, Leitungsverlauf
 - [ ] Fotos georeferenziert inkl. Blickrichtung, Notizen dazu
-- [ ] Berichte (PDF) und Dashboards pro Baustelle
+- [x] Berichte (PDF) je Berechnung
+- [ ] Dashboards pro Baustelle
 - [ ] Kartenansicht aller Baustellen/Scans
 
 ### Ansichten
@@ -506,7 +507,8 @@ Wie in allen Projekten (`firsttris/workflows`):
 ### Phase 5 – Ausbau
 - [ ] Zwangspunkte / Leitungsdokumentation
 - [ ] Plan/Ist-Vergleich mit DXF, Abweichungs-Heatmap
-- [ ] Zeitreihen, Dashboards, PDF-Berichte
+- [x] Zeitreihen, PDF-Berichte
+- [ ] Dashboards
 - [ ] Exporte DXF, LandXML, CSV, GeoTIFF
 - [ ] Flugplanung in Fixpunkt (WPML), danach DJI Cloud API
 - [ ] Android-PWA (Photogrammetrie + Web Bluetooth)
@@ -524,7 +526,7 @@ Was im Vergleich zu SDX-Cloud/PocketScan noch fehlt, geordnet nach Nutzen für d
 
 1. [x] Haufwerk, Soll/Ist, Zeitreihe und Exporte in der Web-UI
 2. [x] 2D-Ansicht der Baustelle: Höhenbild, Abweichungs-Heatmap, Bereiche zeichnen, messen (Punkt, Strecke, Fläche, Profil)
-3. [ ] PDF-Bericht
+3. [x] PDF-Bericht (Aushub, Haufwerk, Soll/Ist, Zeitreihe; mit Karte)
 4. [ ] NodeODM-Anbindung: Drohnenfotos → Punktwolke in Fixpunkt
 5. [ ] Karte aller Baustellen
 6. [ ] 3D-Ansicht

@@ -1,7 +1,7 @@
 ---
 description: >-
   Aushub mit Fixpunkt berechnen: Aufnahmen hochladen, Abrechnungsgrenzen setzen, zwei Aufnahmen vergleichen,
-  Mengenbericht lesen und als CSV, GeoTIFF oder Ausdruck weitergeben.
+  Mengenbericht lesen und als PDF, CSV oder GeoTIFF weitergeben.
 ---
 
 # Aushub berechnen
@@ -59,9 +59,23 @@ mitgerechnet. Meist deckt dann eine der Aufnahmen den Bereich nicht ganz ab.
 
 Weitergeben:
 
+- **PDF-Bericht** – eine Seite A4 für Bauleitung und Büro, siehe unten
 - **Als CSV** – Tabelle für Excel (Semikolon, Dezimalkomma)
 - **Differenzraster (GeoTIFF)** – Höhenänderung je Rasterzelle, zum Ansehen in QGIS oder im CAD
-- **Drucken** – der Bericht als PDF über den Druckdialog des Browsers
+- **Drucken** – die Seite über den Druckdialog des Browsers
+
+### PDF-Bericht
+
+Der Server erzeugt den Bericht selbst, unabhängig vom Browser: Kopf mit Baustelle, Zeitpunkt der Berechnung,
+Bezugssystem und Rasterweite, die Kennzahlen, die Tabelle je Bereich mit dem Anteil der Fläche, für den beide
+Aufnahmen Daten haben, und eine Karte der Höhenänderung mit den Abrechnungsbereichen, Farbskala und
+Maßstabsleiste. Fehlen Daten, steht die Warnung auch im PDF.
+
+[![Seite 1 eines PDF-Berichts: Kennzahlen, Massen je Bereich und Karte der Höhenänderung mit den Bereichen Grube und Bagger](screenshot-pdf.png){ width="910" height="1263" loading="lazy" }](beispiel-mengenbericht.pdf)
+
+[Beispiel herunterladen (PDF)](beispiel-mengenbericht.pdf). Haufwerk, Soll/Ist und Zeitreihe haben denselben
+Knopf; der Soll/Ist-Bericht zeigt zusätzlich Kennwerte, Restmassen, die Verteilung und eine Karte der
+Abweichung. Der PDF-Bericht ist vorerst nur auf Deutsch.
 
 Haufwerke, Soll/Ist-Vergleiche, Zeitreihen und Exporte stehen unter
 [Haufwerk, Soll/Ist, Zeitreihe, Export](berechnungen.md).

@@ -922,3 +922,159 @@ async fn grids_for_the_2d_view() {
         StatusCode::NOT_FOUND
     );
 }
+
+/// Text aller Seiten eines PDFs, unabhängig vom Erzeuger gelesen (lopdf)
+fn pdf_text(bytes: &[u8]) -> (usize, String) {
+    let pdf = lopdf::Document::load_mem(bytes)
+        .unwrap_or_else(|e| panic!("kein PDF ({e}): {}", String::from_utf8_lossy(bytes)));
+    let pages: Vec<u32> = pdf.get_pages().keys().copied().collect();
+    (pages.len(), pdf.extract_text(&pages).expect("Text lesbar"))
+}
+
+#[tokio::test]
+async fn pdf_reports_for_each_kind() {
+    use fixpunkt_server::report::text;
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(
+            Method::POST,
+            "/api/sites",
+            json!({"name": "Kirchstraße 12"}),
+        )
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let mut ids = Vec::new();
+    for (pit, name) in [(false, "Urgelände"), (true, "Aushub")] {
+        let r = c
+            .upload(
+                &format!("/api/sites/{sid}/captures?file={name}.xyz"),
+                terrain_xyz(pit),
+            )
+            .await;
+        ids.push(r.json()["id"].as_i64().unwrap());
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    let fc =
+        json!({"type": "FeatureCollection", "features": [rect("Grube", 5.0, 5.0, 35.0, 35.0)]});
+    let region = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/regions"),
+            json!({"geojson": fc}),
+        )
+        .await
+        .json()[0]["id"]
+        .as_i64()
+        .unwrap();
+    let job = |kind: &str, params: Value| (kind.to_string(), params);
+    let specs = [
+        job(
+            "volume",
+            json!({"before": ids[0], "after": ids[1], "regionIds": [region]}),
+        ),
+        job(
+            "stockpile",
+            json!({"captureId": ids[0], "regionIds": [region], "base": 299.0}),
+        ),
+        job(
+            "compare",
+            json!({"captureId": ids[1], "regionId": region, "tolerance": 0.05,
+            "design": {"type": "height", "height": 298.0}}),
+        ),
+        job("series", json!({"captureIds": ids})),
+        job("dem", json!({"captureId": ids[0]})),
+    ];
+    let mut jids = Vec::new();
+    for (kind, params) in specs {
+        let r = c
+            .json(
+                Method::POST,
+                &format!("/api/sites/{sid}/jobs"),
+                json!({"kind": kind, "params": params}),
+            )
+            .await;
+        assert_eq!(r.status, StatusCode::CREATED, "{}", r.json());
+        jids.push(r.json()["id"].as_i64().unwrap());
+    }
+    // vor der Berechnung gibt es keinen Bericht
+    assert_eq!(
+        c.get(&format!("/api/jobs/{}/report", jids[0])).await.status,
+        StatusCode::NOT_FOUND
+    );
+    jobs::run_pending(&c.app).await.unwrap();
+
+    // Aushub: Grube 20 × 20 × 2 m = 800 m³, Zahl wie im Ergebnis formatiert, Karte eingebettet
+    let res = c.get(&format!("/api/jobs/{}", jids[0])).await.json();
+    let cut = res["result"]["total"]["cut_m3"].as_f64().unwrap();
+    assert!((cut - 800.0).abs() < 2.0, "{cut}");
+    let r = c.get(&format!("/api/jobs/{}/report", jids[0])).await;
+    assert_eq!(r.status, StatusCode::OK);
+    assert_eq!(r.headers[header::CONTENT_TYPE], "application/pdf");
+    assert_eq!(
+        r.headers[header::CONTENT_DISPOSITION],
+        format!(
+            "attachment; filename=\"Mengenbericht-Kirchstrasse-12-{}.pdf\"",
+            jids[0]
+        )
+        .as_str()
+    );
+    let (pages, t) = pdf_text(&r.body);
+    assert!(pages >= 1);
+    for s in [
+        "Mengenbericht",
+        "Urgelände.xyz » Aushub.xyz",
+        "Kirchstraße 12",
+        "Grube",
+        "ETRS89/UTM32",
+    ] {
+        assert!(t.contains(s), "{s} fehlt: {t}");
+    }
+    assert!(
+        t.contains(&text::volume(cut)),
+        "{} fehlt: {t}",
+        text::volume(cut)
+    );
+    assert!(t.contains("Höhenänderung"), "Karte fehlt: {t}");
+
+    // Haufwerk über 299 m: 30 × 30 m Gelände 300,05…300,35 m → ~1,2 m × 900 m² ≈ 1.080 m³
+    let (_, t) = pdf_text(&c.get(&format!("/api/jobs/{}/report", jids[1])).await.body);
+    assert!(t.contains("Haufwerk") && t.contains("Höhe 299,00 m"), "{t}");
+    assert!(
+        t.contains("1.079,") || t.contains("1.080,"),
+        "≈ 1.080 m³: {t}"
+    );
+
+    // Soll/Ist gegen 298 m: Sohle 298,1–298,3 m (10–30 cm zu hoch), Rand 2 m zu hoch → alles zu hoch;
+    // noch abzutragen = 900 m² × mittlere Abweichung (Mittel × Fläche, unabhängig gerechnet)
+    let res = c.get(&format!("/api/jobs/{}", jids[2])).await.json();
+    let d = &res["result"]["deviation"];
+    let rest = d["mean"].as_f64().unwrap() * 900.0;
+    assert!((d["volume"]["fill_m3"].as_f64().unwrap() - rest).abs() < 1.0);
+    let (_, t) = pdf_text(&c.get(&format!("/api/jobs/{}/report", jids[2])).await.body);
+    assert!(
+        t.contains("Soll/Ist-Vergleich") && t.contains("Sohlhöhe 298,00 m"),
+        "{t}"
+    );
+    assert!(
+        t.contains("100,0 %") && t.contains("Noch abzutragen"),
+        "{t}"
+    );
+    let fill = d["volume"]["fill_m3"].as_f64().unwrap();
+    assert!(t.contains(&text::volume(fill)), "{t}");
+
+    let (_, t) = pdf_text(&c.get(&format!("/api/jobs/{}/report", jids[3])).await.body);
+    assert!(t.contains("Zeitreihe") && t.contains("Aushub"), "{t}");
+
+    // Höhenmodell hat keinen Bericht, unbekannte Aufträge auch nicht
+    assert_eq!(
+        c.get(&format!("/api/jobs/{}/report", jids[4])).await.status,
+        StatusCode::NOT_FOUND
+    );
+    assert_eq!(
+        c.get("/api/jobs/999/report").await.status,
+        StatusCode::NOT_FOUND
+    );
+}

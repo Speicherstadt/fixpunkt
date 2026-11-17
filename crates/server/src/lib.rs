@@ -10,6 +10,7 @@ pub mod db;
 pub mod error;
 pub mod events;
 pub mod jobs;
+pub mod report;
 pub mod sites;
 pub mod state;
 pub mod ui;

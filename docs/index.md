@@ -75,7 +75,7 @@ in Länge/Breite.
 ## Abtrag, Auftrag, Bilanz – je Bereich
 
 Zwei Aufnahmen auswählen, „Aushub berechnen“, fertig. Der Bericht zeigt die Massen je Abrechnungsbereich,
-warnt bei Lücken in den Daten und geht als CSV, Differenzraster (GeoTIFF) oder Ausdruck an Bauleitung und Büro.
+warnt bei Lücken in den Daten und geht als PDF mit Karte, als CSV oder Differenzraster (GeoTIFF) an Bauleitung und Büro.
 
 [Aushub berechnen](aushub.md)
 </div>

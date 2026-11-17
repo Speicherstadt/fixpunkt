@@ -17,6 +17,13 @@ export const KIND_TEXT: Record<JobKind, () => string> = {
   export: m.kind_export,
 };
 
+/** Arten mit PDF-Bericht vom Server (`GET /api/jobs/{id}/report`) */
+const REPORT_KINDS = new Set(["volume", "stockpile", "compare", "series"]);
+
+/** Adresse des PDF-Berichts, solange es einen gibt (fertig und passende Art) */
+export const reportHref = (job: Pick<Job, "id" | "kind" | "status">): string | null =>
+  job.status === "done" && REPORT_KINDS.has(job.kind) ? `/api/jobs/${job.id}/report` : null;
+
 type Names = (id: unknown) => string;
 
 /** Titel eines Auftrags in Liste und Bericht */

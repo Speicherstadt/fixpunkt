@@ -256,7 +256,7 @@ async fn file(app: &AppRef, site_id: i64, id: i64) -> Result<PathBuf> {
     Ok(capture(app, site_id, id).await?.1)
 }
 
-async fn regions(app: &AppRef, site_id: i64, ids: &[i64]) -> Result<Vec<Region>> {
+pub(crate) async fn regions(app: &AppRef, site_id: i64, ids: &[i64]) -> Result<Vec<Region>> {
     let mut out = Vec::new();
     for id in ids {
         let (name, gj): (String, String) =

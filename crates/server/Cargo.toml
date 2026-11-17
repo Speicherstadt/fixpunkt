@@ -21,9 +21,11 @@ argon2 = "0.6"
 axum = { version = "0.8", features = ["macros"] }
 axum-extra = { version = "0.12", features = ["cookie"] }
 fixpunkt-processing = { path = "../processing" }
+flate2 = "1.1.11"
 futures = "0.3.34"
 hex = "0.4.3"
 mime_guess = "2.0.5"
+pdf-writer = "0.15.0"
 rand = "0.10"
 rust-embed = { version = "8", features = ["debug-embed"] }
 serde = { version = "1.0.229", features = ["derive"] }
@@ -40,6 +42,7 @@ tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 
 [dev-dependencies]
 http-body-util = "0.1.5"
+lopdf = "0.47.0"
 tempfile = "3.27.0"
 tower = { version = "0.5", features = ["util"] }
 

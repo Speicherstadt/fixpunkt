@@ -48,6 +48,19 @@ test("Aushub einer Baugrube berechnen", async ({ page }, info) => {
   // unter dem Bagger wurde gemessen (nur eben der Bagger): aufgefüllt, also keine Lücken-Warnung
   await expect(page.getByRole("note")).toHaveCount(0);
 
+  // PDF-Bericht vom Server: dieselbe Zahl wie auf der Seite. Die Textströme sind unkomprimiert;
+  // Text mit Umlauten oder ³ steht als WinAnsi-Hex <…> darin
+  const pdf = page.waitForEvent("download");
+  await page.getByRole("link", { name: "PDF-Bericht" }).click();
+  const download = await pdf;
+  expect(download.suggestedFilename()).toMatch(/^Mengenbericht-Baugrube-Kirchstrasse-\d+\.pdf$/);
+  const text = (await import("node:fs")).readFileSync((await download.path())!).toString("latin1");
+  const hex = (s: string) => `<${Buffer.from(s, "latin1").toString("hex").toUpperCase()}>`;
+  expect(text.startsWith("%PDF-")).toBe(true);
+  expect(text).toContain("(Mengenbericht)");
+  expect(text).toContain(hex("Baugrube Kirchstraße"));
+  expect(text).toContain(hex(cut!.trim().replace(/\s/g, " ")));
+
   // Downloads
   const csv = page.waitForEvent("download");
   await page.getByRole("link", { name: "Als CSV" }).click();

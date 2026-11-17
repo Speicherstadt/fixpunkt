@@ -154,6 +154,7 @@
   "report_method": "Grid method, cell size {cm} cm. Balance = fill − cut.",
   "report_method_stockpile": "Grid method, cell size {cm} cm. Volume above the base surface per area.",
   "report_net": "Balance",
+  "report_pdf": "PDF report",
   "report_print": "Print",
   "report_region": "Area",
   "report_status": "Status",

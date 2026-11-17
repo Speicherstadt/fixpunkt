@@ -44,7 +44,8 @@ Dazu einen **Bereich** (am besten nur die Sohle, nicht den Grubenrand) und die *
 
 Der Bericht zeigt den Anteil der Fläche **in Toleranz**, **zu hoch** und **zu tief**, die Verteilung der
 Abweichung und die **Restmassen**: was noch abzutragen und was aufzufüllen ist. Das Abweichungsraster
-(GeoTIFF) zeigt in QGIS, *wo* nachgearbeitet werden muss.
+(GeoTIFF) zeigt in QGIS, *wo* nachgearbeitet werden muss. Der **PDF-Bericht** fasst alles zusammen, mit
+einer Karte der Abweichung (orange: zu hoch, blau: zu tief).
 
 ## Zeitreihe
 

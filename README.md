@@ -5,7 +5,7 @@
 <h1>Fixpunkt: Aushub und Haufwerke aus Drohnenflügen berechnen</h1>
 
 **Selbst gehostete Massenermittlung für Baustellen: Punktwolke oder Höhenmodell hochladen, Abrechnungsgrenze setzen, Mengenbericht in m³.**<br>
-Vergleicht Urgelände und Aushub je Abrechnungsbereich, rechnet Bagger und Bewuchs heraus und gibt den Bericht als CSV, GeoTIFF oder Ausdruck weiter.<br>
+Vergleicht Urgelände und Aushub je Abrechnungsbereich, rechnet Bagger und Bewuchs heraus und gibt den Bericht als PDF, CSV oder GeoTIFF weiter.<br>
 Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf deinem Server.
 
 [![CI](https://github.com/firsttris/fixpunkt/actions/workflows/ci.yml/badge.svg)](https://github.com/firsttris/fixpunkt/actions/workflows/ci.yml)
@@ -61,7 +61,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus.
 - Haufwerke gegen Basisfläche, Zeitreihe über die Bauphase
 - Soll/Ist gegen Sohlhöhe, geneigte Ebene oder Soll-DGM
 - Bodenfilter für Bagger, Container und Bewuchs
-- Bericht als CSV, GeoTIFF, Ausdruck
+- Bericht als PDF mit Karte, als CSV oder GeoTIFF
 
 </td>
 <td width="50%" valign="top">

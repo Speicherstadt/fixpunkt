@@ -1,3 +1,4 @@
+import { spawnSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import { type Api, apiFor } from "./api";
@@ -197,6 +198,27 @@ test("Mengenbericht und Vorschaubild @screenshots", async () => {
   await setTheme("light");
   await page.screenshot({ path: `${DOCS}/social-preview.png` });
   await page.setViewportSize(DESKTOP);
+});
+
+/**
+ * PDF-Bericht als Beispiel zum Herunterladen und Seite 1 als Vorschaubild (pdftoppm aus poppler-utils;
+ * fehlt es, bleibt das alte Bild)
+ */
+test("PDF-Bericht @screenshots", async () => {
+  await go(`/jobs/${reportJob}`);
+  const pdf = page.waitForEvent("download");
+  await page.getByRole("link", { name: "PDF-Bericht" }).click();
+  const file = `${DOCS}/beispiel-mengenbericht.pdf`;
+  await (await pdf).saveAs(file);
+  const render = spawnSync("pdftoppm", [
+    "-png",
+    "-singlefile",
+    "-r",
+    "110",
+    file,
+    `${DOCS}/screenshot-pdf`,
+  ]);
+  if (render.error) console.warn("pdftoppm fehlt, Vorschaubild nicht erneuert");
 });
 
 test("Soll/Ist @screenshots", async () => {

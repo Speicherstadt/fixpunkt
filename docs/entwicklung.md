@@ -40,13 +40,14 @@ bun run e2e
 ## Screenshots und Doku
 
 ```bash
-bun run docs:screenshots          # docs/screenshot-*.png und social-preview.png neu aufnehmen
+bun run docs:screenshots          # docs/screenshot-*.png, social-preview.png und beispiel-mengenbericht.pdf neu
 pip install -r requirements-docs.txt
 zensical serve                    # Doku unter http://localhost:8000
 ```
 
 In GitHub: **Actions → Update screenshots → Run workflow** nimmt die Bilder auf und committet, was sich geändert
-hat. Die Doku baut [Zensical](https://zensical.org/) bei jedem Push auf `main` nach GitHub Pages.
+hat. Das Vorschaubild des PDF-Berichts (`screenshot-pdf.png`) rendert `pdftoppm` aus poppler-utils; fehlt es
+lokal, bleibt das alte Bild. Die Doku baut [Zensical](https://zensical.org/) bei jedem Push auf `main` nach GitHub Pages.
 
 ## Release
 

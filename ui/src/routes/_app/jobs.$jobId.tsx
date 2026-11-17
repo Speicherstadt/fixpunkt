@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Download, FileSpreadsheet, Printer } from "lucide-react";
+import { ArrowLeft, Download, FileSpreadsheet, FileText, Printer } from "lucide-react";
 import type { ReactNode } from "react";
 import { ErrorText, PageHeader, Section } from "@/components/page";
 import { CompareReport } from "@/components/report/compare-report";
@@ -15,7 +15,7 @@ import { StatusBadge } from "@/components/ui/status";
 import { CompareResult, FilesResult, type Job, SeriesResult, VolumeResult } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatDateTime } from "@/lib/format";
-import { jobTitle } from "@/lib/jobs";
+import { jobTitle, reportHref } from "@/lib/jobs";
 import { capturesQuery, jobQuery, siteQuery } from "@/lib/queries";
 import { reportCsv, reportRows } from "@/lib/report";
 import { m } from "@/paraglide/messages";
@@ -72,6 +72,17 @@ function csvLink(job: Job) {
 }
 
 /** Raster-Download (Differenz, Abweichung) für Berichte, die eines schreiben */
+function pdfLink(job: Job) {
+  const href = reportHref(job);
+  if (!href) return null;
+  return (
+    <a href={href} download className={buttonVariants({ variant: "primary" })}>
+      <FileText size={16} aria-hidden="true" />
+      {m.report_pdf()}
+    </a>
+  );
+}
+
 function rasterLink(job: Job) {
   const files = FilesResult.safeParse(job.result);
   const raster = files.success
@@ -131,6 +142,7 @@ function JobPage() {
         actions={
           <div className="flex flex-wrap gap-2 print:hidden">
             {back}
+            {pdfLink(j)}
             {csvLink(j)}
             {rasterLink(j)}
             <Button onClick={() => window.print()}>

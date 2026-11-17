@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Job } from "@/lib/api";
-import { chronological, jobSummary, jobTitle } from "@/lib/jobs";
+import { chronological, jobSummary, jobTitle, reportHref } from "@/lib/jobs";
 
 const job = (kind: string, params: Record<string, unknown>, result: unknown = null): Job => ({
   id: 1,
@@ -76,5 +76,13 @@ describe("jobs", () => {
       { id: 2, capturedAt: 10 },
     ];
     expect(chronological(items).map((i) => i.id)).toEqual([1, 2, 3]);
+  });
+
+  it("bietet den PDF-Bericht nur für fertige Mengen, Soll/Ist und Zeitreihen an", () => {
+    expect(reportHref({ id: 7, kind: "volume", status: "done" })).toBe("/api/jobs/7/report");
+    expect(reportHref({ id: 7, kind: "series", status: "done" })).toBe("/api/jobs/7/report");
+    expect(reportHref({ id: 7, kind: "volume", status: "running" })).toBeNull();
+    expect(reportHref({ id: 7, kind: "export", status: "done" })).toBeNull();
+    expect(reportHref({ id: 7, kind: "dem", status: "done" })).toBeNull();
   });
 });

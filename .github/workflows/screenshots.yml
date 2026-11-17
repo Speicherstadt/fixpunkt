@@ -33,9 +33,9 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
-      # C-Compiler für SQLite im Rust-Build, curl für rustup
+      # C-Compiler für SQLite im Rust-Build, curl für rustup, pdftoppm für das Vorschaubild des PDF-Berichts
       - name: Build-Werkzeuge
-        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl
+        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl poppler-utils
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
         with:
@@ -53,4 +53,5 @@ jobs:
           paths: |
             docs/screenshot-*.png
             docs/social-preview.png
+            docs/beispiel-mengenbericht.pdf
           message: Screenshots erneuert

@@ -39,6 +39,8 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `captures.rs` | Hochladen (gestreamt), Herunterladen, Löschen |
 | `jobs/` | Warteschlange in SQLite, Worker im Prozess, übersteht Neustarts; `spec.rs`: Auftragsarten mit typisierten Parametern |
 | `compute/` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, Zeitreihe (`volume.rs`), Soll/Ist (`compare.rs`), Exporte (`export.rs`) |
+| `view.rs` | Höhenraster für die 2D-Ansicht als Float32 (`/api/captures/{id}/grid`, `/api/jobs/{id}/grid/{name}`), je Aufnahme zwischengespeichert |
+| `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer) |
 | `ui.rs` | eingebettete UI mit ETag, Weiterleitung auf Vite in der Entwicklung |
 | `error.rs` | Fehler als Schlüssel; die UI zeigt den Text in der gewählten Sprache |
 
