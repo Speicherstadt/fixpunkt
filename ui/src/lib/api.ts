@@ -346,11 +346,104 @@ export const Region = z.object({
   material: z.string().nullable().optional(),
   targetM3: z.number().nullable().optional(),
   targetKind: z.enum(["cut", "fill", "stock"]).nullable().optional(),
+  /** Abrechnung: Leistungsposition, Einheitspreis in €, Preiseinheit */
+  lvPosition: z.string().nullable().optional(),
+  unitPrice: z.number().nullable().optional(),
+  priceUnit: z.enum(["m3", "m3_loose", "t"]).nullable().optional(),
 });
 export type Region = z.infer<typeof Region>;
 
 export type TargetKind = "cut" | "fill" | "stock";
-export type RegionTarget = { material?: string; targetM3?: number; targetKind?: TargetKind };
+export type PriceUnit = "m3" | "m3_loose" | "t";
+export type RegionTarget = {
+  material?: string;
+  targetM3?: number;
+  targetKind?: TargetKind;
+  lvPosition?: string;
+  unitPrice?: number;
+  priceUnit?: PriceUnit;
+};
+
+/** Kennwerte je Material (Dichte t/m³ fest, Auflockerung lose/fest) und LKW-Nutzlast in t */
+export const BillingSettings = z.object({
+  truckT: z.number().nullable(),
+  materials: z.array(
+    z.object({ name: z.string(), density: z.number().nullable(), bulking: z.number().nullable() }),
+  ),
+});
+export type BillingSettings = z.infer<typeof BillingSettings>;
+
+/** Menge in allen Einheiten (crates/server/src/billing/convert.rs) */
+const Quantities = z.object({
+  bankM3: z.number(),
+  looseM3: z.number().nullable(),
+  tonnes: z.number().nullable(),
+  loads: z.number().nullable(),
+});
+const StatementCapture = z.object({ id: z.number(), name: z.string(), at: z.number() });
+
+/** Aufmaß eines Zeitraums (crates/server/src/billing/statement.rs) */
+export const Statement = z.object({
+  base: StatementCapture,
+  from: StatementCapture,
+  to: StatementCapture,
+  missing: z.array(z.string()),
+  truckT: z.number().nullable(),
+  amount: z.number().nullable(),
+  unpriced: z.number(),
+  unconverted: z.number(),
+  positions: z.array(
+    z.object({
+      regionId: z.number(),
+      name: z.string(),
+      lvPosition: z.string().nullable(),
+      material: z.string().nullable(),
+      kind: z.string(),
+      previous: z.number().nullable(),
+      total: z.number().nullable(),
+      period: Quantities.nullable(),
+      unit: z.enum(["m3", "m3_loose", "t"]).nullable(),
+      unitPrice: z.number().nullable(),
+      quantity: z.number().nullable(),
+      amount: z.number().nullable(),
+    }),
+  ),
+  checks: z.array(
+    z.object({
+      material: z.string().nullable(),
+      count: z.number(),
+      delivered: z.array(z.tuple([z.enum(["t", "m3", "loads"]), z.number()])),
+      deliveredBank: z.number().nullable(),
+      measuredBank: z.number().nullable(),
+      deviationPercent: z.number().nullable(),
+    }),
+  ),
+});
+export type Statement = z.infer<typeof Statement>;
+
+export const DeliveryUnit = z.enum(["t", "m3", "loads"]);
+export type DeliveryUnit = z.infer<typeof DeliveryUnit>;
+
+/** Lieferschein oder Wiegeschein */
+export const Delivery = z.object({
+  id: z.number(),
+  siteId: z.number(),
+  deliveredAt: z.number(),
+  material: z.string().nullable(),
+  quantity: z.number(),
+  unit: DeliveryUnit,
+  reference: z.string().nullable(),
+  createdAt: z.number(),
+});
+export type Delivery = z.infer<typeof Delivery>;
+export type NewDelivery = {
+  /** `2026-11-17` */
+  date: string;
+  material?: string;
+  quantity: number;
+  unit: DeliveryUnit;
+  reference?: string;
+};
 
 export const VolumeReport = z.object({
   area_m2: z.number(),
@@ -537,6 +630,20 @@ export const api = {
     request("POST", `/sites/${siteId}/markers`, Marker, m),
   deleteMarker: (id: number) => request("DELETE", `/markers/${id}`, Empty),
   plans: (siteId: number) => request("GET", `/sites/${siteId}/plans`, z.array(Plan)),
+  billingSettings: (siteId: number) =>
+    request("GET", `/sites/${siteId}/billing/settings`, BillingSettings),
+  saveBillingSettings: (siteId: number, s: BillingSettings) =>
+    request("PUT", `/sites/${siteId}/billing/settings`, BillingSettings, s),
+  statement: (siteId: number, from: number, to: number) =>
+    request(
+      "GET",
+      `/sites/${siteId}/billing?${new URLSearchParams({ from: String(from), to: String(to) })}`,
+      Statement,
+    ),
+  deliveries: (siteId: number) => request("GET", `/sites/${siteId}/deliveries`, z.array(Delivery)),
+  addDelivery: (siteId: number, d: NewDelivery) =>
+    request("POST", `/sites/${siteId}/deliveries`, Delivery, d),
+  deleteDelivery: (id: number) => request("DELETE", `/deliveries/${id}`, Empty),
   planGeometry: (id: number) => request("GET", `/plans/${id}/geometry`, PlanGeometry),
   deletePlan: (id: number) => request("DELETE", `/plans/${id}`, Empty),
   georefFit: (mode: string, points: unknown[]) =>
@@ -581,6 +688,19 @@ export const uploadPhoto = (
     Marker,
     onProgress,
   );
+
+/** Lieferscheine als CSV einlesen */
+export const importDeliveries = (siteId: number, file: File) =>
+  putFile(
+    `/api/sites/${siteId}/deliveries.csv`,
+    file,
+    z.object({ imported: z.number() }),
+    () => {},
+  );
+
+/** Aufmaßblatt als PDF */
+export const statementPdfHref = (siteId: number, from: number, to: number) =>
+  `/api/sites/${siteId}/billing.pdf?${new URLSearchParams({ from: String(from), to: String(to) })}`;
 
 /** DXF-Plan hochladen */
 export const uploadPlan = (siteId: number, file: File): Promise<Plan> =>

@@ -7,6 +7,7 @@ describe("staleKeys", () => {
       ["job", 7],
       ["jobs", 3],
       ["dashboard", 3],
+      ["billing", 3],
       ["sites"],
     ]);
   });
@@ -15,6 +16,7 @@ describe("staleKeys", () => {
     expect(staleKeys({ type: "changed", topic: "captures", siteId: 3 })).toEqual([
       ["captures", 3],
       ["dashboard", 3],
+      ["billing", 3],
       ["sites"],
     ]);
     expect(staleKeys({ type: "changed", topic: "sites", siteId: null })).toEqual([
@@ -25,6 +27,12 @@ describe("staleKeys", () => {
     expect(staleKeys({ type: "changed", topic: "regions" })).toEqual([
       ["regions"],
       ["dashboard"],
+      ["billing"],
+      ["sites"],
+    ]);
+    expect(staleKeys({ type: "changed", topic: "billing", siteId: 3 })).toEqual([
+      ["billing", 3],
+      ["dashboard", 3],
       ["sites"],
     ]);
   });

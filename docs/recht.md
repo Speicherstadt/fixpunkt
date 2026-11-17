@@ -157,8 +157,9 @@ aufzuheben (bei Bauwerken in der Regel fünf Jahre nach Abnahme, **§ 634a BGB**
 **Während der Arbeiten**
 
 - [ ] in festen Abständen fliegen (z. B. monatlich zur Abschlagsrechnung)
-- [ ] Mengenbericht als PDF der Rechnung beilegen
-- [ ] auf den ersten Baustellen Lieferscheine bzw. LKW-Ladungen mitführen und mit der gemessenen Menge vergleichen
+- [ ] Aufmaßblatt des Zeitraums als PDF der Rechnung beilegen ([Abrechnung](abrechnung.md))
+- [ ] auf den ersten Baustellen Lieferscheine bzw. LKW-Ladungen in Fixpunkt einlesen und mit der gemessenen Menge
+  vergleichen
 
 **Danach**
 
@@ -184,7 +185,8 @@ Den Text an den Vertrag anpassen, etwa wenn nach Tonnen oder LKW-Ladungen abgere
 
 | Anforderung | In Fixpunkt |
 |---|---|
-| prüfbare Mengenberechnung (§ 650g BGB, § 14 VOB/B) | Mengenbericht als PDF mit Karte, Bereichen, Mengen und Berechnungsgrundlagen ([Aushub berechnen](aushub.md#4-mengenbericht)) |
+| prüfbare Mengenberechnung (§ 650g BGB, § 14 VOB/B) | Mengenbericht als PDF mit Karte, Bereichen, Mengen und Berechnungsgrundlagen ([Aushub berechnen](aushub.md#4-mengenbericht)); Aufmaßblatt je Zeitraum mit LV-Position, Preis und Betrag ([Abrechnung](abrechnung.md)) |
+| Plausibilisierung | Lieferscheine und Wiegescheine einlesen, Abweichung zur gemessenen Menge je Material ([Abrechnung](abrechnung.md#abgleich)) |
 | gemeinsame Feststellung des Urgeländes | jede Aufnahme bleibt unverändert gespeichert, mit Datum; Bericht je Stand |
 | nachvollziehbar und wiederholbar | gleiche Daten und Einstellungen ergeben dieselbe Menge; Verfahren offen beschrieben ([Methode](methode.md)) |
 | Genauigkeit belegbar | Rechnung gegen bekannte Formeln geprüft; Kontrollpunkte und Passpunkte mit Restklaffen |

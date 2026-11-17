@@ -205,6 +205,9 @@ mod tests {
             material: material.map(Into::into),
             target_m3: target.map(|t| t.0),
             target_kind: target.map(|t| t.1.into()),
+            lv_position: None,
+            unit_price: None,
+            price_unit: None,
         }
     }
 

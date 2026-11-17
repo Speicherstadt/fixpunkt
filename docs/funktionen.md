@@ -1,7 +1,8 @@
 ---
 description: >-
   Funktionsumfang von Fixpunkt: Daten hochladen, Drohnenfotos auswerten, Flug planen, ansehen und messen,
-  Aushub, Haufwerk, Soll/Ist, Massenziele und Lagerbestand, Dokumentation, Berichte, Export und Betrieb.
+  Aushub, Haufwerk, Soll/Ist, Massenziele und Lagerbestand, Abrechnung mit Lieferscheinen, Dokumentation,
+  Berichte, Export und Betrieb.
 ---
 
 # Funktionsumfang
@@ -46,6 +47,14 @@ steht in der [Roadmap](roadmap.md).
 - **Lagerbestand** je Material aus den Haufwerken, mit Änderung und Verlauf über die Befliegungen
   ([Material und Massenziel](aushub.md#material-und-massenziel))
 
+## Abrechnung
+
+- **Aufmaß je Zeitraum** zwischen zwei Befliegungen, mit LV-Position, Einheitspreis und Betrag, als PDF
+  ([Abrechnung](abrechnung.md))
+- **Umrechnung** in Tonnen, m³ lose und LKW-Fahrten über Dichte, Auflockerung und Nutzlast
+- **Lieferscheine** einzeln oder als CSV, mit Abgleich gegen die gemessene Menge
+- rechtlicher Rahmen: [Abrechnung und Recht](recht.md)
+
 ## Soll/Ist
 
 - gegen **Sohlhöhe, geneigte Ebene** oder ein **Soll-Geländemodell**, mit Toleranz, Statistik, Histogramm und
@@ -65,8 +74,7 @@ steht in der [Roadmap](roadmap.md).
   Aufmerksamkeit braucht – von jedem selbst zusammengestellt ([Erste Schritte](erste-schritte.md#überblick-einer-baustelle))
 - **PDF-Berichte:** Mengenbericht mit Karte, Haufwerk, Soll/Ist, Zeitreihe, Dokumentation mit Fotos, Plan/Ist und
   ein eigener Bericht aus Bausteinen
-- Mengenberichte als prüfbarer Beleg zur Rechnung – was dafür rechtlich gilt, steht unter
-  [Abrechnung und Recht](recht.md)
+- **Aufmaßblatt** je Abrechnungszeitraum
 
 ## Export
 

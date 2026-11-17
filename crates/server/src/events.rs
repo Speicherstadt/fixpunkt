@@ -28,6 +28,8 @@ pub enum Topic {
     Users,
     Markers,
     Plans,
+    /// Abrechnung: Kennwerte, Lieferscheine
+    Billing,
 }
 
 #[derive(Clone)]

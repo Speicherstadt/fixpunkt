@@ -47,3 +47,29 @@ export const formatDuration = (ms: number): string => {
     ? `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, "0")} min`
     : `${min} min`;
 };
+
+/** Tag ohne Uhrzeit, der als Mitternacht UTC gespeichert ist (Lieferscheine) */
+export const formatDay = (ms: number): string =>
+  new Intl.DateTimeFormat(getLocale(), { dateStyle: "medium", timeZone: "UTC" }).format(
+    new Date(ms),
+  );
+
+/** Betrag in Euro: „12.740,00 €“ */
+export const formatEuro = (v: number): string =>
+  new Intl.NumberFormat(getLocale(), { style: "currency", currency: "EUR" }).format(v);
+
+/**
+ * Zahl aus einem Eingabefeld: „1.234,5“ (deutsch), „12,5“, „12.5“ und „1.000“ (Tausenderpunkt);
+ * leer oder unlesbar ergibt `undefined`
+ */
+export const parseDecimal = (s: string): number | undefined => {
+  const t = s.trim().replace(/\s/g, "");
+  if (!t) return undefined;
+  const normalized = t.includes(",")
+    ? t.replace(/\./g, "").replace(",", ".")
+    : /^-?\d{1,3}(\.\d{3})+$/.test(t)
+      ? t.replace(/\./g, "")
+      : t;
+  const v = Number(normalized);
+  return Number.isFinite(v) ? v : undefined;
+};

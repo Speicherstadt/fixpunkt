@@ -4,7 +4,7 @@ import { z } from "zod";
 const ServerEvent = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("changed"),
-    topic: z.enum(["sites", "captures", "regions", "jobs", "users", "markers", "plans"]),
+    topic: z.enum(["sites", "captures", "regions", "jobs", "users", "markers", "plans", "billing"]),
     siteId: z.number().nullable().optional(),
   }),
   z.object({ type: z.literal("job"), id: z.number(), siteId: z.number(), status: z.string() }),
@@ -14,20 +14,25 @@ type ServerEvent = z.infer<typeof ServerEvent>;
 /** Welche Abfragen ein Ereignis veraltet macht */
 export const staleKeys = (e: ServerEvent): unknown[][] => {
   if (e.type === "job")
-    return [["job", e.id], ["jobs", e.siteId], ["dashboard", e.siteId], ["sites"]];
+    return [
+      ["job", e.id],
+      ["jobs", e.siteId],
+      ["dashboard", e.siteId],
+      ["billing", e.siteId],
+      ["sites"],
+    ];
   const site = e.siteId ?? undefined;
   switch (e.topic) {
     case "sites":
       return [["sites"], ["site"]];
     case "users":
       return [["users"]];
-    default:
-      // alles, was zu einer Baustelle gehört, steht auch im Überblick
-      return [
-        [e.topic, ...(site === undefined ? [] : [site])],
-        ["dashboard", ...(site === undefined ? [] : [site])],
-        ["sites"],
-      ];
+    default: {
+      const of = (key: string) => [key, ...(site === undefined ? [] : [site])];
+      // alles, was zu einer Baustelle gehört, steht auch im Überblick und kann das Aufmaß ändern
+      const billing = e.topic === "billing" ? [] : [of("billing")];
+      return [of(e.topic), of("dashboard"), ...billing, ["sites"]];
+    }
   }
 };
 

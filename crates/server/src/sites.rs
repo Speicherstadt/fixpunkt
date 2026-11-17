@@ -216,14 +216,21 @@ pub async fn create_regions(
     Ok((StatusCode::CREATED, Json(out)))
 }
 
-/// Material und Massenziel eines Bereichs; was fehlt oder leer ist, wird gelöscht
-#[derive(Debug, Deserialize)]
+/// Material, Massenziel und Preis eines Bereichs; was fehlt oder leer ist, wird gelöscht
+#[derive(Debug, Default, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RegionPatch {
     name: Option<String>,
     material: Option<String>,
     target_m3: Option<f64>,
     target_kind: Option<String>,
+    lv_position: Option<String>,
+    unit_price: Option<f64>,
+    price_unit: Option<String>,
+}
+
+fn trimmed(s: Option<String>) -> Option<String> {
+    s.map(|m| m.trim().to_string()).filter(|m| !m.is_empty())
 }
 
 pub fn validate_target(p: &RegionPatch) -> ApiResult<()> {
@@ -232,6 +239,17 @@ pub fn validate_target(p: &RegionPatch) -> ApiResult<()> {
         .is_some_and(|t| !t.is_finite() || t <= 0.0 || t > 1e8)
     {
         return bad("Soll-Menge");
+    }
+    if p.unit_price
+        .is_some_and(|t| !t.is_finite() || t < 0.0 || t > 1e6)
+    {
+        return bad("Einheitspreis");
+    }
+    if !matches!(
+        p.price_unit.as_deref(),
+        None | Some("m3") | Some("m3_loose") | Some("t")
+    ) {
+        return bad("Preiseinheit: m3, m3_loose oder t");
     }
     match p.target_kind.as_deref() {
         None | Some("cut") | Some("fill") | Some("stock") => Ok(()),
@@ -251,10 +269,12 @@ pub async fn update_region(
         .await?
         .ok_or_else(ApiError::not_found)?;
     let name = clean_name(p.name).unwrap_or(r.name);
-    let material = p
-        .material
-        .map(|m| m.trim().to_string())
-        .filter(|m| !m.is_empty());
+    let material = trimmed(p.material);
+    // ein Lager wird nicht abgerechnet; ein Preis gilt nur mit Einheit (Standard: m³ fest)
+    let stock = p.target_kind.as_deref() == Some("stock");
+    let price = p.unit_price.filter(|_| !stock);
+    let unit = price.map(|_| p.price_unit.unwrap_or_else(|| "m3".into()));
+    let position = trimmed(p.lv_position).filter(|_| !stock);
     // Lager (Haufwerk) braucht keine Soll-Menge; Abtrag/Auftrag nur mit einer
     let (kind, target) = match p.target_kind.as_deref() {
         Some("stock") => (Some("stock".to_string()), None),
@@ -265,12 +285,16 @@ pub async fn update_region(
         ),
     };
     sqlx::query(
-        "UPDATE regions SET name = ?, material = ?, target_m3 = ?, target_kind = ? WHERE id = ?",
+        "UPDATE regions SET name = ?, material = ?, target_m3 = ?, target_kind = ?, lv_position = ?,
+           unit_price = ?, price_unit = ? WHERE id = ?",
     )
     .bind(&name)
     .bind(material)
     .bind(target)
     .bind(kind)
+    .bind(position)
+    .bind(price)
+    .bind(unit)
     .bind(id)
     .execute(&app.db)
     .await?;

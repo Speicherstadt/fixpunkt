@@ -150,6 +150,32 @@ pub async fn custom(
     Ok(pdf_response(render(doc).await?, name))
 }
 
+/// Aufmaßblatt eines Zeitraums: `GET /api/sites/{id}/billing.pdf?from=&to=`
+pub async fn billing(
+    State(app): State<AppRef>,
+    Path(site): Path<i64>,
+    axum::extract::Query(p): axum::extract::Query<crate::billing::Period>,
+) -> ApiResult<Response> {
+    let (s, statement) = crate::billing::compute(&app, site, &p).await?;
+    let settings = crate::billing::load_settings(&app, site).await?;
+    let materials: Vec<(String, Option<f64>, Option<f64>)> = settings
+        .materials
+        .into_iter()
+        .map(|(n, p)| (n, p.density, p.bulking))
+        .collect();
+    let ctx = SiteContext {
+        site: s.name.clone(),
+        epsg: s.epsg,
+        now: now_ms(),
+        against: statement["to"]["name"].as_str().map(Into::into),
+    };
+    let doc = super::billing::billing_doc(&ctx, &statement, &materials);
+    Ok(pdf_response(
+        render(doc).await?,
+        file_name("Aufmass", &s.name, site),
+    ))
+}
+
 pub async fn plan(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult<Response> {
     let (site, name): (i64, String) =
         sqlx::query_as("SELECT site_id, name FROM plans WHERE id = ?")

@@ -39,6 +39,22 @@ export const flightPlanQuery = (regionId: number, query: string) =>
   });
 export const layoutQuery = (siteId: number) =>
   queryOptions({ queryKey: ["layout", siteId], queryFn: () => api.layout(siteId) });
+/** Abrechnung: alles unter ["billing", siteId], damit ein Ereignis alles neu lädt */
+export const billingSettingsQuery = (siteId: number) =>
+  queryOptions({
+    queryKey: ["billing", siteId, "settings"],
+    queryFn: () => api.billingSettings(siteId),
+  });
+export const statementQuery = (siteId: number, from: number, to: number) =>
+  queryOptions({
+    queryKey: ["billing", siteId, "statement", from, to],
+    queryFn: () => api.statement(siteId, from, to),
+  });
+export const deliveriesQuery = (siteId: number) =>
+  queryOptions({
+    queryKey: ["billing", siteId, "deliveries"],
+    queryFn: () => api.deliveries(siteId),
+  });
 export const dashboardQuery = (siteId: number) =>
   queryOptions({ queryKey: ["dashboard", siteId], queryFn: () => api.dashboard(siteId) });
 export const markersQuery = (siteId: number) =>

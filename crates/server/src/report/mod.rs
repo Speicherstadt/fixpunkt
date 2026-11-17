@@ -1,6 +1,7 @@
 //! PDF-Bericht eines fertigen Auftrags: `GET /api/jobs/{id}/report`. Aushub, Haufwerk, Soll/Ist und
 //! Zeitreihe; der Inhalt entsteht in `build` (reine Funktionen), das Layout in `pdf`.
 
+pub mod billing;
 pub mod build;
 pub mod custom;
 pub mod doc;

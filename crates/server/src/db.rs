@@ -84,6 +84,10 @@ pub struct RegionRow {
     pub material: Option<String>,
     pub target_m3: Option<f64>,
     pub target_kind: Option<String>,
+    /// Abrechnung: Leistungsposition, Einheitspreis in €, Preiseinheit `m3`, `m3_loose` oder `t`
+    pub lv_position: Option<String>,
+    pub unit_price: Option<f64>,
+    pub price_unit: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, FromRow)]

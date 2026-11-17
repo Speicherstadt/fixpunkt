@@ -50,6 +50,9 @@ Bestand kommt aus der [Haufwerk-Berechnung](berechnungen.md#haufwerk) je Beflieg
 ohne neue Messung zählt im Verlauf mit seinem letzten Wert. Abtrag in der Grube und Bestand auf der Halde werden bewusst nicht
 gegeneinander gerechnet: gelöster Boden nimmt auf der Halde etwa 10–30 % mehr Raum ein.
 
+Im selben Formular stehen **LV-Position, Einheitspreis und Preiseinheit** für das Aufmaß; mehr unter
+[Abrechnung](abrechnung.md).
+
 ## 3. Berechnen
 
 Unter **Berechnungen**:

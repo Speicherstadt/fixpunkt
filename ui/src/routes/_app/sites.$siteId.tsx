@@ -3,6 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ErrorText, PageHeader } from "@/components/page";
+import { Billing } from "@/components/site/billing";
 import { Calculations } from "@/components/site/calculations";
 import { Captures } from "@/components/site/captures";
 import { Documentation } from "@/components/site/documentation";
@@ -58,6 +59,7 @@ function SitePage() {
           <Regions siteId={siteId} canEdit={canEdit} />
           <Calculations siteId={siteId} canEdit={canEdit} />
         </div>
+        <Billing siteId={siteId} canEdit={canEdit} />
         <FlightPlanning siteId={siteId} />
         <Plans siteId={siteId} canEdit={canEdit} />
         <Documentation siteId={siteId} canEdit={canEdit} />

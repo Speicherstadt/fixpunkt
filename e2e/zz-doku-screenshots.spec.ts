@@ -340,6 +340,40 @@ test("Bericht zusammenstellen @screenshots", async () => {
   await page.keyboard.press("Escape");
 });
 
+test("Abrechnung @screenshots", async () => {
+  const regions = (await api("GET", `/sites/${siteId}/regions`)) as { id: number; name: string }[];
+  const grube = regions.find((r) => r.name === "Grube")!;
+  await api("PATCH", `/regions/${grube.id}`, {
+    material: "Boden Klasse 4",
+    targetM3: 1000,
+    targetKind: "cut",
+    lvPosition: "02.01.0010",
+    unitPrice: 14.5,
+    priceUnit: "t",
+  });
+  await api("PUT", `/sites/${siteId}/billing/settings`, {
+    truckT: 15,
+    materials: [{ name: "Boden Klasse 4", density: 2, bulking: 1.25 }],
+  });
+  // Zeitraum Zwischenstand → Aushub fertig: 400 m³ fest = 800 t; geliefert 420 + 12 × 15 + 190 = 790 t
+  for (const [date, quantity, unit, reference] of [
+    ["2026-11-12", 420, "t", "WS-2211"],
+    ["2026-11-14", 12, "loads", "LS-0815"],
+    ["2026-11-16", 190, "t", "WS-2247"],
+  ] as const)
+    await api("POST", `/sites/${siteId}/deliveries`, {
+      date,
+      material: "Boden Klasse 4",
+      quantity,
+      unit,
+      reference,
+    });
+  await go(`/sites/${siteId}`);
+  const billing = page.getByRole("region", { name: "Abrechnung" });
+  await expect(billing.getByRole("table", { name: "Abgleich mit Lieferscheinen" })).toBeVisible();
+  await billing.screenshot({ path: `${DOCS}/screenshot-abrechnung.png` });
+});
+
 test("Orthofoto @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const view = page.getByRole("region", { name: "Ansicht" });

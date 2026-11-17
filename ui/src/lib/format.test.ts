@@ -3,9 +3,12 @@ import {
   formatArea,
   formatBytes,
   formatCount,
+  formatDay,
   formatDuration,
+  formatEuro,
   formatHeight,
   formatVolume,
+  parseDecimal,
 } from "@/lib/format";
 
 describe("format (deutsch)", () => {
@@ -27,5 +30,23 @@ describe("format (deutsch)", () => {
     expect(formatBytes(512)).toBe("512 B");
     expect(formatBytes(3_481_531)).toBe("3,5 MB");
     expect(formatBytes(20_000_000_000)).toBe("20,0 GB");
+  });
+});
+
+describe("Abrechnung: Euro, Tag, Eingaben", () => {
+  it("Euro und Tag in UTC", () => {
+    expect(formatEuro(12740)).toBe("12.740,00\u00a0€");
+    // Mitternacht UTC bleibt derselbe Tag, egal in welcher Zeitzone
+    expect(formatDay(Date.UTC(2026, 10, 17))).toBe("17.11.2026");
+  });
+
+  it("Zahlen aus Eingabefeldern", () => {
+    expect(parseDecimal("1.234,5")).toBe(1234.5);
+    expect(parseDecimal("12,50")).toBe(12.5);
+    expect(parseDecimal("12.5")).toBe(12.5);
+    expect(parseDecimal("1.000")).toBe(1000);
+    expect(parseDecimal(" 15 ")).toBe(15);
+    expect(parseDecimal("")).toBeUndefined();
+    expect(parseDecimal("viel")).toBeUndefined();
   });
 });

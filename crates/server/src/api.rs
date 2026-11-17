@@ -3,8 +3,8 @@
 use crate::auth::{passkeys, tokens};
 use crate::state::AppRef;
 use crate::{
-    auth, captures, compute, dashboard, flightplan, jobs, layouts, markers, odm, ortho, plans,
-    points, report, sites, uploads, view,
+    auth, billing, captures, compute, dashboard, flightplan, jobs, layouts, markers, odm, ortho,
+    plans, points, report, sites, uploads, view,
 };
 use axum::extract::{DefaultBodyLimit, State};
 use axum::middleware;
@@ -115,6 +115,21 @@ pub fn router(app: AppRef) -> Router {
             "/sites/{id}/documentation/report",
             get(report::site_routes::documentation),
         )
+        .route(
+            "/sites/{id}/billing/settings",
+            get(billing::get_settings).put(billing::put_settings),
+        )
+        .route("/sites/{id}/billing", get(billing::get_statement))
+        .route("/sites/{id}/billing.pdf", get(report::site_routes::billing))
+        .route(
+            "/sites/{id}/deliveries",
+            get(billing::deliveries::list).post(billing::deliveries::create),
+        )
+        .route(
+            "/sites/{id}/deliveries.csv",
+            put(billing::deliveries::import),
+        )
+        .route("/deliveries/{id}", delete(billing::deliveries::delete))
         .route("/sites/{id}/odm", post(odm::create))
         .route(
             "/jobs/{id}/images",
