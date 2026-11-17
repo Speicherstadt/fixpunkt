@@ -25,6 +25,7 @@ nav:
   - Funktionsumfang: funktionen.md
   - Betrieb:
       - Geräte: geraete.md
+      - Abrechnung und Recht: recht.md
       - Installation: installation.md
       - Konfiguration: konfiguration.md
       - Backup und Updates: backup.md

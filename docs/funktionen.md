@@ -65,6 +65,8 @@ steht in der [Roadmap](roadmap.md).
   Aufmerksamkeit braucht – von jedem selbst zusammengestellt ([Erste Schritte](erste-schritte.md#überblick-einer-baustelle))
 - **PDF-Berichte:** Mengenbericht mit Karte, Haufwerk, Soll/Ist, Zeitreihe, Dokumentation mit Fotos, Plan/Ist und
   ein eigener Bericht aus Bausteinen
+- Mengenberichte als prüfbarer Beleg zur Rechnung – was dafür rechtlich gilt, steht unter
+  [Abrechnung und Recht](recht.md)
 
 ## Export
 

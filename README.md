@@ -171,6 +171,11 @@ iPhone-App mit RTK-Rover für Leitungsgräben und die Erprobung auf echten Baust
 [Roadmap](https://speicherstadt.github.io/fixpunkt/roadmap.html), die nötigen Geräte unter
 [Geräte](https://speicherstadt.github.io/fixpunkt/geraete.html).
 
+**Darf ich mit Fixpunkt abrechnen?**<br>
+Ja. Eine Zertifizierung für Software oder Verfahren gibt es nicht; BGB und VOB/B verlangen eine prüfbare,
+nachvollziehbare Mengenberechnung. Was dazugehört – Vereinbarung mit dem Auftraggeber, Drohnenrecht, Eichrecht,
+Datenschutz –, steht unter [Abrechnung und Recht](https://speicherstadt.github.io/fixpunkt/recht.html).
+
 **Welche Koordinatensysteme werden unterstützt?**<br>
 ETRS89/UTM Zone 32 (EPSG:25832) als Standard, andere UTM-Zonen auf der Kommandozeile. Höhen DHHN2016 über GCG2016.
 

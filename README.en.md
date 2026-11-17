@@ -176,6 +176,12 @@ iPhone app with RTK rover for utility trenches and field testing on real sites a
 [roadmap](https://speicherstadt.github.io/fixpunkt/roadmap.html), the hardware under
 [devices](https://speicherstadt.github.io/fixpunkt/geraete.html) (all German).
 
+**Can I bill with Fixpunkt?**<br>
+Yes. In Germany there is no certification for the software or method; the civil code (BGB) and VOB/B require a
+verifiable, traceable quantity calculation. What it takes – agreement with the client, drone regulations, legal
+metrology, data protection – is described under
+[Billing and law](https://speicherstadt.github.io/fixpunkt/recht.html) (German).
+
 **Which coordinate systems are supported?**<br>
 ETRS89/UTM zone 32 (EPSG:25832) by default, other UTM zones on the command line. Heights DHHN2016 via GCG2016.
 
