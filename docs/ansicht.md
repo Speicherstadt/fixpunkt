@@ -23,6 +23,19 @@ Unter **Ansicht** auf der Seite einer Baustelle zeigt Fixpunkt das Höhenbild ei
 
 Unter dem Bild stehen Ost-, Nordwert und Höhe unter dem Mauszeiger, die Farbskala und der Maßstab.
 
+## Orthofoto
+
+Hat die Aufnahme ein **Orthofoto** – das entzerrte Luftbild aus derselben Befliegung –, zeigt die Ansicht es als
+Hintergrund; unter **Hintergrund** lässt sich auf das Höhenbild umschalten. Differenz, Bereiche, Pläne und
+Markierungen liegen darüber wie gewohnt.
+
+![Ansicht mit Orthofoto: Baugrube, Bagger und Fahrspuren, darüber Bereiche und Markierungen](screenshot-orthofoto.png){ width="982" height="563" loading="lazy" }
+
+Aus [Drohnenfotos](drohnenfotos.md) übernimmt Fixpunkt das Orthofoto von NodeODM selbst. Sonst in der Liste der
+Aufnahmen über das Bildsymbol ein GeoTIFF anhängen (RGB oder RGBA, z. B. `odm_orthophoto.tif` aus WebODM). Fixpunkt
+verkleinert es für die Ansicht auf höchstens 4096 Pixel je Seite – bei einer 100-m-Baustelle rund 2,5 cm je Pixel –
+und legt es auch dann richtig, wenn es in einer anderen UTM-Zone gerechnet wurde.
+
 ## Darüber anzeigen
 
 **Darüber anzeigen** legt das Ergebnis einer Berechnung über das Höhenbild: die Differenz eines Aushubs oder die

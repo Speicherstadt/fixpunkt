@@ -8,6 +8,7 @@ import type { PlanGeometry } from "@/lib/api";
 import { renderDeviation, renderHeights } from "@/lib/view/colors";
 import type { Pt } from "@/lib/view/geometry";
 import { bboxOf, type HeightGrid } from "@/lib/view/grid";
+import { type Corners, orthoTransform } from "@/lib/view/ortho";
 import {
   fitTo,
   pan,
@@ -32,6 +33,8 @@ type Props = {
   pins: Pin[];
   /** DXF-Plan als Strichzeichnung über dem Höhenbild */
   plan: PlanGeometry | null;
+  /** Orthofoto statt des Höhenbilds */
+  ortho: { image: HTMLImageElement; width: number; height: number; corners: Corners } | null;
   shape: Shape;
   /** Klick oder Enter setzt Punkte; im Werkzeug „Verschieben“ nicht */
   picking: boolean;
@@ -85,6 +88,7 @@ export function MapCanvas({
   outlines,
   pins,
   plan,
+  ortho,
   shape,
   picking,
   onPick,
@@ -147,7 +151,13 @@ export function MapCanvas({
       ctx.drawImage(img, x0, y0, (b.maxX - b.minX) * view.scale, (b.maxY - b.minY) * view.scale);
       ctx.globalAlpha = 1;
     };
-    drawGrid(base, grid, 1);
+    if (ortho) {
+      const [a, b, c2, d, e, f] = orthoTransform(ortho.corners, ortho.width, ortho.height, view);
+      ctx.setTransform(dpr * a, dpr * b, dpr * c2, dpr * d, dpr * e, dpr * f);
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(ortho.image, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    } else drawGrid(base, grid, 1);
     if (overlay) drawGrid(over, overlay.grid, 0.85);
     const fg = cssVar("--fg") || "black";
     const bg = cssVar("--bg") || "white";
@@ -247,7 +257,7 @@ export function MapCanvas({
       ctx.lineTo(cx, cy + 8);
       ctx.stroke();
     }
-  }, [view, base, over, grid, overlay, outlines, pins, plan, shape, picking]);
+  }, [view, base, over, grid, overlay, outlines, pins, plan, ortho, shape, picking]);
 
   if (!view) return <div ref={wrap} className="h-72 w-full" />;
   const bar = scaleBar(view);

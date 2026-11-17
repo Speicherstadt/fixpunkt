@@ -27,15 +27,17 @@ pub struct GeoRaster {
     pub epsg: Option<u16>,
 }
 
-pub fn read(path: &Path) -> Result<GeoRaster> {
-    let f = File::open(path).with_context(|| format!("{} nicht lesbar", path.display()))?;
-    let mut d = Decoder::new(BufReader::new(f))
-        .with_context(|| format!("{} ist kein TIFF", path.display()))?
-        .with_limits(Limits::unlimited());
-    let (w, h) = d.dimensions()?;
-    let spp = d
-        .find_tag_unsigned::<u16>(Tag::SamplesPerPixel)?
-        .unwrap_or(1) as usize;
+/// Lage eines GeoTIFF: linke obere Ecke, Pixelgröße, Bezugssystem
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Georef {
+    pub min_x: f64,
+    pub max_y: f64,
+    pub cell: f64,
+    pub epsg: Option<u16>,
+}
+
+/// Georeferenz aus den GeoTIFF-Tags (ModelPixelScale, ModelTiepoint, GeoKeys)
+pub fn georef<R: std::io::Read + std::io::Seek>(d: &mut Decoder<R>) -> Result<Georef> {
     let scale = d
         .find_tag(Tag::ModelPixelScaleTag)?
         .context("GeoTIFF ohne ModelPixelScale")?
@@ -62,19 +64,43 @@ pub fn read(path: &Path) -> Result<GeoRaster> {
             .map(|k| k[3])
     };
     let pixel_is_point = key(KEY_RASTER_TYPE) == Some(2);
-    let epsg = key(KEY_PROJECTED_CRS).filter(|&e| e != 0 && e != 32767);
+    let half = if pixel_is_point { sx / 2.0 } else { 0.0 };
+    Ok(Georef {
+        min_x: tie[3] - tie[0] * sx - half,
+        max_y: tie[4] + tie[1] * sy + half,
+        cell: sx,
+        epsg: key(KEY_PROJECTED_CRS).filter(|&e| e != 0 && e != 32767),
+    })
+}
+
+/// TIFF zum Lesen öffnen, ohne Speichergrenzen (große Raster)
+pub fn open(path: &Path) -> Result<Decoder<BufReader<File>>> {
+    let f = File::open(path).with_context(|| format!("{} nicht lesbar", path.display()))?;
+    Ok(Decoder::new(BufReader::new(f))
+        .with_context(|| format!("{} ist kein TIFF", path.display()))?
+        .with_limits(Limits::unlimited()))
+}
+
+pub fn read(path: &Path) -> Result<GeoRaster> {
+    let mut d = open(path)?;
+    let (w, h) = d.dimensions()?;
+    let spp = d
+        .find_tag_unsigned::<u16>(Tag::SamplesPerPixel)?
+        .unwrap_or(1) as usize;
+    let Georef {
+        min_x,
+        max_y,
+        cell,
+        epsg,
+    } = georef(&mut d)?;
     let nodata: Option<f64> = d
         .find_tag(Tag::GdalNodata)?
         .and_then(|v| v.into_string().ok())
         .and_then(|s| s.trim_matches(char::from(0)).trim().parse().ok());
-
-    let half = if pixel_is_point { sx / 2.0 } else { 0.0 };
-    let min_x = tie[3] - tie[0] * sx - half;
-    let max_y = tie[4] + tie[1] * sy + half;
     let spec = GridSpec {
         min_x,
         max_y,
-        cell: sx,
+        cell,
         cols: w as usize,
         rows: h as usize,
     };

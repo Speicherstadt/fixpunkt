@@ -34,6 +34,7 @@ pub mod code {
     pub const MARKER_NEEDS_POSITION: &str = "markers.needsPosition";
     pub const MARKER_NOT_AN_IMAGE: &str = "markers.notAnImage";
     pub const PLAN_INVALID: &str = "plans.invalid";
+    pub const ORTHO_INVALID: &str = "ortho.invalid";
 
     pub const ALL: &[&str] = &[
         NOT_LOGGED_IN,
@@ -63,6 +64,7 @@ pub mod code {
         MARKER_NEEDS_POSITION,
         MARKER_NOT_AN_IMAGE,
         PLAN_INVALID,
+        ORTHO_INVALID,
     ];
 }
 

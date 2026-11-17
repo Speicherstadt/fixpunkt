@@ -132,6 +132,14 @@ test.beforeAll(async ({ browser }) => {
       "x-csrf-token": (await (await page.request.get("/api/auth/state")).json()).csrf,
     },
   });
+  // Orthofoto zum Stand „Aushub fertig“
+  await page.request.put(`/api/captures/${after}/ortho?file=orthophoto.tif`, {
+    data: readFileSync("e2e/data/ortho.tif"),
+    headers: {
+      "content-type": "application/octet-stream",
+      "x-csrf-token": (await (await page.request.get("/api/auth/state")).json()).csrf,
+    },
+  });
   // Lageplan der Grube (DXF mit Zonenkennung, Höhenpunkte)
   await page.request.put(`/api/sites/${siteId}/plans?file=Lageplan.dxf`, {
     data: readFileSync("e2e/data/lageplan.dxf"),
@@ -214,9 +222,19 @@ test("Baustelle @screenshots", async () => {
   await shot("baustelle", true);
 });
 
+test("Orthofoto @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const view = page.getByRole("region", { name: "Ansicht" });
+  await expect(view.getByRole("group", { name: "Hintergrund" })).toBeVisible();
+  await page.waitForTimeout(400);
+  await view.getByRole("application").scrollIntoViewIfNeeded();
+  await view.getByRole("application").screenshot({ path: `${DOCS}/screenshot-orthofoto.png` });
+});
+
 test("Ansicht mit Differenz @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const view = page.getByRole("region", { name: "Ansicht" });
+  await view.getByRole("group", { name: "Hintergrund" }).getByText("Höhenbild").click();
   await view.getByLabel("Darüber anzeigen").selectOption({ index: 1 });
   await view.getByRole("group", { name: "Werkzeug" }).getByText("Profil", { exact: true }).click();
   const canvas = view.getByRole("application");

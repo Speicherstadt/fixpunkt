@@ -20,6 +20,7 @@ import {
   profile,
 } from "./geometry";
 import { bboxOf, type HeightGrid, parseGrid, robustRange, sampleAt, zRange } from "./grid";
+import { type Corners, orthoTransform } from "./ortho";
 import { fitTo, pan, scaleBar, toScreen, toWorld, zoomAt } from "./viewport";
 
 const X0 = 512_000;
@@ -236,5 +237,27 @@ describe("ringOf", async () => {
     // außerhalb des Overlays: Höhenfarbe in der Mitte der Skala
     expect(color(8, 5, 5)).toEqual(heightColor(0.5));
     expect(terrainColor([0, 10], null)(2, 5, 0)).toEqual(heightColor(0));
+  });
+
+  it("Orthofoto: Ecken landen per affiner Abbildung an ihrer Stelle", () => {
+    const view = fitTo({ minX: 0, minY: 0, maxX: 100, maxY: 100 }, 500, 500, 0);
+    // leicht gedrehtes Bild 200 × 100 Pixel
+    const corners: Corners = [
+      [10, 90],
+      [50, 92],
+      [11, 70],
+    ];
+    const [a, b, c, d, e, f] = orthoTransform(corners, 200, 100, view);
+    const map = (u: number, v: number) => [a * u + c * v + e, b * u + d * v + f];
+    for (const [[u, v], [x, y]] of [
+      [[0, 0], corners[0]],
+      [[200, 0], corners[1]],
+      [[0, 100], corners[2]],
+    ] as const) {
+      const [sx, sy] = map(u, v);
+      const [tx, ty] = toScreen(view, x, y);
+      expect(sx).toBeCloseTo(tx, 9);
+      expect(sy).toBeCloseTo(ty, 9);
+    }
   });
 });

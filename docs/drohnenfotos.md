@@ -52,7 +52,8 @@ lassen sich weiterhin als Aufnahme hochladen ([Daten vorbereiten](daten.md)).
 2. **Name** und **Flugdatum** der neuen Aufnahme, **Qualität** und **Höhenversatz** eintragen (siehe unten).
 3. **Hochladen und auswerten**: Fixpunkt lädt die Fotos nacheinander hoch und gibt sie an NodeODM. Unter
    **Berechnungen** steht der Auftrag mit Fortschritt in Prozent.
-4. Ist NodeODM fertig, erscheint die Punktwolke unter **Aufnahmen** und wird wie jede Aufnahme geprüft.
+4. Ist NodeODM fertig, erscheint die Punktwolke unter **Aufnahmen** und wird wie jede Aufnahme geprüft. Das
+   Orthofoto des Flugs hängt Fixpunkt gleich mit an; es liegt dann als Hintergrund in der [Ansicht](ansicht.md#orthofoto).
 
 | Qualität | ODM-Einstellung | Wofür |
 |---|---|---|

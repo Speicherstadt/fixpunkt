@@ -171,6 +171,19 @@ pub async fn run(app: &AppRef, job: &Job) -> Result<Value> {
     tokio::fs::rename(&staged, target.join(&file_name)).await?;
     let size = tokio::fs::metadata(target.join(&file_name)).await?.len();
     captures::finish(app, capture_id, job.site_id, size, job.created_by).await?;
+    // Orthofoto dazu, falls NodeODM eins hat (ohne ist die Aufnahme trotzdem vollständig)
+    let ortho_file = target.join(crate::ortho::SOURCE);
+    let has_ortho = match odm.download(&uuid, "orthophoto.tif", &ortho_file).await {
+        Ok(_) => match crate::ortho::attach(app, capture_id).await {
+            Ok(()) => true,
+            Err(e) => {
+                tracing::warn!("Orthofoto aus NodeODM nicht lesbar: {e:#}");
+                let _ = tokio::fs::remove_file(&ortho_file).await;
+                false
+            }
+        },
+        Err(_) => false,
+    };
     // NodeODM-Speicher freigeben; die Fotos bleiben im Auftrag, bis er gelöscht wird
     odm.remove(&uuid).await;
     progress(app, job, &mut last, 100.0).await?;
@@ -181,5 +194,6 @@ pub async fn run(app: &AppRef, job: &Job) -> Result<Value> {
         "sourceEpsg": prepared.source_epsg,
         "converted": prepared.converted,
         "heightOffset": p.height_offset,
+        "ortho": has_ortho,
     }))
 }

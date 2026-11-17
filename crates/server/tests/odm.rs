@@ -93,6 +93,8 @@ async fn nodeodm(stub: Shared) -> String {
             get(|State(s): State<Shared>, Path((_, asset)): Path<(String, String)>| async move {
                 if asset == "georeferenced_model.laz" {
                     (StatusCode::OK, s.lock().unwrap().model.clone())
+                } else if asset == "orthophoto.tif" {
+                    (StatusCode::OK, include_bytes!("../../../e2e/data/ortho.tif").to_vec())
                 } else {
                     (StatusCode::NOT_FOUND, Vec::new())
                 }
@@ -187,6 +189,7 @@ async fn photos_become_a_capture_in_the_site_zone() {
     assert_eq!(r["images"], 3);
     assert_eq!(r["sourceEpsg"], 32633);
     assert_eq!(r["converted"], true);
+    assert_eq!(r["ortho"], true, "Orthofoto aus NodeODM übernommen");
     {
         let s = stub.lock().unwrap();
         assert_eq!(s.images, 3);

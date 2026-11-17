@@ -8,6 +8,7 @@ pub mod geom;
 pub mod geotiff;
 pub mod grid;
 pub mod measure;
+pub mod ortho;
 pub mod pointcloud;
 pub mod surface;
 pub mod transform;

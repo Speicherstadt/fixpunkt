@@ -79,7 +79,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 <td width="50%" valign="top">
 
 ### 🗺️ Ansicht und Messen
-- Höhenbild jeder Aufnahme, Differenz oder Abweichung darübergelegt
+- Höhenbild oder Orthofoto jeder Aufnahme, Differenz oder Abweichung darübergelegt
 - Gelände in 3D mit Überhöhung
 - Messen: Punkt, Strecke, Gefälle, Fläche, Profil
 - Abrechnungsbereiche direkt im Browser zeichnen

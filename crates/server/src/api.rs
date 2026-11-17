@@ -1,7 +1,7 @@
 //! Routen der API unter `/api`.
 
 use crate::state::AppRef;
-use crate::{auth, captures, compute, jobs, markers, odm, plans, report, sites, view};
+use crate::{auth, captures, compute, jobs, markers, odm, ortho, plans, report, sites, view};
 use axum::extract::{DefaultBodyLimit, State};
 use axum::middleware;
 use axum::response::sse::{Event as SseEvent, KeepAlive, Sse};
@@ -39,6 +39,13 @@ pub fn router(app: AppRef) -> Router {
         )
         .route("/captures/{id}/file", get(captures::download))
         .route("/captures/{id}/grid", get(view::capture_grid))
+        .route(
+            "/captures/{id}/ortho",
+            get(ortho::image)
+                .put(ortho::upload)
+                .delete(ortho::delete)
+                .layer(DefaultBodyLimit::disable()),
+        )
         .route("/jobs/{id}/grid/{name}", get(view::job_grid))
         .route("/sites/{id}/jobs", get(jobs::list).post(jobs::create))
         .route("/jobs/{id}", get(jobs::get).delete(jobs::delete))

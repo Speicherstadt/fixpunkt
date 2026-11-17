@@ -65,6 +65,9 @@ pub struct Capture {
     pub info: Option<String>,
     pub error: Option<String>,
     pub created_at: i64,
+    /// Orthofoto: Größe und Ecken (JSON), sonst leer
+    #[serde(serialize_with = "raw_json")]
+    pub ortho: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, FromRow)]

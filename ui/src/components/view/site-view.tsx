@@ -67,6 +67,7 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
   const overlayJob = overlays.find((j) => j.id === overlayId);
   const [tool, setTool] = useState<Tool>("pan");
   const [mode, setMode] = useState<"2d" | "3d">("2d");
+  const [background, setBackground] = useState<"ortho" | "heights">("ortho");
   const [exaggeration, setExaggeration] = useState(2);
   const [points, setPoints] = useState<Pt[]>([]);
   const [hover, setHover] = useState<Pt | null>(null);
@@ -104,6 +105,26 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
         ? buildMesh(grid.data, terrainColor(range, overlayProp), exaggeration)
         : null,
     [mode, grid.data, range, overlayProp, exaggeration],
+  );
+  const capture = ready.find((c) => c.id === captureId);
+  const orthoMeta = capture?.ortho ?? null;
+  const orthoImage = useQuery({
+    queryKey: ["ortho", captureId, orthoMeta?.width, orthoMeta?.corners[0][0]],
+    queryFn: async () => {
+      const img = new Image();
+      img.src = `/api/captures/${captureId}/ortho`;
+      await img.decode();
+      return img;
+    },
+    enabled: orthoMeta !== null && mode === "2d" && background === "ortho",
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  const orthoProp = useMemo(
+    () =>
+      orthoMeta && orthoImage.data && background === "ortho"
+        ? { image: orthoImage.data, ...orthoMeta }
+        : null,
+    [orthoMeta, orthoImage.data, background],
   );
   const markers = useQuery(markersQuery(siteId));
   const plans = useQuery(plansQuery(siteId));
@@ -189,6 +210,18 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
           value={mode}
           onChange={setMode}
         />
+        {mode === "2d" && orthoMeta ? (
+          <Segmented
+            name="background"
+            legend={m.view_background()}
+            options={[
+              { id: "ortho", text: m.view_background_ortho() },
+              { id: "heights", text: m.view_background_heights() },
+            ]}
+            value={background}
+            onChange={setBackground}
+          />
+        ) : null}
         {mode === "2d" ? (
           <Segmented
             name="tool"
@@ -232,6 +265,7 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
             outlines={outlines}
             pins={pins}
             plan={planId !== null ? (planGeometry.data ?? null) : null}
+            ortho={orthoProp}
             shape={{ points, closed: tool === "area" || tool === "draw" }}
             picking={tool !== "pan"}
             onPick={(p) => setPoints((ps) => (tool === "point" ? [p] : [...ps, p]))}

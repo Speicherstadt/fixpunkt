@@ -192,6 +192,19 @@ export const Capture = z.object({
   info: CaptureInfo.nullable(),
   error: z.string().nullable(),
   createdAt: z.number(),
+  /** Orthofoto: Bildgröße und Ecken (links oben, rechts oben, links unten) im System der Baustelle */
+  ortho: z
+    .object({
+      width: z.number(),
+      height: z.number(),
+      corners: z.tuple([
+        z.tuple([z.number(), z.number()]),
+        z.tuple([z.number(), z.number()]),
+        z.tuple([z.number(), z.number()]),
+      ]),
+    })
+    .nullable()
+    .optional(),
 });
 export type Capture = z.infer<typeof Capture>;
 
@@ -347,6 +360,7 @@ export const api = {
   deleteSite: (id: number) => request("DELETE", `/sites/${id}`, Empty),
   captures: (siteId: number) => request("GET", `/sites/${siteId}/captures`, z.array(Capture)),
   deleteCapture: (id: number) => request("DELETE", `/captures/${id}`, Empty),
+  deleteOrtho: (captureId: number) => request("DELETE", `/captures/${captureId}/ortho`, Empty),
   regions: (siteId: number) => request("GET", `/sites/${siteId}/regions`, z.array(Region)),
   addRegions: (siteId: number, geojson: unknown, name?: string) =>
     request("POST", `/sites/${siteId}/regions`, z.array(Region), { geojson, name }),
@@ -442,4 +456,17 @@ export const uploadPlan = (siteId: number, file: File): Promise<Plan> =>
     file,
     Plan,
     () => {},
+  );
+
+/** Orthofoto (GeoTIFF) an eine Aufnahme hängen */
+export const uploadOrtho = (
+  captureId: number,
+  file: File,
+  onProgress: (fraction: number) => void,
+): Promise<Capture> =>
+  putFile(
+    `/api/captures/${captureId}/ortho?${new URLSearchParams({ file: file.name })}`,
+    file,
+    Capture,
+    onProgress,
   );

@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, Trash2, Upload } from "lucide-react";
+import { Download, ImageIcon, ImageOff, ImagePlus, Trash2, Upload } from "lucide-react";
 import { useId, useRef, useState } from "react";
 import { EmptyState, ErrorText, Section } from "@/components/page";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { PlaceholderRows } from "@/components/ui/placeholder";
 import { StatusBadge } from "@/components/ui/status";
-import { api, type Capture, uploadCapture } from "@/lib/api";
+import { api, type Capture, uploadCapture, uploadOrtho } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatBytes, formatCount, formatDate } from "@/lib/format";
 import { capturesQuery } from "@/lib/queries";
@@ -109,6 +109,9 @@ export function Captures({ siteId, canEdit }: { siteId: number; canEdit: boolean
                   c={c}
                   canEdit={canEdit}
                   onDelete={() => remove.mutate(c.id)}
+                  onChanged={() =>
+                    queryClient.invalidateQueries({ queryKey: ["captures", siteId] })
+                  }
                 />
               ))}
             </tbody>
@@ -125,11 +128,28 @@ function CaptureRow({
   c,
   canEdit,
   onDelete,
+  onChanged,
 }: {
   c: Capture;
   canEdit: boolean;
   onDelete: () => void;
+  onChanged: () => void;
 }) {
+  const orthoInput = useId();
+  const [orthoBusy, setOrthoBusy] = useState(false);
+  const [orthoError, setOrthoError] = useState<string | null>(null);
+  const addOrtho = async (file: File | undefined) => {
+    if (!file) return;
+    setOrthoBusy(true);
+    setOrthoError(null);
+    try {
+      await uploadOrtho(c.id, file, () => {});
+    } catch (e) {
+      setOrthoError(errorText(e));
+    }
+    setOrthoBusy(false);
+    onChanged();
+  };
   const points = c.info?.type === "pointcloud" && c.info.points ? formatCount(c.info.points) : "–";
   return (
     <tr className="border-t border-border align-top">
@@ -137,6 +157,18 @@ function CaptureRow({
         <div className="font-medium">{c.name}</div>
         <div className="text-[12px] text-muted">{c.fileName}</div>
         {c.error ? <div className="text-[12px] text-danger">{c.error}</div> : null}
+        {c.ortho ? (
+          <div className="flex items-center gap-1 text-[12px] text-muted">
+            <ImageIcon size={14} aria-hidden="true" />
+            {m.captures_ortho({ width: c.ortho.width, height: c.ortho.height })}
+          </div>
+        ) : null}
+        {orthoBusy ? (
+          <div role="status" className="text-[12px] text-muted">
+            {m.captures_ortho_busy()}
+          </div>
+        ) : null}
+        {orthoError ? <div className="text-[12px] text-danger">{orthoError}</div> : null}
       </td>
       <td className="py-2.5 pr-3 whitespace-nowrap">{formatDate(c.capturedAt)}</td>
       <td className="tabular py-2.5 pr-3 text-right">{points}</td>
@@ -155,6 +187,36 @@ function CaptureRow({
           >
             <Download size={16} aria-hidden="true" />
           </a>
+          {canEdit && c.status === "ready" ? (
+            c.ortho ? (
+              <Button
+                variant="ghost"
+                size="iconSm"
+                onClick={() => api.deleteOrtho(c.id).then(onChanged)}
+                aria-label={m.captures_ortho_remove({ name: c.name })}
+              >
+                <ImageOff size={16} aria-hidden="true" />
+              </Button>
+            ) : (
+              <>
+                <input
+                  id={orthoInput}
+                  type="file"
+                  accept=".tif,.tiff"
+                  className="sr-only"
+                  aria-label={m.captures_ortho_add({ name: c.name })}
+                  onChange={(e) => addOrtho(e.target.files?.[0])}
+                />
+                <label
+                  htmlFor={orthoInput}
+                  title={m.captures_ortho_add({ name: c.name })}
+                  className={buttonVariants({ variant: "ghost", size: "iconSm" })}
+                >
+                  <ImagePlus size={16} aria-hidden="true" />
+                </label>
+              </>
+            )
+          ) : null}
           {canEdit ? (
             <Button
               variant="ghost"

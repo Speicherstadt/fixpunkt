@@ -63,7 +63,7 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 - [ ] Kartenansicht aller Baustellen/Scans
 
 ### Ansichten
-- [ ] 2D (Draufsicht, Orthofoto), 3D (Punktwolke, Mesh), Karte – Draufsicht als Höhenbild ✅, Orthofoto, 3D und Karte offen
+- [ ] 2D (Draufsicht, Orthofoto), 3D (Punktwolke, Mesh), Karte – Höhenbild ✅, Orthofoto ✅, 3D als Geländenetz ✅, Karte ✅, Punktwolke offen
 - [ ] Einfärbung nach RGB, Höhe, Intensität, Abweichung – Höhe und Abweichung ✅
 
 ### Export
