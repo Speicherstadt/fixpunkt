@@ -12,3 +12,7 @@ ui/src/routeTree.gen.ts
 test-results/
 playwright-report/
 .env
+
+# E2E
+.e2e-data/
+e2e/.auth/

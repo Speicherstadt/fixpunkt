@@ -1,0 +1,25 @@
+import { queryOptions } from "@tanstack/react-query";
+import { api, setCsrf } from "@/lib/api";
+
+export const authQuery = queryOptions({
+  queryKey: ["auth"],
+  queryFn: async () => {
+    const state = await api.authState();
+    setCsrf(state.csrf);
+    return state;
+  },
+  staleTime: 60_000,
+});
+
+export const sitesQuery = queryOptions({ queryKey: ["sites"], queryFn: api.sites });
+export const siteQuery = (id: number) =>
+  queryOptions({ queryKey: ["site", id], queryFn: () => api.site(id) });
+export const capturesQuery = (siteId: number) =>
+  queryOptions({ queryKey: ["captures", siteId], queryFn: () => api.captures(siteId) });
+export const regionsQuery = (siteId: number) =>
+  queryOptions({ queryKey: ["regions", siteId], queryFn: () => api.regions(siteId) });
+export const jobsQuery = (siteId: number) =>
+  queryOptions({ queryKey: ["jobs", siteId], queryFn: () => api.jobs(siteId) });
+export const jobQuery = (id: number) =>
+  queryOptions({ queryKey: ["job", id], queryFn: () => api.job(id) });
+export const usersQuery = queryOptions({ queryKey: ["users"], queryFn: api.users });

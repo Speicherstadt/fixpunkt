@@ -1,0 +1,129 @@
+@import "tailwindcss";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+
+/* Wie Kontext und Belegt: Zink, Geist. Hell als Vorgabe, dunkel als Klasse auf <html>
+   (public/theme.js, src/lib/theme.ts). Vorbild: firsttris/kontext src/styles.css */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --bg: #ffffff;
+  --side: #fafafa;
+  --fg: #09090b;
+  --muted: #68686f;
+  --subtle: #f4f4f5;
+  --border: #e4e4e7;
+  /* Rand von Bedienelementen: ≥ 3 : 1 gegen --bg und --subtle (WCAG 1.4.11) */
+  --field-border: #85858e;
+  --hover: #f4f4f5;
+  --primary: #18181b;
+  --onprimary: #fafafa;
+  --accent: #2563eb;
+  --danger: #b91c1c;
+  --warn: #b45309;
+  --ok: #15803d;
+  /* Abtrag (Grube) und Auftrag (Haufwerk) in Tabellen und Karten */
+  --cut: #b45309;
+  --fill: #1d4ed8;
+  color-scheme: light;
+}
+
+:root.dark {
+  --bg: #09090b;
+  --side: #0c0c0e;
+  --fg: #fafafa;
+  --muted: #a1a1aa;
+  --subtle: #18181b;
+  --border: #27272a;
+  --field-border: #71717a;
+  --hover: #18181b;
+  --primary: #fafafa;
+  --onprimary: #09090b;
+  --accent: #3b82f6;
+  --danger: #f87171;
+  --warn: #f59e0b;
+  --ok: #22c55e;
+  --cut: #f59e0b;
+  --fill: #60a5fa;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-side: var(--side);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-subtle: var(--subtle);
+  --color-border: var(--border);
+  --color-field-border: var(--field-border);
+  --color-hover: var(--hover);
+  --color-primary: var(--primary);
+  --color-onprimary: var(--onprimary);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-warn: var(--warn);
+  --color-ok: var(--ok);
+  --color-cut: var(--cut);
+  --color-fill: var(--fill);
+  --font-sans: "Geist Variable", system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, monospace;
+  --spacing-sidebar: 236px;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  html,
+  body {
+    background: var(--bg);
+  }
+  body {
+    margin: 0;
+    color: var(--fg);
+    font-family: var(--font-sans);
+    font-size: 14px;
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+  }
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  button {
+    cursor: pointer;
+  }
+  /* Eine Linienstärke für alle Symbole, gleich welcher Größe */
+  .lucide {
+    stroke-width: 1.25px;
+  }
+  .lucide * {
+    vector-effect: non-scaling-stroke;
+  }
+  :focus-visible {
+    outline: 2px solid var(--fg);
+    outline-offset: 2px;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--muted);
+  }
+  /* Zahlen in Tabellen untereinander */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  /* biome-ignore-start lint/complexity/noImportantStyles: „Bewegung reduzieren“ schlägt die Übergänge der Komponenten */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+  /* biome-ignore-end lint/complexity/noImportantStyles: siehe oben */
+}

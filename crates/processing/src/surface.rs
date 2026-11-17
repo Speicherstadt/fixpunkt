@@ -103,13 +103,20 @@ pub fn load(
         });
     }
     let mut cloud = read_cloud(path, o)?;
+    // Mit Bodenfilter: wo gemessen wurde, aber ein Objekt stand (Bagger, Container), bleibt nach dem
+    // Filtern ein Loch. Das wird aus dem Gelände ringsum aufgefüllt – bis zur Größe des größten Objekts.
+    // Stellen ohne jede Messung bleiben leer (und werden im Bericht als Lücke gezählt).
+    let mut measured_cloud = None;
+    let mut object_fill = 0;
     if let Some(p) = o.classify_ground {
         let (cls, _, _) = filter::classify_ground(&cloud, p)?;
         let keep: Vec<bool> = cls.iter().map(|&c| c == filter::CLASS_GROUND).collect();
-        cloud = filter::select(&cloud, &keep);
-        if cloud.is_empty() {
+        let ground = filter::select(&cloud, &keep);
+        if ground.is_empty() {
             bail!("{}: keine Bodenpunkte gefunden", path.display());
         }
+        object_fill = (p.max_window / o.cell).ceil() as usize;
+        measured_cloud = Some(std::mem::replace(&mut cloud, ground));
     }
     let spec = match spec {
         Some(s) => s,
@@ -117,6 +124,14 @@ pub fn load(
     };
     let mut g = Grid::from_points(&cloud, spec, o.aggregate);
     g.fill_gaps(o.fill, None);
+    if let Some(all) = measured_cloud {
+        let measured: Vec<bool> = Grid::from_points(&all, spec, Aggregate::Min)
+            .data
+            .iter()
+            .map(|v| !v.is_nan())
+            .collect();
+        g.fill_gaps(object_fill, Some(&measured));
+    }
     Ok(g)
 }
 
@@ -163,6 +178,43 @@ mod tests {
             assert!((a.data[i] - r.data[i]).abs() < 0.01);
         }
         assert!((extent(&tif, &o).unwrap().min_x - 500_000.0).abs() < 1e-9);
+        // Bodenfilter: unter einem Objekt wird aufgefüllt, außerhalb der Messung nicht
+        let mut pts: Vec<Point3> = (0..=80)
+            .flat_map(|j| (0..=80).map(move |i| (i, j)))
+            .map(|(i, j)| {
+                let (dx, dy) = (i as f64 * 0.25, j as f64 * 0.25);
+                let box_ = (8.0..13.0).contains(&dx) && (8.0..11.0).contains(&dy);
+                Point3 {
+                    x: 500_000.0 + dx,
+                    y: 5_400_000.0 + dy,
+                    z: 200.0 + 0.1 * dx + if box_ { 3.0 } else { 0.0 },
+                }
+            })
+            .collect();
+        pts.retain(|p| p.y - 5_400_000.0 < 14.0); // obere 6 m nicht gemessen
+        let obj = dir.join("obj.laz");
+        PointCloud::new(pts).write(&obj, None).unwrap();
+        let go = SurfaceOptions {
+            cell: 0.5,
+            classify_ground: Some(Default::default()),
+            ..o
+        };
+        let b = BBox {
+            min_x: 500_000.0,
+            min_y: 5_400_000.0,
+            max_x: 500_020.0,
+            max_y: 5_400_020.0,
+        };
+        let g = load(&obj, Some(GridSpec::covering(&b, 0.5).unwrap()), None, &go).unwrap();
+        let z = g.sample(500_010.5, 5_400_009.5).unwrap();
+        assert!(
+            (z - (200.0 + 0.1 * 10.5)).abs() < 0.1,
+            "unter dem Objekt: {z}"
+        );
+        assert!(
+            g.sample(500_010.0, 5_400_019.75).is_none(),
+            "nicht gemessene Kante bleibt leer"
+        );
         // unklassifiziert + ground_only → Rückfall auf alle Punkte
         let go = SurfaceOptions {
             ground_only: true,

@@ -1,0 +1,28 @@
+{
+  "name": "fixpunkt",
+  "private": true,
+  "type": "module",
+  "license": "UNLICENSED",
+  "packageManager": "bun@1.4.4",
+  "workspaces": [
+    "ui"
+  ],
+  "scripts": {
+    "dev": "if [ -t 1 ]; then export FORCE_COLOR=1 CARGO_TERM_COLOR=always; fi && bun run --parallel dev:server dev:ui",
+    "dev:server": "FIXPUNKT_DATA_DIR=.dev FIXPUNKT_LISTEN=127.0.0.1:8080 FIXPUNKT_DEV_UI=http://localhost:5173 FIXPUNKT_USER=admin FIXPUNKT_PASSWORD=adminadmin cargo run -p fixpunkt-server",
+    "dev:ui": "bun run --cwd ui dev",
+    "build": "bun run --cwd ui build",
+    "typecheck": "bun run --cwd ui typecheck && tsc -p e2e",
+    "lint": "biome check .",
+    "format": "biome check --write .",
+    "test": "bun run --cwd ui test",
+    "e2e": "bun run build && cargo build -p fixpunkt-server && bun --bun playwright test"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@biomejs/biome": "^2.6.2",
+    "@playwright/test": "1.64.1",
+    "@types/node": "^26.0.0",
+    "typescript": "^7.0.2"
+  }
+}
