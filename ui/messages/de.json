@@ -1,0 +1,22 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "server_auth_notLoggedIn": "Bitte melde dich an.",
+  "server_auth_wrongCredentials": "Name oder Passwort stimmt nicht.",
+  "server_auth_setupDone": "Fixpunkt ist schon eingerichtet. Bitte melde dich an.",
+  "server_auth_passwordTooShort": "Das Passwort braucht mindestens 8 Zeichen.",
+  "server_auth_nameRequired": "Bitte gib einen Namen ein.",
+  "server_auth_nameTaken": "Diesen Namen gibt es schon.",
+  "server_auth_wrongPassword": "Das bisherige Passwort stimmt nicht.",
+  "server_auth_csrf": "Die Sitzung ist abgelaufen. Bitte lade die Seite neu.",
+  "server_auth_forbidden": "Dafür fehlt dir die Berechtigung.",
+  "server_auth_lastAdmin": "Der letzte Admin kann nicht gelöscht werden.",
+  "server_api_notFound": "Das gibt es nicht (mehr).",
+  "server_api_internal": "Auf dem Server ist ein Fehler aufgetreten. Deine Daten sind nicht verloren.",
+  "server_api_invalidInput": "Die Eingabe ist ungültig.",
+  "server_captures_unsupportedFile": "Dieses Dateiformat kennt Fixpunkt nicht. Möglich sind LAS, LAZ, XYZ, CSV, GeoTIFF und ASC.",
+  "server_captures_fileTooLarge": "Die Datei ist zu groß.",
+  "server_jobs_captureNotReady": "Die Aufnahme wird noch geprüft. Bitte warte einen Moment.",
+  "server_regions_invalidGeojson": "Die Datei enthält kein gültiges Polygon (GeoJSON).",
+  "server_jobs_wrongSite": "Die Aufnahme oder der Bereich gehört zu einer anderen Baustelle.",
+  "server_jobs_unknownKind": "Diese Berechnung gibt es nicht."
+}

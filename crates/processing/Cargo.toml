@@ -1,9 +1,9 @@
 [package]
 name = "fixpunkt-processing"
-version = "0.1.0"
-edition = "2021"
+version.workspace = true
+edition.workspace = true
 description = "Fixpunkt-Engine: Punktwolken einlesen, DGM rastern, Volumen (Aushub, Haufwerk) berechnen"
-license = "UNLICENSED"
+license.workspace = true
 publish = false
 
 [lib]
@@ -11,7 +11,7 @@ name = "fixpunkt"
 path = "src/lib.rs"
 
 [[bin]]
-name = "fixpunkt"
+name = "fixpunkt-engine"
 path = "src/main.rs"
 
 [dependencies]

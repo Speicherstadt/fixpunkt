@@ -1,0 +1,22 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "server_auth_notLoggedIn": "Please sign in.",
+  "server_auth_wrongCredentials": "Name or password is wrong.",
+  "server_auth_setupDone": "Fixpunkt is already set up. Please sign in.",
+  "server_auth_passwordTooShort": "The password needs at least 8 characters.",
+  "server_auth_nameRequired": "Please enter a name.",
+  "server_auth_nameTaken": "This name already exists.",
+  "server_auth_wrongPassword": "The current password is wrong.",
+  "server_auth_csrf": "The session has expired. Please reload the page.",
+  "server_auth_forbidden": "You don't have permission for this.",
+  "server_auth_lastAdmin": "The last admin cannot be deleted.",
+  "server_api_notFound": "This does not exist (any more).",
+  "server_api_internal": "The server ran into an error. Your data is not lost.",
+  "server_api_invalidInput": "The input is invalid.",
+  "server_captures_unsupportedFile": "Fixpunkt does not know this file format. Supported: LAS, LAZ, XYZ, CSV, GeoTIFF and ASC.",
+  "server_captures_fileTooLarge": "The file is too large.",
+  "server_jobs_captureNotReady": "The capture is still being checked. Please wait a moment.",
+  "server_regions_invalidGeojson": "The file contains no valid polygon (GeoJSON).",
+  "server_jobs_wrongSite": "The capture or area belongs to another site.",
+  "server_jobs_unknownKind": "This calculation does not exist."
+}

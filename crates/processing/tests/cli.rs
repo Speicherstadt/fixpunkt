@@ -58,7 +58,7 @@ fn cloud(f: impl Fn(f64, f64) -> f64, step: f64) -> Vec<Point3> {
 }
 
 fn run(args: &[&str]) -> Value {
-    let out = Command::new(env!("CARGO_BIN_EXE_fixpunkt"))
+    let out = Command::new(env!("CARGO_BIN_EXE_fixpunkt-engine"))
         .args(args)
         .output()
         .unwrap();
@@ -72,7 +72,7 @@ fn run(args: &[&str]) -> Value {
 }
 
 fn run_fail(args: &[&str]) -> String {
-    let out = Command::new(env!("CARGO_BIN_EXE_fixpunkt"))
+    let out = Command::new(env!("CARGO_BIN_EXE_fixpunkt-engine"))
         .args(args)
         .output()
         .unwrap();

@@ -1,7 +1,15 @@
 [workspace]
 resolver = "2"
-members = ["crates/processing"]
+members = ["crates/processing", "crates/server"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "UNLICENSED"
+repository = "https://github.com/firsttris/fixpunkt"
 
 [profile.release]
 debug = false
 lto = "thin"
+codegen-units = 4
+strip = true

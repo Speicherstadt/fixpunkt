@@ -1,4 +1,5 @@
 //! Fixpunkt-Engine: Punktwolken aufbereiten, georeferenzieren, rastern, messen, vergleichen, Volumen berechnen, exportieren.
+pub mod cli;
 pub mod compare;
 pub mod crs;
 pub mod export;

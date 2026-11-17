@@ -3,3 +3,12 @@ target/
 *.laz
 *.asc
 !crates/processing/tests/data/**
+
+# UI
+node_modules/
+ui/dist/
+ui/src/paraglide/
+ui/src/routeTree.gen.ts
+test-results/
+playwright-report/
+.env
