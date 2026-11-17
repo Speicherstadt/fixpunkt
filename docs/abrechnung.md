@@ -2,7 +2,7 @@
 description: >-
   Abrechnung in Fixpunkt: Leistungsposition und Einheitspreis je Bereich, Umrechnung in Tonnen, m³ lose und
   LKW-Ladungen, Schichten (Homogenbereiche) nach Tiefe, Aufmaß je Zeitraum als PDF, Lieferscheine als CSV
-  einlesen und gegen die gemessene Menge prüfen, Freigabe durch den Auftraggeber per Link.
+  einlesen und gegen die gemessene Menge prüfen, GAEB X31, Freigabe durch den Auftraggeber per Link.
 ---
 
 # Abrechnung
@@ -129,6 +129,24 @@ genau voll. Große Abweichungen deuten auf falsche Kennwerte, vergessene Scheine
 Bereich oder eine fehlende Befliegung hin. Auf den ersten Baustellen ist der Abgleich der beste Beleg, dass die
 Drohnenmengen stimmen ([Abrechnung und Recht → Checkliste](recht.md#checkliste)).
 
+## 4a. GAEB X31 für die Abrechnungssoftware
+
+**GAEB X31** lädt das Aufmaß des Zeitraums als Mengenermittlung im Format **GAEB DA XML 3.3, Datenaustauschphase
+X31** herunter. Die Datei lässt sich in AVA- und Abrechnungsprogramme einlesen, die GAEB beherrschen; das ist
+bei öffentlichen Auftraggebern üblich.
+
+- Je **LV-Position** steht die Menge in der Einheit des Preises (m³ fest, m³ lose oder t). Bereiche oder
+  Schichten mit derselben LV-Position werden addiert; Bereiche ohne LV-Position fehlen in der Datei.
+- Die Gliederung der Ordnungszahl ergibt sich aus den LV-Positionen, z. B. `02.01.0010` → zwei Stufen mit je
+  2 Stellen und eine Position mit 4 Stellen. Alle LV-Positionen müssen derselben Gliederung folgen.
+- Fixpunkt überträgt je Position die **Gesamtmenge**, keine Rechenansätze nach REB-VB 23.003 – die Menge stammt
+  aus dem Vergleich zweier Geländemodelle. Die Fachdokumentation erlaubt das ausdrücklich (GAEB DA XML 3.3,
+  Ausgabe 2023-01, Kapitel 7.3). Den Nachweis, wie die Menge entstand, liefert das Aufmaßblatt (PDF).
+- Der Knopf erscheint, sobald es LV-Positionen gibt und sich jede Menge in ihre Preiseinheit umrechnen lässt.
+
+Jede erzeugte Datei entspricht dem offiziellen Schema `GAEB_DA_XML_31_3.3_2023-01.xsd`; die Tests prüfen das
+bei jedem Build gegen das Schema von [gaeb.de](https://www.gaeb.de).
+
 ## 5. Freigabe durch den Auftraggeber
 
 Die VOB/B verlangt, die Feststellungen für die Abrechnung **möglichst gemeinsam** zu treffen
@@ -156,6 +174,7 @@ Der Link ist so geheim wie ein Passwort: Wer ihn hat, sieht dieses eine Aufmaß 
 | Kennwerte lesen, ersetzen | `GET`/`PUT /api/sites/{id}/billing/settings` |
 | Aufmaß als JSON | `GET /api/sites/{id}/billing?from={Aufnahme}&to={Aufnahme}` |
 | Aufmaßblatt als PDF | `GET /api/sites/{id}/billing.pdf?from=…&to=…` |
+| GAEB X31 | `GET /api/sites/{id}/billing.x31?from=…&to=…` |
 | Lieferscheine | `GET`/`POST /api/sites/{id}/deliveries`, `DELETE /api/deliveries/{id}` |
 | CSV einlesen | `PUT /api/sites/{id}/deliveries.csv` (Datei als Körper) |
 | Schichten | `layers` in `PUT /api/sites/{id}/billing/settings` (`name`, `bottomM`, `lvPosition`, `unitPrice`, `priceUnit`) |

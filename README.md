@@ -63,7 +63,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Soll/Ist gegen Sohlhöhe, geneigte Ebene oder Soll-DGM
 - Bodenfilter für Bagger, Container und Bewuchs
 - Bericht als PDF mit Karte, als CSV oder GeoTIFF; Dokumentation, Plan/Ist und eigener Baustellenbericht als PDF
-- Abrechnung: Aufmaß je Zeitraum mit LV-Position und Preis, in m³ fest und lose, Tonnen und LKW-Fahrten, nach Schichten (Homogenbereichen); Lieferscheine als CSV gegengerechnet; Freigabe durch den Auftraggeber per Link
+- Abrechnung: Aufmaß je Zeitraum mit LV-Position und Preis, in m³ fest und lose, Tonnen und LKW-Fahrten, nach Schichten (Homogenbereichen); Lieferscheine als CSV gegengerechnet; GAEB X31; Freigabe durch den Auftraggeber per Link
 - Überblick je Baustelle, von jedem selbst zusammengestellt: Aushub je Befliegung, Massenziele, Lagerbestand und Verlauf je Material, Soll/Ist, Zwangspunkte
 
 </td>

@@ -768,6 +768,10 @@ export const sharePdfHref = (id: number) => `/api/billing/shares/${id}/pdf`;
 export const publicSharePdfHref = (token: string) =>
   `/api/public/shares/${encodeURIComponent(token)}/pdf`;
 
+/** Aufmaß als GAEB DA XML X31 (Mengenermittlung) */
+export const statementX31Href = (siteId: number, from: number, to: number) =>
+  `/api/sites/${siteId}/billing.x31?${new URLSearchParams({ from: String(from), to: String(to) })}`;
+
 /** Aufmaßblatt als PDF */
 export const statementPdfHref = (siteId: number, from: number, to: number) =>
   `/api/sites/${siteId}/billing.pdf?${new URLSearchParams({ from: String(from), to: String(to) })}`;

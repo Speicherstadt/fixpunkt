@@ -3,13 +3,13 @@
  * Einheitspreis und Betrag, Mengen in m³ fest und lose, Tonnen und LKW-Ladungen; Abgleich mit Lieferscheinen.
  */
 import { useQuery } from "@tanstack/react-query";
-import { FileDown } from "lucide-react";
+import { FileCode, FileDown } from "lucide-react";
 import { useState } from "react";
 import { EmptyState, ErrorText, Section } from "@/components/page";
 import { Kpis } from "@/components/report/kpis";
 import { buttonVariants } from "@/components/ui/button";
 import { Label, Select } from "@/components/ui/input";
-import { statementPdfHref } from "@/lib/api";
+import { statementPdfHref, statementX31Href } from "@/lib/api";
 import { defaultPeriod, readyCaptures } from "@/lib/billing";
 import { errorText } from "@/lib/errors";
 import { formatDate, formatEuro, formatNumber, formatVolume } from "@/lib/format";
@@ -44,6 +44,16 @@ export function Billing({ siteId, canEdit }: { siteId: number; canEdit: boolean 
         s && period ? (
           <>
             {canEdit ? <ShareButton siteId={siteId} period={period} /> : null}
+            {/* GAEB nur mit LV-Positionen, deren Menge sich in die Preiseinheit umrechnen lässt */}
+            {s.positions.some((p) => p.lvPosition) && !s.unconverted ? (
+              <a
+                href={statementX31Href(siteId, period.from, period.to)}
+                className={buttonVariants()}
+              >
+                <FileCode size={16} aria-hidden="true" />
+                {m.billing_x31()}
+              </a>
+            ) : null}
             <a
               href={statementPdfHref(siteId, period.from, period.to)}
               className={buttonVariants({ variant: "primary" })}

@@ -120,6 +120,7 @@ pub fn router(app: AppRef) -> Router {
             get(billing::get_settings).put(billing::put_settings),
         )
         .route("/sites/{id}/billing", get(billing::get_statement))
+        .route("/sites/{id}/billing.x31", get(billing::get_x31))
         .route(
             "/sites/{id}/billing/shares",
             get(billing::shares::list).post(billing::shares::create),

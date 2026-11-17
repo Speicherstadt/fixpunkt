@@ -95,6 +95,15 @@ test("Aufmaß mit Preis, Kennwerten und Lieferscheinen", async ({ page }) => {
   await billing.getByRole("button", { name: "Lieferschein LS-4 löschen" }).click();
   await expect(billing.getByRole("button", { name: "Lieferscheine (3)" })).toBeVisible();
 
+  // GAEB X31 (Mengenermittlung) mit der Menge an der LV-Position
+  const x31 = await page.request.get(
+    (await billing.getByRole("link", { name: "GAEB X31" }).getAttribute("href"))!,
+  );
+  expect(x31.status()).toBe(200);
+  expect(await x31.text()).toMatch(
+    /<Item ID="I_01_02_0010" RNoPart="0010"><QtyDeterm><Qty>1\d{3}\.\d{3}<\/Qty>/,
+  );
+
   // PDF
   const href = await billing.getByRole("link", { name: "Aufmaß als PDF" }).getAttribute("href");
   const pdf = await page.request.get(href!);

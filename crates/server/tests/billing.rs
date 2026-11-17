@@ -168,6 +168,21 @@ async fn statement_with_prices_and_deliveries() {
         "{check}"
     );
 
+    // GAEB X31: Menge in der Preiseinheit (t) an der Ordnungszahl 01.02.0010
+    let x31 = c
+        .get(&format!("/api/sites/{sid}/billing.x31?{period}"))
+        .await;
+    assert_eq!(x31.status, StatusCode::OK);
+    assert!(x31.headers["content-disposition"]
+        .to_str()
+        .unwrap()
+        .ends_with(".x31\""));
+    let xml = String::from_utf8(x31.body.clone()).unwrap();
+    assert!(xml.contains("<DP>31</DP>"));
+    assert!(xml.contains(&format!(
+        r#"<Item ID="I_01_02_0010" RNoPart="0010"><QtyDeterm><Qty>{t:.3}</Qty>"#
+    )));
+
     let pdf = c
         .get(&format!("/api/sites/{sid}/billing.pdf?{period}"))
         .await;

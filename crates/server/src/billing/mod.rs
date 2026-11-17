@@ -7,6 +7,7 @@
 
 pub mod convert;
 pub mod deliveries;
+pub mod gaeb;
 pub mod layers;
 pub mod positions;
 pub mod shares;
@@ -203,6 +204,47 @@ pub async fn compute(app: &AppRef, site: i64, p: &Period) -> ApiResult<(db::Site
     let v = statement::statement(&captures, &regions, &jobs, &ds, &settings, p.from, p.to)
         .map_err(|e| ApiError::bad_request(code::INVALID_INPUT).with_detail(e.to_string()))?;
     Ok((s, v))
+}
+
+/// Aufmaß als GAEB DA XML X31 (Mengenermittlung): `GET /api/sites/{id}/billing.x31?from=&to=`
+pub async fn get_x31(
+    State(app): State<AppRef>,
+    Path(site): Path<i64>,
+    Query(p): Query<Period>,
+) -> ApiResult<axum::response::Response> {
+    use axum::http::header;
+    use axum::response::IntoResponse;
+    let (s, v) = compute(&app, site, &p).await?;
+    let day = |ms: Option<i64>| {
+        let t = time::OffsetDateTime::from_unix_timestamp(ms.unwrap_or(0) / 1000)
+            .unwrap_or(time::OffsetDateTime::UNIX_EPOCH);
+        format!("{:04}-{:02}-{:02}", t.year(), u8::from(t.month()), t.day())
+    };
+    let now = time::OffsetDateTime::now_utc();
+    let head = gaeb::Head {
+        site: &s.name,
+        date: day(Some(crate::db::now_ms())),
+        time: format!("{:02}:{:02}:{:02}", now.hour(), now.minute(), now.second()),
+        from: day(v["from"]["at"].as_i64()),
+        to: day(v["to"]["at"].as_i64()),
+    };
+    let xml = gaeb::x31(&v, &head)
+        .map_err(|e| ApiError::bad_request(code::INVALID_INPUT).with_detail(e))?;
+    let name = crate::report::file_name("Aufmass", &s.name, site).replace(".pdf", ".x31");
+    Ok((
+        [
+            (
+                header::CONTENT_TYPE,
+                "application/xml; charset=utf-8".to_string(),
+            ),
+            (
+                header::CONTENT_DISPOSITION,
+                format!("attachment; filename=\"{name}\""),
+            ),
+        ],
+        xml,
+    )
+        .into_response())
 }
 
 pub async fn get_statement(

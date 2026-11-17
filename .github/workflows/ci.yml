@@ -38,6 +38,13 @@ jobs:
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
+      # GAEB-Export (X31) gegen das offizielle Schema prüfen; es steht nicht im Repo (© DIN)
+      - name: GAEB-Schema X31 laden
+        run: |
+          sudo apt-get install -y -qq libxml2-utils
+          curl -fsSL -o /tmp/x31.zip https://www.gaeb.de/wp-content/uploads/2023/09/2023-01_Mengenermittlung.zip
+          unzip -q -o /tmp/x31.zip -d /tmp/gaeb
+          echo "GAEB_X31_XSD=/tmp/gaeb/GAEB_DA_XML_31_3.3_2023-01.xsd" >> "$GITHUB_ENV"
       - run: cargo test --workspace
 
   web:

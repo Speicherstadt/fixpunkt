@@ -63,7 +63,9 @@ VOB/B noch DIN 18300 fest.
 Bei Aufträgen von Bund, Ländern und Kommunen können die Vertragsunterlagen weitere Vorgaben machen, etwa
 Zusätzliche Technische Vertragsbedingungen (z. B. ZTV E-StB im Straßenbau), eine Mengenberechnung nach den
 **REB-Verfahrensbeschreibungen** oder die Übergabe im **GAEB-Format**. Dann gelten diese Vorgaben; die
-Leistungsbeschreibung vorher darauf prüfen. Bei privaten Bauherren und unter Unternehmen gibt es solche Vorgaben
+Leistungsbeschreibung vorher darauf prüfen. Fixpunkt gibt das Aufmaß als GAEB DA XML X31 aus
+([Abrechnung](abrechnung.md#4a-gaeb-x31-für-die-abrechnungssoftware)) – mit Mengen je Position, ohne
+Rechenansätze nach REB-VB 23.003. Bei privaten Bauherren und unter Unternehmen gibt es solche Vorgaben
 nur, wenn sie vereinbart sind.
 
 ### Beweis im Streitfall
