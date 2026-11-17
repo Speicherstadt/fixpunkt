@@ -16,3 +16,4 @@ playwright-report/
 # E2E
 .e2e-data/
 e2e/.auth/
+ui/project.inlang/cache/
