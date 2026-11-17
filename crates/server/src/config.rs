@@ -24,6 +24,24 @@ pub struct Config {
     pub nodeodm_token: Option<String>,
     /// Abstand der Statusabfragen bei NodeODM
     pub nodeodm_poll: std::time::Duration,
+    /// Kacheln der Übersichtskarte (`{z}/{x}/{y}`) und Namensnennung; `None`: Karte ohne Hintergrund
+    pub map_tiles: Option<(String, String)>,
+}
+
+/// OpenStreetMap: frei mit Namensnennung, für wenige Nutzer im Rahmen der Tile Usage Policy
+pub const OSM_TILES: &str = "https://tile.openstreetmap.org/{z}/{x}/{y}.png";
+pub const OSM_ATTRIBUTION: &str = "© OpenStreetMap-Mitwirkende";
+
+/// `none` schaltet den Kartenhintergrund ab
+fn map_tiles(url: Option<String>, attribution: Option<String>) -> Option<(String, String)> {
+    match url.as_deref() {
+        Some("none") => None,
+        Some(u) => Some((u.to_string(), attribution.unwrap_or_default())),
+        None => Some((
+            OSM_TILES.to_string(),
+            attribution.unwrap_or_else(|| OSM_ATTRIBUTION.to_string()),
+        )),
+    }
 }
 
 impl Config {
@@ -66,6 +84,7 @@ impl Config {
             nodeodm_url: var("FIXPUNKT_NODEODM_URL").map(|u| u.trim_end_matches('/').to_string()),
             nodeodm_token: var("FIXPUNKT_NODEODM_TOKEN"),
             nodeodm_poll: std::time::Duration::from_secs_f64(nodeodm_poll.max(0.01)),
+            map_tiles: map_tiles(var("FIXPUNKT_MAP_TILES"), var("FIXPUNKT_MAP_ATTRIBUTION")),
         })
     }
 
@@ -94,6 +113,7 @@ impl Config {
             nodeodm_url: None,
             nodeodm_token: None,
             nodeodm_poll: std::time::Duration::from_millis(20),
+            map_tiles: None,
         }
     }
 }
@@ -110,6 +130,7 @@ mod tests {
         assert!(c.initial_user.is_none());
         assert!(c.nodeodm_url.is_none());
         assert_eq!(c.nodeodm_poll.as_secs(), 10);
+        assert_eq!(c.map_tiles.as_ref().unwrap().0, OSM_TILES);
         let c = Config::from_vars(|k| match k {
             "FIXPUNKT_LISTEN" => Some("127.0.0.1:9000".into()),
             "FIXPUNKT_USER" => Some("admin".into()),
@@ -128,5 +149,8 @@ mod tests {
         assert_eq!(c.nodeodm_url.as_deref(), Some("http://nodeodm:3000"));
         assert_eq!(c.nodeodm_poll.as_millis(), 2500);
         assert!(Config::from_vars(|k| (k == "FIXPUNKT_LISTEN").then(|| "x".into())).is_err());
+        let off =
+            Config::from_vars(|k| (k == "FIXPUNKT_MAP_TILES").then(|| "none".into())).unwrap();
+        assert!(off.map_tiles.is_none());
     }
 }

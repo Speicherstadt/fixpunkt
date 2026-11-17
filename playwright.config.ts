@@ -8,6 +8,8 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 28080;
 /** NodeODM-Nachbau (e2e/nodeodm-stub.ts) für die Drohnenfotos */
 const ODM_PORT = 28081;
+/** Kartenkacheln von OpenStreetMap nur für die Doku-Bilder; Tests laufen ohne Netz */
+const MAP_TILES = process.env.DOKU_SCREENSHOTS ? "" : "none";
 const DATA = ".e2e-data";
 
 const launchOptions = process.env.PW_CHROMIUM_PATH
@@ -82,7 +84,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: `rm -rf ${DATA} && FIXPUNKT_DATA_DIR=${DATA} FIXPUNKT_LISTEN=127.0.0.1:${PORT} FIXPUNKT_NODEODM_URL=http://127.0.0.1:${ODM_PORT} FIXPUNKT_NODEODM_POLL_SECS=0.3 ./target/debug/fixpunkt`,
+      command: `rm -rf ${DATA} && FIXPUNKT_DATA_DIR=${DATA} FIXPUNKT_LISTEN=127.0.0.1:${PORT} FIXPUNKT_NODEODM_URL=http://127.0.0.1:${ODM_PORT} FIXPUNKT_NODEODM_POLL_SECS=0.3 FIXPUNKT_MAP_TILES=${MAP_TILES} ./target/debug/fixpunkt`,
       url: `http://127.0.0.1:${PORT}/api/health`,
       reuseExistingServer: false,
       timeout: 60_000,

@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, Plus } from "lucide-react";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useMemo, useState } from "react";
 import { EmptyState, ErrorText, PageHeader } from "@/components/page";
+import { SitesMap } from "@/components/sites-map";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { Input, Label, Textarea } from "@/components/ui/input";
@@ -10,13 +11,16 @@ import { PlaceholderRows } from "@/components/ui/placeholder";
 import { api } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatDate } from "@/lib/format";
-import { authQuery, sitesQuery } from "@/lib/queries";
+import { authQuery, settingsQuery, sitesQuery } from "@/lib/queries";
+import { mapSites } from "@/lib/sites-map";
 import { m } from "@/paraglide/messages";
 
 export const Route = createFileRoute("/_app/")({ component: SitesPage });
 
 function SitesPage() {
   const sites = useQuery(sitesQuery);
+  const settings = useQuery(settingsQuery);
+  const located = useMemo(() => mapSites(sites.data ?? []), [sites.data]);
   const { data: auth } = useQuery(authQuery);
   const canEdit = auth?.user?.role !== "viewer";
   const [open, setOpen] = useState(false);
@@ -37,28 +41,33 @@ function SitesPage() {
       {sites.isPending ? (
         <PlaceholderRows />
       ) : sites.data?.length ? (
-        <ul className="m-0 flex list-none flex-col divide-y divide-border rounded-xl border border-border p-0">
-          {sites.data.map((s) => (
-            <li key={s.id}>
-              <Link
-                to="/sites/$siteId"
-                params={{ siteId: String(s.id) }}
-                className="flex items-center gap-4 px-5 py-4 hover:bg-hover"
-              >
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="truncate font-medium">{s.name}</span>
-                  <span className="truncate text-[13px] text-muted">
-                    {m.sites_counts({ captures: s.captures, jobs: s.jobs })}
-                    {s.lastCaptureAt
-                      ? ` · ${m.sites_last({ date: formatDate(s.lastCaptureAt) })}`
-                      : ""}
-                  </span>
-                </div>
-                <ChevronRight size={16} aria-hidden="true" className="text-muted" />
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="flex flex-col gap-6">
+          {located.length && settings.data ? (
+            <SitesMap sites={located} tiles={settings.data.mapTiles} />
+          ) : null}
+          <ul className="m-0 flex list-none flex-col divide-y divide-border rounded-xl border border-border p-0">
+            {sites.data.map((s) => (
+              <li key={s.id}>
+                <Link
+                  to="/sites/$siteId"
+                  params={{ siteId: String(s.id) }}
+                  className="flex items-center gap-4 px-5 py-4 hover:bg-hover"
+                >
+                  <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                    <span className="truncate font-medium">{s.name}</span>
+                    <span className="truncate text-[13px] text-muted">
+                      {m.sites_counts({ captures: s.captures, jobs: s.jobs })}
+                      {s.lastCaptureAt
+                        ? ` · ${m.sites_last({ date: formatDate(s.lastCaptureAt) })}`
+                        : ""}
+                    </span>
+                  </div>
+                  <ChevronRight size={16} aria-hidden="true" className="text-muted" />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       ) : (
         <EmptyState>{m.sites_empty()}</EmptyState>
       )}

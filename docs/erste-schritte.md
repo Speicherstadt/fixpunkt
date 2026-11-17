@@ -1,6 +1,7 @@
 ---
 description: >-
-  Erste Schritte mit Fixpunkt: einrichten, anmelden, erste Baustelle anlegen, Sprache und Farbschema wählen.
+  Erste Schritte mit Fixpunkt: einrichten, anmelden, erste Baustelle anlegen, Karte der Baustellen, Sprache und
+  Farbschema wählen.
 ---
 
 # Erste Schritte
@@ -18,8 +19,13 @@ Unter **Baustellen → Neue Baustelle** einen Namen und optional eine Beschreibu
 Tiefgarage · Aushub bis −2,0 m“). Eine Baustelle sammelt alles, was zu ihr gehört: Aufnahmen, Abrechnungsbereiche
 und Berechnungen.
 
-![Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen.png#only-light){ width="1440" height="900" }
-![Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen-dunkel.png#only-dark){ width="1440" height="900" }
+Über der Liste zeigt eine **Karte**, wo die Baustellen liegen. Die Lage ergibt sich von selbst aus den geprüften
+Aufnahmen (oder, solange es keine gibt, aus den Abrechnungsbereichen); ein Klick auf einen Punkt öffnet die
+Baustelle. Den Kartenhintergrund liefert OpenStreetMap, ein eigener Kachelserver oder keiner
+([Konfiguration](konfiguration.md)).
+
+![Karte und Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen.png#only-light){ width="1440" height="900" }
+![Karte und Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen-dunkel.png#only-dark){ width="1440" height="900" }
 
 Weiter geht es mit [Aushub berechnen](aushub.md).
 

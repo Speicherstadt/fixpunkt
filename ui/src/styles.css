@@ -127,3 +127,41 @@
   }
   /* biome-ignore-end lint/complexity/noImportantStyles: siehe oben */
 }
+
+/* Übersichtskarte (Leaflet): Farben aus den Tokens, Kacheln im Dunkeln abgedunkelt und invertiert */
+@layer components {
+  .sites-map {
+    font: inherit;
+    background: var(--subtle);
+  }
+  .sites-map .site-marker {
+    fill: var(--accent);
+    fill-opacity: 0.9;
+    stroke: var(--bg);
+    stroke-width: 2.5px;
+  }
+  .sites-map .leaflet-tooltip {
+    background: var(--bg);
+    color: var(--fg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    box-shadow: none;
+    font-size: 13px;
+  }
+  .sites-map .leaflet-tooltip-top::before {
+    border-top-color: var(--border);
+  }
+  .sites-map .leaflet-control-attribution {
+    background: var(--bg);
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .sites-map .leaflet-bar a {
+    background: var(--bg);
+    color: var(--fg);
+    border-color: var(--border);
+  }
+  .dark .sites-map .leaflet-tile {
+    filter: invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9);
+  }
+}

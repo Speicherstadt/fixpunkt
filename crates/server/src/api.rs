@@ -45,6 +45,7 @@ pub fn router(app: AppRef) -> Router {
         .route("/jobs/{id}/files/{name}", get(jobs::file))
         .route("/jobs/{id}/report", get(report::job_report))
         .route("/odm", get(odm::node_status))
+        .route("/settings", get(settings))
         .route("/sites/{id}/odm", post(odm::create))
         .route(
             "/jobs/{id}/images",
@@ -68,6 +69,15 @@ pub fn router(app: AppRef) -> Router {
 
 async fn health() -> Json<serde_json::Value> {
     Json(serde_json::json!({ "status": "ok", "version": env!("CARGO_PKG_VERSION") }))
+}
+
+/// Einstellungen, die die UI braucht: Kacheln der Übersichtskarte
+async fn settings(State(app): State<AppRef>) -> Json<serde_json::Value> {
+    Json(serde_json::json!({
+        "mapTiles": app.cfg.map_tiles.as_ref().map(|(url, attribution)| {
+            serde_json::json!({ "url": url, "attribution": attribution })
+        }),
+    }))
 }
 
 async fn events(

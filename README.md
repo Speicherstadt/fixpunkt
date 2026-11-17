@@ -82,6 +82,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Höhenbild jeder Aufnahme, Differenz oder Abweichung darübergelegt
 - Messen: Punkt, Strecke, Gefälle, Fläche, Profil
 - Abrechnungsbereiche direkt im Browser zeichnen
+- Karte aller Baustellen
 - Bedienbar mit Maus und Tastatur
 
 </td>

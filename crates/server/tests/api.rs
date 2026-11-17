@@ -5,7 +5,7 @@ mod common;
 
 use axum::body::Body;
 use axum::http::{header, Method, Request, StatusCode};
-use common::{rect, terrain_xyz, Client, X0};
+use common::{rect, terrain_xyz, Client, X0, Y0};
 use fixpunkt_server::config::Config;
 use fixpunkt_server::{jobs, router};
 use serde_json::{json, Value};
@@ -910,5 +910,86 @@ async fn pdf_reports_for_each_kind() {
     assert_eq!(
         c.get("/api/jobs/999/report").await.status,
         StatusCode::NOT_FOUND
+    );
+}
+
+#[tokio::test]
+async fn sites_have_a_location_for_the_map() {
+    use fixpunkt::crs::Utm;
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let s = |c: &Value, id: i64| {
+        c.as_array()
+            .unwrap()
+            .iter()
+            .find(|s| s["id"] == id)
+            .unwrap()
+            .clone()
+    };
+    let a = c
+        .json(Method::POST, "/api/sites", json!({"name": "Mit Aufnahme"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let b = c
+        .json(Method::POST, "/api/sites", json!({"name": "Nur Bereiche"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let empty = c
+        .json(Method::POST, "/api/sites", json!({"name": "Leer"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    c.upload(
+        &format!("/api/sites/{a}/captures?file=a.xyz"),
+        terrain_xyz(false),
+    )
+    .await;
+    let fc = json!({"type": "FeatureCollection",
+        "features": [rect("West", 0.0, 0.0, 10.0, 10.0), rect("Ost", 90.0, 0.0, 100.0, 10.0)]});
+    c.json(
+        Method::POST,
+        &format!("/api/sites/{b}/regions"),
+        json!({"geojson": fc}),
+    )
+    .await;
+    // vor der Prüfung: Aufnahme zählt noch nicht
+    let list = c.get("/api/sites").await.json();
+    assert!(s(&list, a)["center"].is_null());
+    jobs::run_pending(&c.app).await.unwrap();
+    let list = c.get("/api/sites").await.json();
+
+    // unabhängig geprüft: Breite/Länge zurück nach UTM32 ergibt die Mitte des Geländes
+    let back = |site: &Value| {
+        let ll = site["center"].as_array().unwrap();
+        Utm::new(32)
+            .unwrap()
+            .forward(ll[0].as_f64().unwrap(), ll[1].as_f64().unwrap())
+    };
+    let (e, n) = back(&s(&list, a));
+    assert!(
+        (e - (X0 + 20.0)).abs() < 1e-3 && (n - (Y0 + 20.0)).abs() < 1e-3,
+        "{e} {n}"
+    );
+    // beide Bereiche zusammen: 0 … 100 m → Mitte bei 50 m
+    let (e, n) = back(&s(&list, b));
+    assert!(
+        (e - (X0 + 50.0)).abs() < 1e-3 && (n - (Y0 + 5.0)).abs() < 1e-3,
+        "{e} {n}"
+    );
+    assert!(s(&list, empty)["center"].is_null());
+    // Stuttgarter Gegend
+    let ll = s(&list, a)["center"].clone();
+    assert!((ll[0].as_f64().unwrap() - 48.78).abs() < 0.05, "{ll}");
+    assert!((ll[1].as_f64().unwrap() - 9.16).abs() < 0.05, "{ll}");
+
+    // Testkonfiguration ohne Kartenhintergrund
+    assert_eq!(
+        c.get("/api/settings").await.json(),
+        json!({"mapTiles": null})
     );
 }

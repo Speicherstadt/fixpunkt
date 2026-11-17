@@ -20,7 +20,14 @@ Container in `/etc/fixpunkt/fixpunkt.env`.
 | `FIXPUNKT_NODEODM_URL` | – | NodeODM für [Drohnenfotos](drohnenfotos.md), z. B. `http://nodeodm:3000`; ohne ist die Funktion aus |
 | `FIXPUNKT_NODEODM_TOKEN` | – | Token, falls NodeODM mit `--token` läuft |
 | `FIXPUNKT_NODEODM_POLL_SECS` | `10` | Abstand der Fortschrittsabfragen bei NodeODM |
+| `FIXPUNKT_MAP_TILES` | OpenStreetMap | Kacheln der Übersichtskarte als URL mit `{z}/{x}/{y}`; `none` zeigt die Karte ohne Hintergrund (kein Abruf nach außen) |
+| `FIXPUNKT_MAP_ATTRIBUTION` | `© OpenStreetMap-Mitwirkende` | Namensnennung zu den Kacheln |
 | `RUST_LOG` | `info` | Ausführlichkeit der Logs, z. B. `debug` |
+
+> [!NOTE]
+> Die Kartenkacheln lädt der Browser direkt vom Kachelserver. Bei OpenStreetMap sieht dieser also, welcher
+> Kartenausschnitt angezeigt wird – und damit ungefähr, wo die Baustellen liegen. Wer das nicht möchte, nimmt einen
+> eigenen Kachelserver oder `FIXPUNKT_MAP_TILES=none`.
 
 ## Reverse-Proxy
 

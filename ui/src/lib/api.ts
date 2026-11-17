@@ -90,7 +90,14 @@ export const SiteItem = Site.extend({
   captures: z.number(),
   jobs: z.number(),
   lastCaptureAt: z.number().nullable(),
+  /** [Breite, Länge] für die Karte; ohne geprüfte Daten leer */
+  center: z.tuple([z.number(), z.number()]).nullable().optional(),
 });
+
+export const Settings = z.object({
+  mapTiles: z.object({ url: z.string(), attribution: z.string() }).nullable(),
+});
+export type Settings = z.infer<typeof Settings>;
 export type SiteItem = z.infer<typeof SiteItem>;
 
 export const CaptureInfo = z
@@ -280,6 +287,7 @@ export const api = {
     request("POST", `/sites/${siteId}/jobs`, Job, { kind, params }),
   deleteJob: (id: number) => request("DELETE", `/jobs/${id}`, Empty),
   odmStatus: () => request("GET", "/odm", OdmStatus),
+  settings: () => request("GET", "/settings", Settings),
   createOdm: (siteId: number, params: OdmParams) =>
     request("POST", `/sites/${siteId}/odm`, Job, params),
   startOdm: (jobId: number) => request("POST", `/jobs/${jobId}/start`, Job, {}),

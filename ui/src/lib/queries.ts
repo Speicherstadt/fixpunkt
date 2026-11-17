@@ -22,4 +22,10 @@ export const jobsQuery = (siteId: number) =>
   queryOptions({ queryKey: ["jobs", siteId], queryFn: () => api.jobs(siteId) });
 export const jobQuery = (id: number) =>
   queryOptions({ queryKey: ["job", id], queryFn: () => api.job(id) });
+/** Einstellungen ändern sich nur mit einem Neustart des Servers */
+export const settingsQuery = queryOptions({
+  queryKey: ["settings"],
+  queryFn: api.settings,
+  staleTime: Number.POSITIVE_INFINITY,
+});
 export const usersQuery = queryOptions({ queryKey: ["users"], queryFn: api.users });

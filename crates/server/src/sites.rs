@@ -21,20 +21,26 @@ pub struct SiteItem {
     captures: i64,
     jobs: i64,
     last_capture_at: Option<i64>,
+    /// [Breite, Länge] der Baustelle für die Karte; ohne Daten leer
+    #[sqlx(skip)]
+    center: Option<[f64; 2]>,
 }
 
 pub async fn list(State(app): State<AppRef>) -> ApiResult<Json<Vec<SiteItem>>> {
-    Ok(Json(
-        sqlx::query_as(
-            "SELECT s.*,
-               (SELECT COUNT(*) FROM captures c WHERE c.site_id = s.id) AS captures,
-               (SELECT COUNT(*) FROM jobs j WHERE j.site_id = s.id AND j.kind != 'inspect') AS jobs,
-               (SELECT MAX(captured_at) FROM captures c WHERE c.site_id = s.id) AS last_capture_at
-             FROM sites s ORDER BY s.name COLLATE NOCASE",
-        )
-        .fetch_all(&app.db)
-        .await?,
-    ))
+    let mut sites: Vec<SiteItem> = sqlx::query_as(
+        "SELECT s.*,
+           (SELECT COUNT(*) FROM captures c WHERE c.site_id = s.id) AS captures,
+           (SELECT COUNT(*) FROM jobs j WHERE j.site_id = s.id AND j.kind != 'inspect') AS jobs,
+           (SELECT MAX(captured_at) FROM captures c WHERE c.site_id = s.id) AS last_capture_at
+         FROM sites s ORDER BY s.name COLLATE NOCASE",
+    )
+    .fetch_all(&app.db)
+    .await?;
+    let centers = crate::location::site_centers(&app.db).await?;
+    for s in &mut sites {
+        s.center = centers.get(&s.site.id).copied();
+    }
+    Ok(Json(sites))
 }
 
 #[derive(Deserialize)]
