@@ -172,7 +172,9 @@ fn document(mut i: Inputs) -> Result<Option<(doc::Doc, &'static str)>> {
             i.ctx.subject = format!("{n} Aufnahmen ab „{}“", name(s.capture_ids[0]));
             (build::series_doc(&i.ctx, &i.result)?, "Zeitreihe")
         }
-        JobSpec::Inspect(_) | JobSpec::Dem(_) | JobSpec::Export(_) => return Ok(None),
+        JobSpec::Inspect(_) | JobSpec::Dem(_) | JobSpec::Export(_) | JobSpec::Georef(_) => {
+            return Ok(None)
+        }
     }))
 }
 

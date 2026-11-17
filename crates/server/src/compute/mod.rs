@@ -4,6 +4,7 @@
 
 pub mod compare;
 pub mod export;
+pub mod georef;
 pub mod volume;
 
 #[cfg(test)]

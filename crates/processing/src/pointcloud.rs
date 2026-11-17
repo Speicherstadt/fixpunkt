@@ -306,6 +306,11 @@ pub fn rewrite_las(
     Ok(written)
 }
 
+/// LAS oder LAZ nach der Endung
+pub fn is_las(p: &Path) -> bool {
+    ext_of(p) == "las" || ext_of(p) == "laz"
+}
+
 /// VLR-Nummer des GeoTIFF-GeoKeyDirectory in LAS
 const GEOKEY_DIRECTORY: u16 = 34735;
 /// VLR-Nummer des Bezugssystems als WKT (LAS 1.4, PDAL)

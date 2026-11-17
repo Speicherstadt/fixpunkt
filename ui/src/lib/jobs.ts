@@ -10,10 +10,11 @@ import {
   SeriesResult,
   VolumeResult,
 } from "@/lib/api";
-import { formatVolume } from "@/lib/format";
+import { formatNumber, formatVolume } from "@/lib/format";
+import { GeorefResult } from "@/lib/georef";
 import { m } from "@/paraglide/messages";
 
-export const JOB_KINDS = ["volume", "stockpile", "compare", "series", "export"] as const;
+export const JOB_KINDS = ["volume", "stockpile", "compare", "series", "export", "georef"] as const;
 export type JobKind = (typeof JOB_KINDS)[number];
 
 export const KIND_TEXT: Record<JobKind, () => string> = {
@@ -22,6 +23,7 @@ export const KIND_TEXT: Record<JobKind, () => string> = {
   compare: m.kind_compare,
   series: m.kind_series,
   export: m.kind_export,
+  georef: m.kind_georef,
 };
 
 /** Arten mit PDF-Bericht vom Server (`GET /api/jobs/{id}/report`) */
@@ -48,6 +50,7 @@ export const jobTitle = (job: Job, names: Names): string => {
     case "stockpile":
     case "compare":
     case "export":
+    case "georef":
     case "dem":
       return `${(KIND_TEXT[job.kind as JobKind] ?? m.kind_dem)()} · ${names(p.captureId)}`;
     default:
@@ -60,6 +63,10 @@ export const jobSummary = (job: Job): string | null => {
   if (job.status === "running" && job.progress != null)
     return m.job_progress({ percent: Math.round(job.progress) });
   switch (job.kind) {
+    case "georef": {
+      const r = GeorefResult.safeParse(job.result);
+      return r.success ? m.job_summary_georef({ cm: formatNumber(r.data.rms_3d * 100, 1) }) : null;
+    }
     case "odm": {
       const r = OdmResult.safeParse(job.result);
       return r.success ? m.job_summary_odm({ count: r.data.images }) : null;

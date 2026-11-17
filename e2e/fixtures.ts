@@ -12,7 +12,8 @@ export const PIT_M3 = 800;
 const inPit = (dx: number, dy: number) => dx >= 10 && dx < 30 && dy >= 10 && dy < 30;
 const onExcavator = (dx: number, dy: number) => dx >= 33 && dx < 38 && dy >= 2 && dy < 5;
 
-export const terrainXyz = (after: boolean): string => {
+/** `east`/`north`: Verschiebung in m, damit Baustellen auf der Karte nicht übereinanderliegen */
+export const terrainXyz = (after: boolean, east = 0, north = 0): string => {
   const lines = ["x y z"];
   for (let j = 0; j < 200; j++) {
     for (let i = 0; i < 200; i++) {
@@ -21,7 +22,7 @@ export const terrainXyz = (after: boolean): string => {
       let z = 300 + 0.01 * dx;
       if (after && inPit(dx, dy)) z -= 2;
       if (after && onExcavator(dx, dy)) z += 3.5;
-      lines.push(`${(X0 + dx).toFixed(3)} ${(Y0 + dy).toFixed(3)} ${z.toFixed(3)}`);
+      lines.push(`${(X0 + east + dx).toFixed(3)} ${(Y0 + north + dy).toFixed(3)} ${z.toFixed(3)}`);
     }
   }
   return lines.join("\n");

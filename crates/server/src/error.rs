@@ -30,6 +30,7 @@ pub mod code {
     pub const ODM_NOT_DRAFT: &str = "odm.notDraft";
     pub const ODM_TOO_FEW_IMAGES: &str = "odm.tooFewImages";
     pub const ODM_UNSUPPORTED_IMAGE: &str = "odm.unsupportedImage";
+    pub const GEOREF_INVALID: &str = "georef.invalid";
 
     pub const ALL: &[&str] = &[
         NOT_LOGGED_IN,
@@ -55,6 +56,7 @@ pub mod code {
         ODM_NOT_DRAFT,
         ODM_TOO_FEW_IMAGES,
         ODM_UNSUPPORTED_IMAGE,
+        GEOREF_INVALID,
     ];
 }
 

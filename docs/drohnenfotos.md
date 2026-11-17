@@ -80,5 +80,5 @@ Auftrag. Die Fotos bleiben im Auftrag, bis er gelöscht wird; in NodeODM räumt 
 > messen und vergleichen. Für Massen zwischen zwei Flügen zählt vor allem, dass beide denselben Höhenversatz
 > haben.
 
-Ohne RTK liegt die Drohne einige Meter daneben; dann braucht der Flug Passpunkte. Die Transformation über
-Passpunkte gibt es bisher auf der Kommandozeile (`fixpunkt georef`), in der Web-UI ist sie geplant.
+Ohne RTK liegt die Drohne einige Meter daneben; dann bringen [Passpunkte](berechnungen.md#passpunkte) die
+Punktwolke an die richtige Stelle.

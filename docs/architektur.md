@@ -39,7 +39,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `captures.rs` | Hochladen (gestreamt), Herunterladen, Löschen |
 | `jobs/` | Warteschlange in SQLite, Worker im Prozess, übersteht Neustarts; `spec.rs`: Auftragsarten mit typisierten Parametern. Zwei Spuren: `FIXPUNKT_MAX_JOBS` Rechen-Worker und ein Photogrammetrie-Worker, der nur auf NodeODM wartet |
 | `odm/` | Drohnenfotos über NodeODM: REST-Client (`client.rs`, reqwest mit rustls/ring), Ablauf mit Fortschritt und Wiederaufnahme nach Neustart (`run.rs`), Umrechnung in die Zone der Baustelle und Höhenversatz (`cloud.rs`) |
-| `compute/` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, Zeitreihe (`volume.rs`), Soll/Ist (`compare.rs`), Exporte (`export.rs`) |
+| `compute/` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, Zeitreihe (`volume.rs`), Soll/Ist (`compare.rs`), Exporte (`export.rs`), Passpunkte (`georef.rs`, Vorschau unter `/api/georef/fit`) |
 | `view.rs` | Höhenraster für die 2D-Ansicht als Float32 (`/api/captures/{id}/grid`, `/api/jobs/{id}/grid/{name}`), je Aufnahme zwischengespeichert |
 | `location.rs` | Lage der Baustellen für die Karte: Mitte der geprüften Aufnahmen (sonst der Bereiche), UTM → Breite/Länge |
 | `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer) |

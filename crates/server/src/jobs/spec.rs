@@ -3,6 +3,7 @@
 
 use crate::compute::compare::DesignInput;
 use crate::compute::export::Format;
+use crate::compute::georef::Gcp;
 use crate::compute::{self, SurfaceParams};
 use crate::db::{self, status};
 use crate::error::{code, ApiError, ApiResult};
@@ -10,13 +11,22 @@ use crate::state::AppRef;
 use anyhow::{anyhow, bail, Context, Result};
 use axum::http::StatusCode;
 use fixpunkt::geom::Region;
+use fixpunkt::transform::Mode;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::HashSet;
 use std::path::PathBuf;
 
 /// Arten, die man über die API anlegen kann (`inspect` legt der Upload selbst an)
-pub const USER_KINDS: &[&str] = &["volume", "stockpile", "dem", "compare", "series", "export"];
+pub const USER_KINDS: &[&str] = &[
+    "volume",
+    "stockpile",
+    "dem",
+    "compare",
+    "series",
+    "export",
+    "georef",
+];
 
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "kind", content = "params", rename_all = "lowercase")]
@@ -28,6 +38,7 @@ pub enum JobSpec {
     Compare(Compare),
     Series(Series),
     Export(Export),
+    Georef(Georef),
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -129,6 +140,16 @@ pub struct Export {
     pub surface: SurfaceParams,
 }
 
+/// Passpunkte: Aufnahme über identische Punkte ins Zielsystem bringen (neue Aufnahme)
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Georef {
+    pub capture_id: i64,
+    #[serde(default)]
+    pub mode: Mode,
+    pub points: Vec<Gcp>,
+}
+
 fn interval() -> f64 {
     0.5
 }
@@ -153,6 +174,7 @@ impl JobSpec {
             },
             JobSpec::Series(s) => s.capture_ids.clone(),
             JobSpec::Export(e) => vec![e.capture_id],
+            JobSpec::Georef(g) => vec![g.capture_id],
         }
     }
 
@@ -161,6 +183,7 @@ impl JobSpec {
             JobSpec::Volume(v) => v.region_ids.clone(),
             JobSpec::Stockpile(s) => s.region_ids.clone(),
             JobSpec::Export(e) => e.region_ids.clone(),
+            JobSpec::Georef(_) => Vec::new(),
             JobSpec::Compare(Compare { region_id, .. })
             | JobSpec::Series(Series { region_id, .. }) => region_id.iter().copied().collect(),
             JobSpec::Inspect(_) | JobSpec::Dem(_) => Vec::new(),
@@ -176,6 +199,7 @@ impl JobSpec {
             JobSpec::Compare(c) => c.surface,
             JobSpec::Series(s) => s.surface,
             JobSpec::Export(e) => e.surface,
+            JobSpec::Georef(_) => SurfaceParams::default(),
         }
     }
 
@@ -200,6 +224,10 @@ impl JobSpec {
                 }
             }
             JobSpec::Export(e) if e.formats.is_empty() => bail!("kein Format gewählt"),
+            // bestimmbar? (genug Punkte, nicht auf einer Linie) – vor dem Einreihen prüfen
+            JobSpec::Georef(g) => {
+                compute::georef::fit(&g.points, g.mode)?;
+            }
             _ => {}
         }
         Ok(())
@@ -368,6 +396,35 @@ pub async fn execute(app: &AppRef, site_id: i64, spec: JobSpec, out_dir: PathBuf
                 )
             })
             .await
+        }
+        JobSpec::Georef(g) => {
+            let (name, input) = capture(app, s, g.capture_id).await?;
+            let (report, out) = tokio::task::spawn_blocking(move || {
+                compute::georef::georef(&input, &g.points, g.mode, &out_dir)
+            })
+            .await??;
+            let file_name = out
+                .file_name()
+                .and_then(|n| n.to_str())
+                .context("Dateiname")?
+                .to_string();
+            let source = db::get_capture(&app.db, g.capture_id).await?;
+            let new = crate::captures::insert(
+                app,
+                s,
+                &format!("{name} (georeferenziert)"),
+                &file_name,
+                source.map(|c| c.captured_at),
+            )
+            .await?;
+            let dir = app.cfg.capture_dir(new);
+            tokio::fs::create_dir_all(&dir).await?;
+            tokio::fs::rename(&out, dir.join(&file_name)).await?;
+            let size = tokio::fs::metadata(dir.join(&file_name)).await?.len();
+            crate::captures::finish(app, new, s, size, None).await?;
+            let mut v = serde_json::to_value(report)?;
+            v["captureId"] = json!(new);
+            Ok(v)
         }
     }
 }

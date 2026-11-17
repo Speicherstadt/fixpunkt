@@ -5,11 +5,11 @@
 
 use anyhow::{bail, Context, Result};
 use nalgebra::{Matrix3, Vector3};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 
 /// Welche Parameter bestimmt werden.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, clap::ValueEnum, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, clap::ValueEnum, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Mode {
     /// 7 Parameter: Drehung, Verschiebung, Maßstab (Helmert)
@@ -197,6 +197,30 @@ pub fn fit(points: &[ControlPoint], mode: Mode) -> Result<FitReport> {
         residuals,
         transform: t,
     })
+}
+
+/// Wendet die Transformation auf eine Punktwolke an: LAS/LAZ → LAS/LAZ mit allen Attributen, sonst über
+/// die Punkte (Text rein, LAS/LAZ oder Text raus je nach Endung von `output`). Gibt die Zahl der Punkte.
+pub fn apply_to_file(t: &Transform, input: &Path, output: &Path) -> Result<u64> {
+    if crate::pointcloud::is_las(input) && crate::pointcloud::is_las(output) {
+        let f = |p: [f64; 3]| t.apply(p);
+        return crate::pointcloud::rewrite_las(input, output, Some(&f), |_, p| {
+            let q = t.apply([p.x, p.y, p.z]);
+            (p.x, p.y, p.z) = (q[0], q[1], q[2]);
+            true
+        });
+    }
+    let mut c = crate::pointcloud::PointCloud::read(input, Default::default())?;
+    c.map(|p| {
+        let q = t.apply([p.x, p.y, p.z]);
+        crate::pointcloud::Point3 {
+            x: q[0],
+            y: q[1],
+            z: q[2],
+        }
+    });
+    c.write(output, None)?;
+    Ok(c.len() as u64)
 }
 
 /// Liest Passpunkte aus CSV: `name, x_quelle, y_quelle, z_quelle, x_ziel, y_ziel, z_ziel`

@@ -9,6 +9,7 @@ import { fileHref } from "@/components/report/kpis";
 import { OdmReport } from "@/components/report/odm-report";
 import { SeriesReport } from "@/components/report/series-report";
 import { VolumeReport } from "@/components/report/volume-report";
+import { Residuals } from "@/components/site/calc/residuals";
 import { nameOf } from "@/components/site/calculations";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { PlaceholderRows } from "@/components/ui/placeholder";
@@ -23,6 +24,7 @@ import {
 } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatDateTime } from "@/lib/format";
+import { GeorefResult } from "@/lib/georef";
 import { jobTitle, reportHref } from "@/lib/jobs";
 import { capturesQuery, jobQuery, siteQuery } from "@/lib/queries";
 import { reportCsv, reportRows } from "@/lib/report";
@@ -47,6 +49,23 @@ function resultView(job: Job): ReactNode {
     case "series": {
       const r = SeriesResult.safeParse(job.result);
       return r.success ? <SeriesReport result={r.data} /> : null;
+    }
+    case "georef": {
+      const r = GeorefResult.safeParse(job.result);
+      return r.success ? (
+        <div className="flex flex-col gap-4">
+          <Residuals report={r.data} />
+          <div>
+            <Link
+              to="/sites/$siteId"
+              params={{ siteId: String(job.siteId) }}
+              className={buttonVariants({ variant: "primary" })}
+            >
+              {m.odm_result_capture()}
+            </Link>
+          </div>
+        </div>
+      ) : null;
     }
     case "odm": {
       const r = OdmResult.safeParse(job.result);

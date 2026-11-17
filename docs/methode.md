@@ -59,6 +59,8 @@ Der Rechenkern wird bei jeder Änderung gegen unabhängig bekannte Ergebnisse ge
 - Pyramidenstumpf (Grube mit Böschung) gegen die Prismoidformel, Kegel auf geneigtem Gelände gegen π r² h / 3 – Abweichung < 1 %
 - 4 Mio. Punkte, 200 × 200 m, 2 cm Rauschen, Grube 25.600 m³ und Bagger: Bilanz −25.600,96 m³ (0,004 %), Bagger herausgefiltert, in 3,7 s
 - UTM gegen die numerisch integrierte Meridianbogenlänge (< 0,1 mm), Rundreise Lage → UTM → Lage
-- Helmert-Transformation mit vorgegebener Drehung, Maßstab und Verschiebung
+- Helmert-Transformation (Umeyama, kleinste Quadrate) mit vorgegebener Drehung, Maßstab und Verschiebung; über
+  die Web-UI ein um 100 m / −50 m / 2 m verschobener Scan, der mm-genau auf das Gelände zurückkommt
+- Zonenwechsel UTM 33 → 32 symmetrisch um 12° Ost, Drohnenpunktwolke mm-genau in die Zone der Baustelle
 
 Die nächste Stufe ist der Vergleich mit dem Aufmaß eines Vermessungsbüros auf einer echten Baugrube.

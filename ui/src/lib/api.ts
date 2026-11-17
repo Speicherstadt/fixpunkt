@@ -4,6 +4,7 @@
  * übersetzt (src/lib/errors.ts). Antworten werden mit Zod geprüft.
  */
 import { z } from "zod";
+import { FitReport } from "@/lib/georef";
 
 export class ApiError extends Error {
   constructor(
@@ -288,6 +289,8 @@ export const api = {
   deleteJob: (id: number) => request("DELETE", `/jobs/${id}`, Empty),
   odmStatus: () => request("GET", "/odm", OdmStatus),
   settings: () => request("GET", "/settings", Settings),
+  georefFit: (mode: string, points: unknown[]) =>
+    request("POST", "/georef/fit", FitReport, { mode, points }),
   createOdm: (siteId: number, params: OdmParams) =>
     request("POST", `/sites/${siteId}/odm`, Job, params),
   startOdm: (jobId: number) => request("POST", `/jobs/${jobId}/start`, Job, {}),

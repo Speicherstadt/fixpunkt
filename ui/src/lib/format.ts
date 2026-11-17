@@ -6,6 +6,9 @@ const nf = (digits: number) =>
     maximumFractionDigits: digits,
   });
 
+/** Zahl mit fester Zahl Nachkommastellen in der Sprache der Oberfläche */
+export const formatNumber = (v: number, digits: number): string => nf(digits).format(v);
+
 /** „1.234,5 m³“ – eine Nachkommastelle, wie im Aufmaß üblich */
 export const formatVolume = (m3: number): string => `${nf(1).format(m3)} m³`;
 

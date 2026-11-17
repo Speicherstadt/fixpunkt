@@ -20,6 +20,7 @@ import {
   StockpileForm,
   VolumeForm,
 } from "./calc/forms";
+import { GeorefForm } from "./calc/georef-form";
 
 export { defaultPair } from "./calc/forms";
 
@@ -33,6 +34,7 @@ const FORMS: Record<JobKind, (p: FormProps) => React.JSX.Element> = {
   compare: CompareForm,
   series: SeriesForm,
   export: ExportForm,
+  georef: GeorefForm,
 };
 
 const HINTS: Record<JobKind, () => string> = {
@@ -41,6 +43,7 @@ const HINTS: Record<JobKind, () => string> = {
   compare: m.calc_text_compare,
   series: m.calc_text_series,
   export: m.calc_text_export,
+  georef: m.calc_text_georef,
 };
 
 const START: Record<JobKind, () => string> = {
@@ -49,6 +52,7 @@ const START: Record<JobKind, () => string> = {
   compare: m.calc_start_compare,
   series: m.calc_start_series,
   export: m.calc_start_export,
+  georef: m.calc_start_georef,
 };
 
 export function Calculations({ siteId, canEdit }: { siteId: number; canEdit: boolean }) {

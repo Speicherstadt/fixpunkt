@@ -102,7 +102,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 
 ### 🧮 Exporte und Kommandozeile
 - GeoTIFF, DXF mit Höhenlinien, LandXML, CSV, OBJ – aus der Web-UI
-- Passpunkt-Transformation (Helmert), Koordinaten und Höhen umrechnen
+- Passpunkte (Helmert) mit Restklaffen in der Web-UI, Koordinaten und Höhen umrechnen
 - Bodenfilter, Ausreißer, Profile auf der Kommandozeile
 - [Alle Befehle](https://firsttris.github.io/fixpunkt/kommandozeile.html)
 
@@ -161,7 +161,7 @@ Punktwolke aus WebODM hoch.
 
 **Ist Fixpunkt eine Alternative zu SDX-Cloud, Propeller oder DroneDeploy?**<br>
 Für die Massenermittlung von Baugruben und Haufwerken: ja, selbst gehostet und ohne Abo – mit 2D- und 3D-Ansicht,
-Messen, PDF-Bericht und Drohnenfotos über NodeODM. Passpunkte in der Web-UI, Pläne als Hintergrund und die
+Messen, PDF-Bericht, Passpunkten und Drohnenfotos über NodeODM. Pläne als Hintergrund und die
 iPhone-App mit RTK-Rover folgen ([Projektplan](https://firsttris.github.io/fixpunkt/PLAN.html)).
 
 **Welche Koordinatensysteme werden unterstützt?**<br>

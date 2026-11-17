@@ -1,7 +1,7 @@
 ---
 description: >-
   Weitere Berechnungen in Fixpunkt: Haufwerk gegen Basisfläche, Soll/Ist gegen Sohlhöhe, geneigte Ebene oder
-  Soll-Geländemodell, Zeitreihe über die Bauphase, Export nach GeoTIFF, DXF, LandXML, CSV und OBJ.
+  Soll-Geländemodell, Zeitreihe über die Bauphase, Export nach GeoTIFF, DXF, LandXML, CSV und OBJ, Passpunkte.
 ---
 
 # Haufwerk, Soll/Ist, Zeitreihe, Export
@@ -67,3 +67,31 @@ Für CAD und Vermessung aus einer Aufnahme, optional nur innerhalb von Bereichen
 
 Große Flächen werden für LandXML, CSV und OBJ ausgedünnt (höchstens 250.000 Punkte), damit CAD-Programme sie
 öffnen. Alle Dateien liegen im Koordinatensystem der Baustelle (EPSG:25832).
+
+## Passpunkte
+
+Liegt eine Punktwolke nicht im Bezugssystem der Baustelle – ein Scan im lokalen System, ein Flug ohne RTK –,
+bringen identische Punkte sie dorthin: Punkte, die in der Aufnahme zu sehen sind und deren Sollkoordinaten
+bekannt sind (Passpunktplatten, Kanaldeckel, Bolzen, vom Vermesser eingemessen).
+
+![Passpunkte: vier Punkte mit Koordinaten in der Aufnahme und Soll, Vorschau mit RMS Lage 2,8 cm, Restklaffen je Punkt](screenshot-passpunkte.png){ width="979" height="1223" loading="lazy" }
+
+1. **Berechnungen → Passpunkte** und die Aufnahme wählen.
+2. Je Punkt die Koordinate in der Aufnahme (in der [Ansicht](ansicht.md) mit **Punkt** messen) und die
+   Sollkoordinate eintragen – oder unter **Liste einfügen** aus einer Tabelle kopieren: eine Zeile je Punkt mit
+   Name, x, y, z in der Aufnahme, Ost, Nord, Höhe (wie `fixpunkt georef --gcp`).
+3. Die **Vorschau** rechnet sofort: Verschiebung, Maßstab und die **Restklaffen** je Punkt. Fällt ein Punkt aus
+   der Reihe, ist er vermutlich falsch zugeordnet – korrigieren oder entfernen.
+4. **Georeferenzieren** legt die Aufnahme ein zweites Mal an, transformiert und neu geprüft
+   („… (georeferenziert)“). Die ursprüngliche bleibt unverändert.
+
+| Verfahren | Bestimmt | Punkte |
+|---|---|---|
+| Helmert | Drehung, Verschiebung, Maßstab (7 Parameter) | ab 3, besser 4–6 gut verteilte |
+| Drehung und Verschiebung | wie Helmert, Maßstab fest 1 | ab 3 |
+| Nur Verschiebung | 3 Parameter, z. B. für einen konstanten Höhenfehler | ab 1 |
+
+> [!TIP]
+> Passpunkte über die ganze Fläche verteilen, nicht in einer Reihe, und mindestens einen mehr als nötig
+> nehmen – nur dann zeigen die Restklaffen, ob alles passt. Gerechnet wird nach Umeyama (kleinste Quadrate über
+> alle Punkte), siehe [Methode und Genauigkeit](methode.md).

@@ -7,7 +7,7 @@ use crate::export::{self, Dxf, Mesh};
 use crate::filter::{self, GroundParams};
 use crate::geom::{self, BBox, Polygon, Region};
 use crate::grid::{Aggregate, Grid, GridSpec};
-use crate::pointcloud::{self, Point3, PointCloud, ReadOptions};
+use crate::pointcloud::{self, PointCloud, ReadOptions};
 use crate::surface::{self, SurfaceOptions};
 use crate::transform::{self, Mode};
 use crate::volume::{self, Base};
@@ -313,16 +313,6 @@ fn write_grid(g: &Grid, path: &Path, epsg: u16) -> Result<()> {
     }
 }
 
-fn is_las(p: &Path) -> bool {
-    matches!(
-        p.extension()
-            .and_then(|e| e.to_str())
-            .map(|e| e.to_ascii_lowercase())
-            .as_deref(),
-        Some("las" | "laz")
-    )
-}
-
 /// Gemeinsames Raster für mehrere Eingaben: Grenze, sonst Schnittmenge der Ausdehnungen.
 fn common_spec(inputs: &[&PathBuf], rs: &[Region], o: &SurfaceOptions) -> Result<GridSpec> {
     let cell = o.cell;
@@ -402,7 +392,7 @@ fn run(cli: Cli) -> Result<()> {
                     "bbox": {"min_x": b.min_x, "min_y": b.min_y, "max_x": b.max_x, "max_y": b.max_y},
                     "z_min": lo, "z_max": hi, "density_per_m2": c.len() as f64 / area,
                 });
-                if is_las(&input) {
+                if pointcloud::is_las(&input) {
                     let g = PointCloud::read(&input, ReadOptions { ground_only: true })
                         .map(|g| g.len())
                         .unwrap_or(0);
@@ -549,7 +539,7 @@ fn run(cli: Cli) -> Result<()> {
             };
             let cloud = PointCloud::read(&input, ReadOptions::default())?;
             let (cls, dtm, rep) = filter::classify_ground(&cloud, params)?;
-            if is_las(&input) && is_las(&output) {
+            if pointcloud::is_las(&input) && pointcloud::is_las(&output) {
                 pointcloud::rewrite_las(&input, &output, None, |i, p| {
                     if let Some(i) = i {
                         p.classification =
@@ -591,7 +581,7 @@ fn run(cli: Cli) -> Result<()> {
                 }
             }
             let n = keep.iter().filter(|k| **k).count();
-            if is_las(&input) && is_las(&output) {
+            if pointcloud::is_las(&input) && pointcloud::is_las(&output) {
                 pointcloud::rewrite_las(&input, &output, None, |i, _| i.is_some_and(|i| keep[i]))?;
             } else {
                 filter::select(&cloud, &keep).write(&output, None)?;
@@ -610,31 +600,7 @@ fn run(cli: Cli) -> Result<()> {
             let rep = transform::fit(&pts, mode)?;
             if let Some(inp) = input {
                 let out = output.context("Ausgabedatei fehlt")?;
-                let t = rep.transform.clone();
-                if is_las(&inp) && is_las(&out) {
-                    let f = |p: [f64; 3]| t.apply(p);
-                    pointcloud::rewrite_las(&inp, &out, Some(&f), |_, p| {
-                        let q = t.apply([p.x, p.y, p.z]);
-                        (p.x, p.y, p.z) = (q[0], q[1], q[2]);
-                        true
-                    })?;
-                } else {
-                    let c = PointCloud::read(&inp, ReadOptions::default())?;
-                    let moved = PointCloud::new(
-                        c.points
-                            .iter()
-                            .map(|p| {
-                                let q = t.apply([p.x, p.y, p.z]);
-                                Point3 {
-                                    x: q[0],
-                                    y: q[1],
-                                    z: q[2],
-                                }
-                            })
-                            .collect(),
-                    );
-                    moved.write(&out, None)?;
-                }
+                transform::apply_to_file(&rep.transform, &inp, &out)?;
             }
             print(&rep)?;
         }

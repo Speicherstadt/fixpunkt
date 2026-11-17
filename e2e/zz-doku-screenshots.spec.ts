@@ -110,16 +110,23 @@ test.beforeAll(async ({ browser }) => {
     })
   ).id;
   // weitere Baustellen für die Übersicht
+  // je eine eigene Lage (Ost, Nord in m), damit die Karte vier Punkte zeigt
   const others = [
-    ["Kanal Bahnhofstraße", "Leitungsgraben DN 300, 140 m", 1],
-    ["Haufwerk Bauhof Nord", "Oberboden-Mieten, monatliche Bestandsaufnahme", 2],
-    ["Regenrückhaltebecken Am Wiesengrund", "Erdbecken 1.800 m³", 1],
+    ["Kanal Bahnhofstraße", "Leitungsgraben DN 300, 140 m", 1, 1400, 900],
+    ["Haufwerk Bauhof Nord", "Oberboden-Mieten, monatliche Bestandsaufnahme", 2, -900, 1300],
+    ["Regenrückhaltebecken Am Wiesengrund", "Erdbecken 1.800 m³", 1, 600, -1100],
   ] as const;
-  for (const [name, description, flights] of others) {
+  for (const [name, description, flights, east, north] of others) {
     const other = await api("POST", "/sites", { name, description });
     for (let i = 0; i < flights; i++) {
       const day = START - (20 - 7 * i) * DAY;
-      await upload(other.id, `flug-${i + 1}.xyz`, `Befliegung ${i + 1}`, day, terrainXyz(i > 0));
+      await upload(
+        other.id,
+        `flug-${i + 1}.xyz`,
+        `Befliegung ${i + 1}`,
+        day,
+        terrainXyz(i > 0, east, north),
+      );
     }
   }
   await waitForJobs(siteId);
@@ -247,6 +254,40 @@ test("Drohnenfotos @screenshots", async () => {
   await section.getByLabel("Name der Aufnahme").fill("Befliegung 4");
   await section.scrollIntoViewIfNeeded();
   await section.screenshot({ path: `${DOCS}/screenshot-drohnenfotos.png` });
+  await page.reload();
+});
+
+test("Passpunkte @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const calc = page.getByRole("region", { name: "Berechnungen" });
+  await calc.getByText("Passpunkte", { exact: true }).click();
+  // Scan-Koordinaten mit Messrauschen von wenigen Millimetern, P4 mit einem Fehler von 8 cm
+  const noise = [
+    [0.004, -0.003, 0.006],
+    [-0.002, 0.005, -0.004],
+    [0.003, 0.002, -0.005],
+    [0.06, -0.05, 0.02],
+  ];
+  const list = [
+    [2, 3],
+    [37, 4],
+    [36, 38],
+    [3, 37],
+  ]
+    .map(([dx, dy], i) => {
+      const dst = [X0 + dx!, Y0 + dy!, 300 + 0.01 * dx!];
+      const src = dst.map((v, k) => v - [X0, Y0, 0][k]! + noise[i]![k]!);
+      return [`P${i + 1}`, ...src.map((v) => v.toFixed(3)), ...dst.map((v) => v.toFixed(3))]
+        .join(";")
+        .replaceAll(".", ",");
+    })
+    .join("\n");
+  await calc.getByText("Liste einfügen").click();
+  await calc.getByLabel(/Eine Zeile je Punkt/).fill(list);
+  await calc.getByRole("button", { name: "4 Punkte übernehmen" }).click();
+  await expect(calc.getByRole("table", { name: "Restklaffen je Punkt" })).toBeVisible();
+  await calc.scrollIntoViewIfNeeded();
+  await calc.screenshot({ path: `${DOCS}/screenshot-passpunkte.png` });
   await page.reload();
 });
 
