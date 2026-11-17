@@ -19,9 +19,10 @@ Vorbild: [SDX-PocketScan / SDX-Cloud](https://makineo.de/produkte/baudokumentati
 | Bereich | Technik |
 |---|---|
 | `apps/ios` | Swift, SwiftUI, ARKit (LiDAR), CoreBluetooth + External Accessory (MFi), NTRIP-Client |
-| `apps/web` | TanStack Start (TypeScript), Potree / CesiumJS |
-| `crates/processing` | Rust-Worker: `las`/`laz`, `nalgebra`, `proj`, `rayon` (+ PDAL-/PotreeConverter-CLI) |
-| `infra` | Postgres, S3-kompatibler Storage, NodeODM, Podman/Docker |
+| `crates/server` | Rust: tokio, axum, SQLite (sqlx), SSE – liefert die Web-UI eingebettet aus (**eine Programmdatei**) |
+| `crates/processing` | Rust-Rechenkern: LAS/LAZ, GeoTIFF, Bodenfilter, Helmert, UTM32/GCG2016, Volumen, Exporte |
+| `ui` | Bun, Vite, TypeScript, React, TanStack Router + Query, shadcn/ui, Paraglide JS, CesiumJS/Potree |
+| `docker` | Image in drei Stufen (UI → Binärdatei → Debian slim); NodeODM als eigener Container |
 
 Details, Einkaufsliste und Phasen: **[docs/PLAN.md](docs/PLAN.md)**
 

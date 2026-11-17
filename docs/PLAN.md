@@ -309,18 +309,24 @@ Zum Vergleich: Allein das fertige *Pix4D & Emlid Scanning Kit* kostet 3.900 € 
  RTK über Bluetooth (Reach RX2)  Flugplan (Pilot 2 → später WPML/KMZ, Cloud API)
           │                               │
           └───────────────┬───────────────┘
-                          ▼
-           Web / API  (TanStack Start, TypeScript)
-           Baustellen · Scans · Upload · Auth · Berichte
-                          │  Job-Queue (Postgres)
-                          ▼
-           Processing-Worker  (Rust)
-           Georeferenzierung · Längen · Volumen · Vergleich · Export
-           ruft auf: PDAL · PotreeConverter / py3dtiles · NodeODM (Drohne)
-                          │
-                          ▼
-           Storage (S3)  →  Viewer im Browser (Potree / CesiumJS)
+                          ▼  HTTPS (Upload, API, SSE)
+   ┌──────────────────────────────────────────────────────────┐
+   │  fixpunkt  – EINE Programmdatei (Rust)                   │
+   │  axum: /api · Auth · Upload · Live-Updates (SSE)         │
+   │  Web-UI eingebettet (rust-embed)  ← ui/dist              │
+   │  Jobs im Prozess (tokio + rayon), Status in SQLite       │
+   │  Rechenkern als Bibliothek (crates/processing)           │
+   │  Kacheln für den Viewer selbst erzeugen                  │
+   └───────────────┬───────────────────────┬──────────────────┘
+                   │ Dateien               │ HTTP
+                   ▼                       ▼
+     Datenverzeichnis (/var/lib/fixpunkt)  NodeODM (Docker, nur für Drohnenfotos)
+     SQLite · Rohdaten · Ergebnisse · Kacheln
 ```
+
+**Ein Server, eine Datei:** wie bei `haul` – der Rust-Server bringt die gebaute Web-UI mit (`rust-embed`),
+dazu SQLite und das Dateisystem statt Postgres und S3. Installation = Datei kopieren + systemd-Dienst
+(oder ein Docker-Image). Einziger Fremddienst ist NodeODM für die Photogrammetrie.
 
 **Grundprinzip:** Die Cloud nimmt „Punkte bzw. Bilder + RTK-Trajektorie“ entgegen – egal woher.
 iPhone, Drohne, später Android-PWA oder ein eigener LiDAR-Scanner sind austauschbare Erfassungsquellen.
@@ -370,15 +376,36 @@ Quelle: [Emlid – How to integrate with Reach RX2](https://docs.emlid.com/reach
 
 **Umsetzung:** Zwei kleine Treiber (MFi und BLE) hinter einer gemeinsamen Schnittstelle. NMEA-Parser, NTRIP-Client und Scan-Logik bleiben gleich → nicht an einen Hersteller gebunden.
 
-### 5.2 Web / API (TypeScript) – Verantwortung: Tristan
-- TanStack Start, Postgres (Drizzle o. ä.), S3-kompatibler Storage
-- Mandanten → Baustellen → Aufnahmen (Scans/Flüge) → Ergebnisse
-- Upload großer Dateien (multipart, resumable)
-- Viewer: Potree für Punktwolken **oder** CesiumJS + 3D Tiles (Karte + 3D in einem)
-- Messwerkzeuge im Viewer (Punkt, Linie, Fläche, Profil, Volumen-Polygon)
-- DXF-Import für Pläne, Berichte als PDF
+### 5.2 Server (Rust) – Verantwortung: Tristan
+Aufbau wie in `haul`:
 
-### 5.3 Processing (Rust) – Verantwortung: Tristan
+| Bereich | Technik |
+|---|---|
+| HTTP, API | `tokio`, `axum`, JSON; Live-Fortschritt der Jobs per Server-Sent Events (`/api/events`) |
+| Datenbank | SQLite über `sqlx`, Migrationen beim Start |
+| Dateien | Datenverzeichnis: Rohdaten, Ergebnisse, Kacheln je Aufnahme; Sicherung per restic/rsync auf netcup Storage Space |
+| Jobs | Warteschlange in SQLite, Ausführung im Prozess (`spawn_blocking` + `rayon`), überlebt Neustarts |
+| Rechenkern | `crates/processing` direkt als Bibliothek (kein Aufruf der CLI) |
+| Web-UI | `rust-embed` auf `ui/dist`; `build.rs` legt leere Ordner an, damit `cargo test` ohne Bun baut |
+| Auth | Login mit Sitzungs-Cookie, Rollen (Admin, Bauleiter, nur lesen), API-Token für die iOS-App |
+| Upload | große Dateien und Fotomengen in Teilen, fortsetzbar (tus-Protokoll o. ä.) |
+| Drohne | NodeODM per HTTP: Fotos übergeben, Fortschritt abfragen, Ergebnis abholen |
+| Ausliefern | eine Binärdatei (systemd) oder Docker in drei Stufen: Bun (UI) → Rust (Binärdatei) → Debian slim |
+
+Datenmodell: Mandant → Baustelle → Aufnahme (Scan/Flug) → Rohdaten, Ergebnisse, Passpunkte, Messungen, Bereiche.
+
+### 5.2a Web-UI (TypeScript) – Verantwortung: Tristan
+Wie in unseren anderen Projekten:
+- **Bun**, **Vite**, **TypeScript**, **React** mit **TanStack Router** und **TanStack Query**
+- **shadcn/ui** + Tailwind, Icons von lucide
+- **Paraglide JS** für Texte (Deutsch zuerst, Englisch später); der Server schickt Schlüssel statt fertiger Texte
+- **Single-Page-App** (kein TanStack Start mit eigenem JS-Server): Der Rust-Server liefert nur statische Dateien aus
+- Viewer: **CesiumJS** (Karte + Punktwolke/3D Tiles + Orthofoto in einem) oder Potree – Entscheidung nach einem Test mit echten ODM-Daten
+- Messwerkzeuge im Viewer (Punkt, Linie, Fläche, Profil, Volumen-Polygon), Ergebnisse vom Rechenkern
+- Berichte als PDF, DXF-Pläne als Overlay
+- `bun run dev`: Server auf :8080, UI mit Hot Reload auf :5173
+
+### 5.3 Rechenkern (Rust, `crates/processing`) – Verantwortung: Tristan – ✅ fertig
 | Aufgabe | Crates / Tools |
 |---|---|
 | Punktwolken lesen/schreiben | `las`, `laz-rs` |
@@ -387,7 +414,7 @@ Quelle: [Emlid – How to integrate with Reach RX2](https://docs.emlid.com/reach
 | Nachbarschaftssuche, Parallelisierung | `kiddo`, `rayon` |
 | Bodenfilter, DGM, Raster | eigener Code (SMRF), kein PDAL nötig |
 | Volumen | DGM-Differenz / TIN (`delaunator`) |
-| Kacheln für den Browser | PotreeConverter bzw. py3dtiles (CLI) |
+| Kacheln für den Browser | eigener Octree-Schreiber in Rust (3D Tiles bzw. Potree 2) – sonst bräuchte die Programmdatei PotreeConverter/py3dtiles daneben |
 | Drohnen-Photogrammetrie | NodeODM per HTTP-API |
 
 ### 5.4 Drohnen-Pipeline
@@ -408,16 +435,17 @@ Quelle: [Emlid – How to integrate with Reach RX2](https://docs.emlid.com/reach
 - [x] Rechenkern fertig (`crates/processing`, s. dortige README): Aushub je Bereich, Haufwerk, Zeitreihe, Soll/Ist,
       Bodenfilter (SMRF), Ausreißer, Passpunkt-Transformation (Helmert), UTM32 + GCG2016, Messen/Profile,
       Exporte GeoTIFF/DXF/LandXML/OBJ/PLY/CSV, ODM-GeoTIFF als Eingabe – 43 Tests
-- [ ] Weitere Struktur: `apps/web`, `infra` (`apps/ios` erst ab Phase 4)
+- [ ] Weitere Struktur: `crates/server` (Rust, axum), `ui/` (Bun, Vite, React, TanStack, shadcn/ui, Paraglide), `docker/` (`apps/ios` erst ab Phase 4)
 - [ ] netcup RS 2000 aufsetzen, NodeODM testen
 - [ ] SAPOS-Zugang (BW) beantragen
 - [ ] **Mit der Firma klären:** Drohne (Matrice 4E) oder BLK2GO (+ Rover)? Matrice 4E kaufen? Wer macht A1/A3 + A2? Betreiberregistrierung, Versicherung
 - [ ] Erste Baugrube als Pilotprojekt aussuchen (Termin vor dem Aushub!)
 
 ### Phase 1 – Backend + Viewer (3–4 Wochen)
-- [ ] Datenmodell: Mandant, Baustelle, Aufnahme, Rohdaten, Ergebnis, Passpunkt, Messung
-- [ ] Upload großer Fotomengen (resumable) + Job-Queue
-- [ ] Rust-Worker: LAS/LAZ (und E57 vom BLK2GO) einlesen, transformieren, Browser-Kacheln erzeugen
+- [ ] Server-Gerüst: axum, SQLite/sqlx, Login, UI per rust-embed, eine Binärdatei + Docker-Image
+- [ ] Datenmodell: Mandant, Baustelle, Aufnahme, Rohdaten, Ergebnis, Passpunkt, Messung, Bereich
+- [ ] Upload großer Fotomengen (fortsetzbar) + Job-Warteschlange mit Live-Fortschritt (SSE)
+- [ ] Jobs rufen den Rechenkern auf: LAS/LAZ (und E57 vom BLK2GO) einlesen, transformieren, Browser-Kacheln erzeugen
 - [ ] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung
 - [ ] Mit öffentlichen OpenDroneMap-Datensätzen arbeiten, bis eigene Flüge da sind
 
