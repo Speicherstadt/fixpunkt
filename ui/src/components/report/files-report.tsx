@@ -11,6 +11,7 @@ const FILE_TEXT: Record<string, () => string> = {
   "dgm.xml": m.export_landxml,
   "dgm.csv": m.export_csv,
   "dgm.obj": m.export_obj,
+  "orthofoto.tif": m.export_ortho,
 };
 
 /** Ergebnisdateien zum Herunterladen (Export, Höhenmodell) */

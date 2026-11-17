@@ -1,4 +1,4 @@
-//! GeoTIFF lesen und schreiben (Höhenraster).
+//! GeoTIFF lesen und schreiben (Höhenraster, Orthofoto als RGBA).
 //!
 //! Lesen: einkanalige Raster beliebigen Zahlentyps, unkomprimiert/LZW/Deflate, Streifen oder Kacheln –
 //! z. B. `odm_dem/dsm.tif` / `dtm.tif` aus OpenDroneMap. Schreiben: Float32, Deflate, mit EPSG-Code.
@@ -9,7 +9,11 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 use tiff::decoder::{Decoder, DecodingResult, Limits};
-use tiff::encoder::{colortype::Gray32Float, compression::DeflateLevel, Compression, TiffEncoder};
+use tiff::encoder::{
+    colortype::{Gray32Float, RGBA8},
+    compression::DeflateLevel,
+    Compression, TiffEncoder,
+};
 use tiff::tags::Tag;
 
 const NODATA: f32 = -9999.0;
@@ -139,6 +143,44 @@ pub fn read(path: &Path) -> Result<GeoRaster> {
     })
 }
 
+/// Lage und Bezugssystem als GeoTIFF-Tags: ModelPixelScale, ModelTiepoint (linke obere Ecke), GeoKeys
+fn geo_tags<W: std::io::Write + std::io::Seek, K: tiff::encoder::TiffKind>(
+    e: &mut tiff::encoder::DirectoryEncoder<W, K>,
+    r: &Georef,
+    vertical_epsg: Option<u16>,
+) -> Result<()> {
+    e.write_tag(Tag::ModelPixelScaleTag, &[r.cell, r.cell, 0.0][..])?;
+    e.write_tag(
+        Tag::ModelTiepointTag,
+        &[0.0, 0.0, 0.0, r.min_x, r.max_y, 0.0][..],
+    )?;
+    let mut keys: Vec<[u16; 4]> = vec![[KEY_MODEL_TYPE, 0, 1, 1], [KEY_RASTER_TYPE, 0, 1, 1]];
+    if let Some(c) = r.epsg {
+        keys.push([KEY_PROJECTED_CRS, 0, 1, c]);
+    }
+    if let Some(c) = vertical_epsg {
+        keys.push([KEY_VERTICAL_CRS, 0, 1, c]);
+    }
+    let mut dir = vec![1u16, 1, 0, keys.len() as u16];
+    dir.extend(keys.iter().flatten());
+    e.write_tag(Tag::GeoKeyDirectoryTag, &dir[..])?;
+    Ok(())
+}
+
+/// RGBA-GeoTIFF (Deflate), Zeile 0 = Norden; Alpha 0 = keine Daten
+pub fn write_rgba(path: &Path, width: u32, height: u32, rgba: &[u8], r: &Georef) -> Result<()> {
+    if rgba.len() != (width as usize) * (height as usize) * 4 {
+        bail!("Bildgröße passt nicht");
+    }
+    let f = File::create(path).with_context(|| format!("{} nicht schreibbar", path.display()))?;
+    let mut enc = TiffEncoder::new(std::io::BufWriter::new(f))?
+        .with_compression(Compression::Deflate(DeflateLevel::Balanced));
+    let mut img = enc.new_image::<RGBA8>(width, height)?;
+    geo_tags(img.encoder(), r, None)?;
+    img.write_data(rgba)?;
+    Ok(())
+}
+
 /// Schreibt ein Float32-GeoTIFF (Deflate). `epsg` z. B. 25832; `vertical_epsg` z. B. 7837 (DHHN2016).
 pub fn write(g: &Grid, path: &Path, epsg: Option<u16>, vertical_epsg: Option<u16>) -> Result<()> {
     let f = File::create(path).with_context(|| format!("{} nicht schreibbar", path.display()))?;
@@ -148,21 +190,13 @@ pub fn write(g: &Grid, path: &Path, epsg: Option<u16>, vertical_epsg: Option<u16
     let mut img = enc.new_image::<Gray32Float>(s.cols as u32, s.rows as u32)?;
     {
         let e = img.encoder();
-        e.write_tag(Tag::ModelPixelScaleTag, &[s.cell, s.cell, 0.0][..])?;
-        e.write_tag(
-            Tag::ModelTiepointTag,
-            &[0.0, 0.0, 0.0, s.min_x, s.max_y, 0.0][..],
-        )?;
-        let mut keys: Vec<[u16; 4]> = vec![[KEY_MODEL_TYPE, 0, 1, 1], [KEY_RASTER_TYPE, 0, 1, 1]];
-        if let Some(c) = epsg {
-            keys.push([KEY_PROJECTED_CRS, 0, 1, c]);
-        }
-        if let Some(c) = vertical_epsg {
-            keys.push([KEY_VERTICAL_CRS, 0, 1, c]);
-        }
-        let mut dir = vec![1u16, 1, 0, keys.len() as u16];
-        dir.extend(keys.iter().flatten());
-        e.write_tag(Tag::GeoKeyDirectoryTag, &dir[..])?;
+        let r = Georef {
+            min_x: s.min_x,
+            max_y: s.max_y,
+            cell: s.cell,
+            epsg,
+        };
+        geo_tags(e, &r, vertical_epsg)?;
         e.write_tag(Tag::GdalNodata, "-9999")?;
     }
     let data: Vec<f32> = g

@@ -134,6 +134,7 @@
   "export_dxf": "Contours and boundaries (DXF)",
   "export_landxml": "Surface as TIN (LandXML)",
   "export_obj": "Triangle mesh (OBJ)",
+  "export_ortho": "Orthophoto as GeoTIFF (RGBA, clipped to the regions)",
   "export_tif": "Elevation model (GeoTIFF)",
   "files_download": "Download",
   "files_text": "In the site's coordinate system (EPSG:25832).",

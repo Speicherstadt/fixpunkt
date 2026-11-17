@@ -30,7 +30,40 @@ test("Orthofoto als Hintergrund", async ({ page }) => {
   await view.getByRole("group", { name: "Hintergrund" }).getByText("Höhenbild").click();
   await expect.poll(yellow).toBe(0);
 
+  // als GeoTIFF exportieren: erst mit Orthofoto wählbar
+  const calc = page.getByRole("region", { name: "Berechnungen" });
+  await calc
+    .getByRole("group", { name: "Art der Berechnung" })
+    .getByText("Export", { exact: true })
+    .click();
+  const ortho = calc.getByLabel(/Orthofoto als GeoTIFF/);
+  await expect(ortho).toBeEnabled();
+  for (const f of ["Höhenmodell", "DXF", "LandXML"]) {
+    const box = calc.getByLabel(new RegExp(f));
+    if (await box.isChecked()) await box.uncheck();
+  }
+  await ortho.check();
+  await calc.getByRole("button", { name: "Exportieren" }).click();
+  const job = page.getByRole("link", { name: /Export · Aushub/ });
+  await expect(job.getByText("Fertig")).toBeVisible({ timeout: 30_000 });
+  await job.click();
+  const link = page
+    .getByRole("listitem")
+    .filter({ hasText: "orthofoto.tif" })
+    .getByRole("link", { name: "Herunterladen" });
+  const res = await page.request.get((await link.getAttribute("href"))!);
+  // TIFF, little-endian: „II*\0“
+  expect([...(await res.body()).subarray(0, 4)]).toEqual([0x49, 0x49, 0x2a, 0]);
+  await page.goBack();
+
   await row.getByRole("button", { name: "Orthofoto von Aushub entfernen" }).click();
+  await expect(row).not.toContainText("Orthofoto");
+  // ohne Orthofoto nicht wählbar
+  await calc
+    .getByRole("group", { name: "Art der Berechnung" })
+    .getByText("Export", { exact: true })
+    .click();
+  await expect(ortho).toBeDisabled();
   await expect(row).not.toContainText("Orthofoto");
   await expect(view.getByRole("group", { name: "Hintergrund" })).toHaveCount(0);
 });

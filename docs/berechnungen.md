@@ -1,7 +1,7 @@
 ---
 description: >-
   Weitere Berechnungen in Fixpunkt: Haufwerk gegen Basisfläche, Soll/Ist gegen Sohlhöhe, geneigte Ebene oder
-  Soll-Geländemodell, Zeitreihe über die Bauphase, Export nach GeoTIFF, DXF, LandXML, CSV und OBJ, Passpunkte.
+  Soll-Geländemodell, Zeitreihe über die Bauphase, Export nach GeoTIFF, DXF, LandXML, CSV und OBJ, Orthofoto als GeoTIFF, Passpunkte.
 ---
 
 # Haufwerk, Soll/Ist, Zeitreihe, Export
@@ -64,9 +64,11 @@ Für CAD und Vermessung aus einer Aufnahme, optional nur innerhalb von Bereichen
 | Oberfläche als TIN (LandXML) | für Civil-Programme (Civil 3D, Card/1, BricsCAD) |
 | Rasterpunkte (CSV) | `x;y;z` |
 | Dreiecksnetz (OBJ) | für 3D-Programme, relativ zu einem Bezugspunkt |
+| Orthofoto (GeoTIFF) | das [Orthofoto](ansicht.md#orthofoto) der Aufnahme in voller Auflösung (höchstens 8192 Pixel je Seite), RGBA, auf die gewählten Bereiche zugeschnitten und außerhalb durchsichtig; nur wählbar, wenn die Aufnahme eins hat |
 
 Große Flächen werden für LandXML, CSV und OBJ ausgedünnt (höchstens 250.000 Punkte), damit CAD-Programme sie
-öffnen. Alle Dateien liegen im Koordinatensystem der Baustelle (EPSG:25832).
+öffnen. Alle Dateien liegen im Koordinatensystem der Baustelle (EPSG:25832) – das Orthofoto bleibt in dem seiner
+Quelle, falls es aus einer anderen UTM-Zone stammt (die Bereiche werden dafür umgerechnet).
 
 ## Passpunkte
 

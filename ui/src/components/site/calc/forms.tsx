@@ -281,7 +281,7 @@ export function SeriesForm({ ready, regions, onSubmit, footer }: FormProps) {
   );
 }
 
-export const EXPORT_FORMATS = ["tif", "dxf", "landxml", "csv", "obj"] as const;
+export const EXPORT_FORMATS = ["tif", "dxf", "landxml", "csv", "obj", "ortho"] as const;
 
 export function ExportForm({ ready, regions, onSubmit, footer }: FormProps) {
   const [capture, setCapture] = useState(latest(ready));
@@ -296,12 +296,16 @@ export function ExportForm({ ready, regions, onSubmit, footer }: FormProps) {
     landxml: m.export_landxml,
     csv: m.export_csv,
     obj: m.export_obj,
+    ortho: m.export_ortho,
   };
+  const hasOrtho = Boolean(ready.find((r) => r.id === c)?.ortho);
+  // ohne Orthofoto an der Aufnahme nicht wählbar (und nicht mitgeschickt)
+  const chosen = hasOrtho ? formats : formats.filter((f) => f !== "ortho");
   return (
     <form
       onSubmit={submitWith(onSubmit, () => ({
         captureId: c,
-        formats,
+        formats: chosen,
         regionIds,
         contourInterval: Number(interval),
         surface,
@@ -329,7 +333,8 @@ export function ExportForm({ ready, regions, onSubmit, footer }: FormProps) {
             <input
               type="checkbox"
               className="size-5 accent-fg"
-              checked={formats.includes(f)}
+              checked={chosen.includes(f)}
+              disabled={f === "ortho" && !hasOrtho}
               onChange={() =>
                 setFormats(formats.includes(f) ? formats.filter((x) => x !== f) : [...formats, f])
               }
@@ -345,7 +350,7 @@ export function ExportForm({ ready, regions, onSubmit, footer }: FormProps) {
         emptyText={m.calc_no_regions_export()}
       />
       {footer(
-        ready.length < 1 ? m.calc_need_one() : formats.length === 0 ? m.calc_need_format() : null,
+        ready.length < 1 ? m.calc_need_one() : chosen.length === 0 ? m.calc_need_format() : null,
       )}
     </form>
   );

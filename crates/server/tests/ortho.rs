@@ -84,3 +84,97 @@ async fn orthophoto_for_a_capture() {
         StatusCode::NOT_FOUND
     );
 }
+
+/// Orthofoto als GeoTIFF exportieren, auf einen Bereich um den Bagger zugeschnitten (Pixel 330…380 / 350…380 =
+/// Ost +33…38 m, Nord +2…5 m): Ausschnitt Ost +32…39, Nord +1…6 → 70 × 50 Pixel à 0,1 m
+#[tokio::test]
+async fn orthophoto_export_clipped_to_a_region() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": "Ortho-Export"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let cap = c
+        .upload(
+            &format!("/api/sites/{sid}/captures?file=g.xyz"),
+            terrain_xyz(true),
+        )
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    jobs::run_pending(&c.app).await.unwrap();
+    let export = |regions: Vec<i64>| json!({"kind": "export", "params": {"captureId": cap, "formats": ["ortho"], "regionIds": regions}});
+    // ohne Orthofoto schlägt der Auftrag fehl, mit Grund
+    let j = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/jobs"),
+            export(vec![]),
+        )
+        .await
+        .json();
+    jobs::run_pending(&c.app).await.unwrap();
+    let failed = c.get(&format!("/api/jobs/{}", j["id"])).await.json();
+    assert_eq!(failed["status"], "failed");
+    assert!(
+        failed["error"].as_str().unwrap().contains("kein Orthofoto"),
+        "{failed}"
+    );
+
+    c.upload(
+        &format!("/api/captures/{cap}/ortho?file=o.tif"),
+        ORTHO.to_vec(),
+    )
+    .await;
+    let fc = json!({"type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}},
+        "features": [common::rect("Bagger", 32.0, 1.0, 39.0, 6.0)]});
+    let rid = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/regions"),
+            json!({"geojson": fc}),
+        )
+        .await
+        .json()[0]["id"]
+        .as_i64()
+        .unwrap();
+    let j = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/jobs"),
+            export(vec![rid]),
+        )
+        .await
+        .json();
+    jobs::run_pending(&c.app).await.unwrap();
+    let done = c.get(&format!("/api/jobs/{}", j["id"])).await.json();
+    assert_eq!(done["status"], "done", "{done}");
+    assert_eq!(done["result"]["files"], json!(["orthofoto.tif"]));
+
+    let tif = c
+        .get(&format!("/api/jobs/{}/files/orthofoto.tif", j["id"]))
+        .await;
+    assert_eq!(tif.status, StatusCode::OK);
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("o.tif");
+    std::fs::write(&path, &tif.body).unwrap();
+    // unabhängig gelesen: Lage, EPSG, Größe, Bagger gelb an seiner Stelle
+    let o = fixpunkt::ortho::read_downsampled(&path, 8192).unwrap();
+    assert_eq!((o.width, o.height), (70, 50));
+    assert_eq!(o.georef.epsg, Some(25832));
+    assert!(
+        (o.georef.min_x - (X0 + 32.0)).abs() < 1e-6 && (o.georef.max_y - (Y0 + 6.0)).abs() < 1e-6
+    );
+    assert!((o.georef.cell - 0.1).abs() < 1e-9);
+    // Ost +35,5 / Nord +3,5 → Spalte 35, Zeile 25
+    let px = |col: u32, row: u32| {
+        let i = ((row * o.width + col) * 4) as usize;
+        [o.rgba[i], o.rgba[i + 1], o.rgba[i + 2], o.rgba[i + 3]]
+    };
+    assert_eq!(px(35, 25), [230, 180, 30, 255]);
+}

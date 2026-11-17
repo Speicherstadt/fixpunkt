@@ -134,6 +134,7 @@
   "export_dxf": "Höhenlinien und Grenzen (DXF)",
   "export_landxml": "Oberfläche als TIN (LandXML)",
   "export_obj": "Dreiecksnetz (OBJ)",
+  "export_ortho": "Orthofoto als GeoTIFF (RGBA, auf die Bereiche zugeschnitten)",
   "export_tif": "Höhenmodell (GeoTIFF)",
   "files_download": "Herunterladen",
   "files_text": "Im Koordinatensystem der Baustelle (EPSG:25832).",

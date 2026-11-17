@@ -1,11 +1,13 @@
-//! Exporte für CAD und Vermessung: GeoTIFF, DXF mit Höhenlinien, LandXML, CSV, OBJ.
+//! Exporte für CAD und Vermessung: GeoTIFF, DXF mit Höhenlinien, LandXML, CSV, OBJ, Orthofoto als GeoTIFF.
 
 use super::{mask_to_regions, surface_box, SurfaceParams};
 use anyhow::{bail, Result};
+use fixpunkt::crs::Utm;
 use fixpunkt::export::{self, Dxf, Mesh};
-use fixpunkt::geom::Region;
+use fixpunkt::geom::{Polygon, Region};
 use fixpunkt::geotiff;
 use fixpunkt::grid::{Grid, GridSpec};
+use fixpunkt::ortho;
 use fixpunkt::surface;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -24,7 +26,12 @@ pub enum Format {
     Csv,
     /// Dreiecksnetz, relativ zur linken unteren Ecke
     Obj,
+    /// Orthofoto der Aufnahme als RGBA-GeoTIFF, auf die Bereiche zugeschnitten
+    Ortho,
 }
+
+/// Größtes Orthofoto im Export (Pixel je Seite); 100 m Baugrube bei 2 cm sind 5000
+pub const ORTHO_MAX_SIDE: u32 = 8192;
 
 /// Mesh und CSV werden ausgedünnt, damit Dateien für CAD-Programme handlich bleiben
 const MAX_POINTS: usize = 250_000;
@@ -41,6 +48,7 @@ fn file_name(f: Format) -> &'static str {
         Format::Landxml => "dgm.xml",
         Format::Csv => "dgm.csv",
         Format::Obj => "dgm.obj",
+        Format::Ortho => "orthofoto.tif",
     }
 }
 
@@ -85,6 +93,7 @@ pub fn export(
                     .write_obj(&path, [spec.min_x, spec.min_y(), z0])?
             }
             Format::Dxf => contours = write_dxf(&g, regions, interval, &path)?,
+            Format::Ortho => write_ortho(input, regions, epsg, &path)?,
         }
         files.push(file_name(f));
     }
@@ -93,6 +102,47 @@ pub fn export(
         "files": files, "cells": g.valid_cells(), "stride": stride, "contours": contours,
         "zMin": st.map(|s| s.0), "zMax": st.map(|s| s.1), "cell": p.cell,
     }))
+}
+
+/// Orthofoto neben der Aufnahme (`ortho.tif`) auf die Bereiche zuschneiden; Bereiche in die Zone des Orthofotos
+/// umrechnen, falls es aus einer anderen stammt (dann bleibt das GeoTIFF in dessen System)
+fn write_ortho(input: &Path, regions: &[Region], site_epsg: u16, out: &Path) -> Result<()> {
+    let src = input.with_file_name(crate::ortho::SOURCE);
+    if !src.exists() {
+        bail!("Die Aufnahme hat kein Orthofoto");
+    }
+    let source_epsg = geotiff::georef(&mut geotiff::open(&src)?)?.epsg;
+    let site = fixpunkt::crs::utm_zone(u32::from(site_epsg));
+    let from = source_epsg.and_then(|e| fixpunkt::crs::utm_zone(u32::from(e)));
+    let areas: Vec<Polygon> = match (site, from) {
+        (Some(s), Some(f)) if s != f => {
+            let (s, f) = (Utm::new(s)?, Utm::new(f)?);
+            let to = |pts: &Vec<[f64; 2]>| -> Vec<[f64; 2]> {
+                pts.iter()
+                    .map(|p| {
+                        let (x, y) = s.to_zone(&f, p[0], p[1]);
+                        [x, y]
+                    })
+                    .collect()
+            };
+            regions
+                .iter()
+                .map(|r| {
+                    Polygon::with_holes(
+                        to(&r.polygon.exterior),
+                        r.polygon.holes.iter().map(to).collect(),
+                    )
+                })
+                .collect::<Result<_>>()?
+        }
+        _ => regions.iter().map(|r| r.polygon.clone()).collect(),
+    };
+    let o = ortho::clip(&src, &areas, ORTHO_MAX_SIDE)?;
+    let georef = geotiff::Georef {
+        epsg: o.georef.epsg.or(Some(site_epsg)),
+        ..o.georef
+    };
+    geotiff::write_rgba(out, o.width, o.height, &o.rgba, &georef)
 }
 
 fn write_dxf(g: &Grid, regions: &[Region], interval: f64, path: &Path) -> Result<usize> {
