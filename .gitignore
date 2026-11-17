@@ -8,7 +8,6 @@ target/
 node_modules/
 ui/dist/
 ui/src/paraglide/
-ui/src/routeTree.gen.ts
 test-results/
 playwright-report/
 .env

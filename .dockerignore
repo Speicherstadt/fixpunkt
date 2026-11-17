@@ -3,7 +3,6 @@ target
 **/node_modules
 ui/dist
 ui/src/paraglide
-ui/src/routeTree.gen.ts
 ui/project.inlang/cache
 .e2e-data
 .dev
