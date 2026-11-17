@@ -207,6 +207,12 @@ export const FlightPlan = z.object({
 });
 export type FlightPlan = z.infer<typeof FlightPlan>;
 
+export const Layout = z.object({
+  sections: z.array(z.object({ id: z.string(), visible: z.boolean() })),
+  custom: z.boolean(),
+});
+export type Layout = z.infer<typeof Layout>;
+
 export const Dashboard = z.object({
   captures: z.object({
     count: z.number(),
@@ -521,6 +527,10 @@ export const api = {
   settings: () => request("GET", "/settings", Settings),
   flightPlan: (regionId: number, query: string) =>
     request("GET", `/regions/${regionId}/flightplan?${query}`, FlightPlan),
+  layout: (siteId: number) => request("GET", `/me/layouts/${siteId}`, Layout),
+  saveLayout: (siteId: number, sections: Layout["sections"]) =>
+    request("PUT", `/me/layouts/${siteId}`, Layout, { sections }),
+  resetLayout: (siteId: number) => request("DELETE", `/me/layouts/${siteId}`, Empty),
   dashboard: (siteId: number) => request("GET", `/sites/${siteId}/dashboard`, Dashboard),
   markers: (siteId: number) => request("GET", `/sites/${siteId}/markers`, z.array(Marker)),
   createMarker: (siteId: number, m: NewMarker) =>

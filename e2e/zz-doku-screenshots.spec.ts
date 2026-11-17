@@ -300,6 +300,15 @@ test("Überblick @screenshots", async () => {
   await overview.screenshot({ path: `${DOCS}/screenshot-ueberblick.png` });
 });
 
+test("Überblick anpassen @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const overview = page.getByRole("region", { name: "Überblick" });
+  await overview.getByRole("button", { name: "Anpassen" }).click();
+  await expect(overview.getByRole("list", { name: "Anpassen" })).toBeVisible();
+  await overview.screenshot({ path: `${DOCS}/screenshot-ueberblick-anpassen.png` });
+  await overview.getByRole("button", { name: "Fertig" }).click();
+});
+
 test("Orthofoto @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const view = page.getByRole("region", { name: "Ansicht" });

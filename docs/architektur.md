@@ -47,6 +47,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `uploads.rs` | Fortsetzbarer Upload nach tus 1.0 (Kern, creation, termination): Stücke nach `uploads/`, fertige Dateien an ihr Ziel (Aufnahme, Drohnenfoto, Orthofoto) |
 | `dashboard.rs` | Überblick einer Baustelle: Aushub je Befliegung gegen das Urgelände, Massenziele je Bereich und Material, Lagerbestand aus den Haufwerk-Berechnungen, letzter Soll/Ist, Zwangspunkte gegen die letzte Aufnahme |
 | `flightplan.rs` | Flugplanung je Bereich: Vorschau als JSON mit Höhenbereich der letzten Aufnahme, Mission als KMZ (Rechenkern `flightplan.rs`, `wpml.rs`) |
+| `layouts.rs` | eigener Überblick je Benutzer und Baustelle (`/api/me/layouts/{site}`): Reihenfolge und Sichtbarkeit der Abschnitte, unbekannte fallen weg, neue kommen hinten dazu |
 | `points.rs` | Punktwolke für 3D: höchstens 1 Mio. Punkte, Float32 relativ zum Ursprung plus RGB, als `punkte.bin` zwischengespeichert |
 | `location.rs` | Lage der Baustellen für die Karte: Mitte der geprüften Aufnahmen (sonst der Bereiche), UTM → Breite/Länge |
 | `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer, Fotos als JPEG); Dokumentation und Plan/Ist der Baustelle (`site.rs`, Abruf in `site_routes.rs`) |

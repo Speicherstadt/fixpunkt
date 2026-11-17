@@ -12,6 +12,7 @@ pub mod error;
 pub mod events;
 pub mod flightplan;
 pub mod jobs;
+pub mod layouts;
 pub mod location;
 pub mod markers;
 pub mod odm;

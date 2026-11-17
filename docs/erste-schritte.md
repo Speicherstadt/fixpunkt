@@ -48,6 +48,15 @@ der neuesten Haufwerk-Berechnung, Änderung zur Befliegung davor und Stand, daru
 
 ![Überblick mit Kennzahlen, Aushub je Befliegung und dem Massenziel der Grube](screenshot-ueberblick.png)
 
+### Überblick anpassen
+
+**Anpassen** oben rechts zeigt alle Abschnitte des Überblicks: Häkchen blenden einen Abschnitt ein oder aus, die
+Pfeile verschieben ihn. Das gilt für dich und diese Baustelle – jeder im Team stellt sich seinen Überblick selbst
+zusammen, auch mit der Rolle „Nur lesen“. Gespeichert wird sofort; **Zurücksetzen** stellt die Grundeinstellung
+wieder her.
+
+![Überblick anpassen: Abschnitte mit Häkchen und Pfeilen](screenshot-ueberblick-anpassen.png)
+
 Weiter geht es mit [Aushub berechnen](aushub.md).
 
 ## Sprache und Farbschema

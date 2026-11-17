@@ -41,3 +41,39 @@ test("Überblick zeigt Aushub und verletzte Zwangspunkte", async ({ page }) => {
     overview.getByRole("list", { name: "Braucht Aufmerksamkeit" }).getByRole("listitem"),
   ).toHaveText([/Zwangspunkt „Kanal“: \+?50,0 cm/]);
 });
+
+/** Überblick anpassen: Kennzahlen ausblenden, Aushub nach oben, bleibt nach dem Neuladen, Zurücksetzen */
+test("Überblick anpassen", async ({ page }) => {
+  await page.goto("/");
+  const api = await apiFor(page);
+  const site = (await api.call("POST", "/sites", { name: "Anpassen" })) as { id: number };
+  const before = await api.upload(site.id, "u.xyz", "Urgelände", 1, terrainXyz(false));
+  const after = await api.upload(site.id, "a.xyz", "Aushub", 2, terrainXyz(true));
+  await api.settled(site.id);
+  await api.call("POST", `/sites/${site.id}/jobs`, { kind: "volume", params: { before, after } });
+  await api.settled(site.id);
+  await page.goto(`/sites/${site.id}`);
+
+  const overview = page.getByRole("region", { name: "Überblick" });
+  await expect(overview.getByText("Aufnahmen", { exact: true })).toBeVisible();
+  await overview.getByRole("button", { name: "Anpassen" }).click();
+  const list = overview.getByRole("list", { name: "Anpassen" });
+  await list.getByLabel("Kennzahlen", { exact: true }).uncheck();
+  await list
+    .getByRole("button", { name: "Aushub je Befliegung (gegen das Urgelände) nach oben" })
+    .click();
+  await expect(list.getByRole("listitem").first()).toContainText("Aushub je Befliegung");
+  await overview.getByRole("button", { name: "Fertig" }).click();
+  await expect(overview.getByText("Aufnahmen", { exact: true })).toHaveCount(0);
+
+  // gespeichert: nach dem Neuladen gleich
+  await page.reload();
+  await expect(overview.getByRole("heading", { level: 3 }).first()).toHaveText(
+    "Aushub je Befliegung (gegen das Urgelände)",
+  );
+  await expect(overview.getByText("Aufnahmen", { exact: true })).toHaveCount(0);
+
+  await overview.getByRole("button", { name: "Anpassen" }).click();
+  await overview.getByRole("button", { name: "Zurücksetzen" }).click();
+  await expect(overview.getByText("Aufnahmen", { exact: true })).toBeVisible();
+});

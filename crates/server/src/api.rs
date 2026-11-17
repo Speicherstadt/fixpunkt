@@ -3,8 +3,8 @@
 use crate::auth::{passkeys, tokens};
 use crate::state::AppRef;
 use crate::{
-    auth, captures, compute, dashboard, flightplan, jobs, markers, odm, ortho, plans, points,
-    report, sites, uploads, view,
+    auth, captures, compute, dashboard, flightplan, jobs, layouts, markers, odm, ortho, plans,
+    points, report, sites, uploads, view,
 };
 use axum::extract::{DefaultBodyLimit, State};
 use axum::middleware;
@@ -23,6 +23,10 @@ pub fn router(app: AppRef) -> Router {
         .route("/users", get(auth::list_users).post(auth::add_user))
         .route("/me/tokens", get(tokens::list).post(tokens::create))
         .route("/me/tokens/{id}", delete(tokens::delete))
+        .route(
+            "/me/layouts/{site}",
+            get(layouts::get).put(layouts::put).delete(layouts::reset),
+        )
         .route("/me/passkeys", get(passkeys::list))
         .route("/me/passkeys/start", post(passkeys::register_start))
         .route("/me/passkeys/finish", post(passkeys::register_finish))
