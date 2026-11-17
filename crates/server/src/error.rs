@@ -35,6 +35,10 @@ pub mod code {
     pub const MARKER_NOT_AN_IMAGE: &str = "markers.notAnImage";
     pub const PLAN_INVALID: &str = "plans.invalid";
     pub const ORTHO_INVALID: &str = "ortho.invalid";
+    pub const SESSION_REQUIRED: &str = "auth.sessionRequired";
+    pub const PASSKEYS_DISABLED: &str = "passkeys.disabled";
+    pub const PASSKEY_FAILED: &str = "passkeys.failed";
+    pub const NO_PASSKEY: &str = "passkeys.none";
 
     pub const ALL: &[&str] = &[
         NOT_LOGGED_IN,
@@ -65,6 +69,10 @@ pub mod code {
         MARKER_NOT_AN_IMAGE,
         PLAN_INVALID,
         ORTHO_INVALID,
+        SESSION_REQUIRED,
+        PASSKEYS_DISABLED,
+        PASSKEY_FAILED,
+        NO_PASSKEY,
     ];
 }
 

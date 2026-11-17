@@ -27,7 +27,8 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   globalSetup: "./e2e/global-setup.ts",
   use: {
-    baseURL: `http://127.0.0.1:${PORT}`,
+    // localhost statt 127.0.0.1: Passkeys brauchen einen Hostnamen als RP-ID
+    baseURL: `http://localhost:${PORT}`,
     locale: "de-DE",
     timezoneId: "Europe/Berlin",
     trace: "retain-on-failure",
@@ -84,7 +85,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: `rm -rf ${DATA} && FIXPUNKT_DATA_DIR=${DATA} FIXPUNKT_LISTEN=127.0.0.1:${PORT} FIXPUNKT_NODEODM_URL=http://127.0.0.1:${ODM_PORT} FIXPUNKT_NODEODM_POLL_SECS=0.3 FIXPUNKT_MAP_TILES=${MAP_TILES} ./target/debug/fixpunkt`,
+      command: `rm -rf ${DATA} && FIXPUNKT_DATA_DIR=${DATA} FIXPUNKT_LISTEN=127.0.0.1:${PORT} FIXPUNKT_NODEODM_URL=http://127.0.0.1:${ODM_PORT} FIXPUNKT_NODEODM_POLL_SECS=0.3 FIXPUNKT_MAP_TILES=${MAP_TILES} FIXPUNKT_PUBLIC_URL=http://localhost:${PORT} ./target/debug/fixpunkt`,
       url: `http://127.0.0.1:${PORT}/api/health`,
       reuseExistingServer: false,
       timeout: 60_000,

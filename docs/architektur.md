@@ -34,7 +34,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | Modul | Aufgabe |
 |---|---|
 | `api.rs` | Routen unter `/api`, Live-Ereignisse `/api/events` |
-| `auth.rs` | Einrichten, Anmelden, Sitzungen, CSRF, Rollen, Benutzer |
+| `auth/` | Einrichten, Anmelden, Sitzungen, CSRF, Rollen, Benutzer; API-Tokens als Bearer ohne CSRF (`tokens.rs`); Passkeys mit webauthn-rs, Zeremonien fünf Minuten im Speicher (`passkeys.rs`) |
 | `sites.rs` | Baustellen und Bereiche (GeoJSON) |
 | `captures.rs` | Hochladen (gestreamt), Herunterladen, Löschen |
 | `jobs/` | Warteschlange in SQLite, Worker im Prozess, übersteht Neustarts; `spec.rs`: Auftragsarten mit typisierten Parametern. Zwei Spuren: `FIXPUNKT_MAX_JOBS` Rechen-Worker und ein Photogrammetrie-Worker, der nur auf NodeODM wartet |

@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { KeyRound } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { ErrorText } from "@/components/page";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,7 @@ import { Input, Label } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { authQuery } from "@/lib/queries";
+import { assertionJson, isCancelled, requestOptions } from "@/lib/webauthn";
 import { m } from "@/paraglide/messages";
 
 export const Route = createFileRoute("/login")({
@@ -27,14 +29,39 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const signedIn = async () => {
+    await queryClient.invalidateQueries({ queryKey: ["auth"] });
+    await navigate({ to: "/" });
+  };
+
+  const withPasskey = async () => {
+    if (!name.trim()) {
+      setError(m.login_passkey_name());
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const start = await api.passkeyLoginStart(name);
+      const cred = (await navigator.credentials.get(
+        requestOptions(start.options),
+      )) as PublicKeyCredential | null;
+      if (!cred) throw new DOMException("", "NotAllowedError");
+      await api.passkeyLoginFinish(start.id, assertionJson(cred));
+      await signedIn();
+    } catch (err) {
+      if (!isCancelled(err)) setError(errorText(err));
+      setBusy(false);
+    }
+  };
+
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError(null);
     try {
       await (setup ? api.setup(name, password) : api.login(name, password));
-      await queryClient.invalidateQueries({ queryKey: ["auth"] });
-      await navigate({ to: "/" });
+      await signedIn();
     } catch (err) {
       setError(errorText(err));
       setBusy(false);
@@ -60,7 +87,7 @@ function LoginPage() {
           {m.login_name()}
           <Input
             name="name"
-            autoComplete="username"
+            autoComplete="username webauthn"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required
@@ -83,6 +110,12 @@ function LoginPage() {
         <Button type="submit" variant="primary" disabled={busy}>
           {setup ? m.login_setup_submit() : m.login_submit()}
         </Button>
+        {!setup && data?.passkeys ? (
+          <Button type="button" onClick={withPasskey} disabled={busy}>
+            <KeyRound size={16} aria-hidden="true" />
+            {m.login_passkey()}
+          </Button>
+        ) : null}
       </form>
     </main>
   );

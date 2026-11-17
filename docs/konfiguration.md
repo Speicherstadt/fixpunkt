@@ -16,6 +16,7 @@ Container in `/etc/fixpunkt/fixpunkt.env`.
 | `FIXPUNKT_USER`, `FIXPUNKT_PASSWORD` | – | Erster Admin, falls es noch keinen Benutzer gibt |
 | `FIXPUNKT_MAX_JOBS` | `1` | Berechnungen gleichzeitig; jede braucht für große Flüge einige GB RAM |
 | `FIXPUNKT_MAX_UPLOAD_GB` | `20` | Größte Datei beim Hochladen |
+| `FIXPUNKT_PUBLIC_URL` | – | Öffentliche Adresse, z. B. `https://fixpunkt.example.de`; schaltet [Passkeys](benutzer.md#passkeys) ein |
 | `FIXPUNKT_SECURE_COOKIES` | `false` | Sitzungs-Cookie nur über HTTPS – hinter einem Proxy mit TLS einschalten |
 | `FIXPUNKT_NODEODM_URL` | – | NodeODM für [Drohnenfotos](drohnenfotos.md), z. B. `http://nodeodm:3000`; ohne ist die Funktion aus |
 | `FIXPUNKT_NODEODM_TOKEN` | – | Token, falls NodeODM mit `--token` läuft |

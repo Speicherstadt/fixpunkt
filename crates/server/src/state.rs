@@ -14,6 +14,10 @@ pub struct App {
     pub jobs_wakeup: Notify,
     /// weckt den Photogrammetrie-Worker (NodeODM-Aufträge laufen Stunden und dürfen Rechnungen nicht blockieren)
     pub odm_wakeup: Notify,
+    /// Passkeys, falls `FIXPUNKT_PUBLIC_URL` gesetzt ist
+    pub webauthn: Option<webauthn_rs::Webauthn>,
+    /// laufende Passkey-Anmeldungen und -Registrierungen
+    pub ceremonies: crate::auth::passkeys::Ceremonies,
 }
 
 pub type AppRef = Arc<App>;

@@ -1,5 +1,9 @@
 //! Login, Sitzungen, CSRF und Rollen. Vorbild: firsttris/haul crates/haul/src/auth.rs –
-//! erweitert um mehrere Benutzer mit Rollen und ein CSRF-Token pro Sitzung.
+//! erweitert um mehrere Benutzer mit Rollen und ein CSRF-Token pro Sitzung, API-Tokens (`tokens.rs`) und
+//! Passkeys (`passkeys.rs`).
+
+pub mod passkeys;
+pub mod tokens;
 
 use crate::crypto::{hash_password, random_token, same, sha256_hex, verify_password};
 use crate::db::{self, now_ms, User};
@@ -58,6 +62,9 @@ pub struct CurrentUser {
     pub role: Role,
     #[serde(skip)]
     pub csrf: String,
+    /// über ein API-Token statt eine Sitzung angemeldet
+    #[serde(skip)]
+    pub via_token: bool,
 }
 
 impl CurrentUser {
@@ -68,11 +75,22 @@ impl CurrentUser {
             Err(ApiError::new(StatusCode::FORBIDDEN, code::FORBIDDEN))
         }
     }
+
+    /// Passkeys und Tokens verwaltet nur, wer sich angemeldet hat – nicht ein Token selbst
+    pub fn require_session(&self) -> ApiResult<()> {
+        if self.via_token {
+            Err(ApiError::new(StatusCode::FORBIDDEN, code::SESSION_REQUIRED))
+        } else {
+            Ok(())
+        }
+    }
 }
 
-/// Mindestrolle für eine Anfrage: Lesen darf jeder Angemeldete, Ändern ab „editor“.
-pub fn role_for(method: &Method) -> Role {
-    if is_safe(method) {
+/// Mindestrolle für eine Anfrage: Lesen darf jeder Angemeldete, Ändern ab „editor“ – außer am eigenen Konto
+/// (Passwort, Passkeys, Tokens unter `/me/`).
+pub fn role_for(method: &Method, path: &str) -> Role {
+    let path = path.strip_prefix("/api").unwrap_or(path);
+    if is_safe(method) || path == "/auth/password" || path.starts_with("/me/") {
         Role::Viewer
     } else {
         Role::Editor
@@ -112,24 +130,27 @@ async fn session_user(app: &AppRef, token: &str) -> Option<CurrentUser> {
         name,
         role: Role::parse(&role)?,
         csrf,
+        via_token: false,
     })
 }
 
-/// Sitzungs-Cookie prüfen, bei ändernden Anfragen auch das CSRF-Token und die Rolle.
+/// Sitzungs-Cookie oder API-Token prüfen, bei ändernden Anfragen auch das CSRF-Token und die Rolle.
 pub async fn require_auth(
     State(app): State<AppRef>,
     jar: CookieJar,
     mut req: Request,
     next: Next,
 ) -> Response {
-    let user = match jar.get(SESSION_COOKIE) {
-        Some(c) => session_user(&app, c.value()).await,
-        None => None,
+    let user = match (tokens::bearer(req.headers()), jar.get(SESSION_COOKIE)) {
+        (Some(t), _) => tokens::token_user(&app, t).await,
+        (None, Some(c)) => session_user(&app, c.value()).await,
+        (None, None) => None,
     };
     let Some(user) = user else {
         return ApiError::new(StatusCode::UNAUTHORIZED, code::NOT_LOGGED_IN).into_response();
     };
-    if !is_safe(req.method()) {
+    // CSRF schützt nur das Cookie, das der Browser von selbst mitschickt
+    if !user.via_token && !is_safe(req.method()) {
         let sent = req
             .headers()
             .get(CSRF_HEADER)
@@ -139,7 +160,7 @@ pub async fn require_auth(
             return ApiError::new(StatusCode::FORBIDDEN, code::CSRF).into_response();
         }
     }
-    if let Err(e) = user.require(role_for(req.method())) {
+    if let Err(e) = user.require(role_for(req.method(), req.uri().path())) {
         return e.into_response();
     }
     req.extensions_mut().insert(user);
@@ -153,6 +174,8 @@ pub struct AuthState {
     user: Option<CurrentUser>,
     /// für den Header `x-csrf-token` bei ändernden Anfragen
     csrf: Option<String>,
+    /// Anmelden mit Passkey möglich (`FIXPUNKT_PUBLIC_URL` gesetzt)
+    passkeys: bool,
 }
 
 pub async fn state(State(app): State<AppRef>, jar: CookieJar) -> ApiResult<Json<AuthState>> {
@@ -166,6 +189,7 @@ pub async fn state(State(app): State<AppRef>, jar: CookieJar) -> ApiResult<Json<
         setup_required,
         user,
         csrf,
+        passkeys: app.webauthn.is_some(),
     }))
 }
 
@@ -375,9 +399,13 @@ mod tests {
     #[test]
     fn roles_are_ordered_and_methods_map() {
         assert!(Role::Admin > Role::Editor && Role::Editor > Role::Viewer);
-        assert_eq!(role_for(&Method::GET), Role::Viewer);
-        assert_eq!(role_for(&Method::POST), Role::Editor);
-        assert_eq!(role_for(&Method::DELETE), Role::Editor);
+        assert_eq!(role_for(&Method::GET, "/sites"), Role::Viewer);
+        assert_eq!(role_for(&Method::POST, "/sites"), Role::Editor);
+        assert_eq!(role_for(&Method::DELETE, "/api/regions/1"), Role::Editor);
+        // eigenes Konto: auch „nur lesen“ darf Passwort, Passkeys und Tokens ändern
+        assert_eq!(role_for(&Method::POST, "/auth/password"), Role::Viewer);
+        assert_eq!(role_for(&Method::DELETE, "/api/me/tokens/3"), Role::Viewer);
+        assert_eq!(role_for(&Method::POST, "/me/passkeys/start"), Role::Viewer);
         for r in [Role::Viewer, Role::Editor, Role::Admin] {
             assert_eq!(Role::parse(r.as_str()), Some(r));
         }
@@ -387,8 +415,15 @@ mod tests {
             name: "a".into(),
             role: Role::Editor,
             csrf: String::new(),
+            via_token: false,
         };
         assert!(u.require(Role::Viewer).is_ok() && u.require(Role::Admin).is_err());
+        assert!(u.require_session().is_ok());
+        let t = CurrentUser {
+            via_token: true,
+            ..u
+        };
+        assert!(t.require_session().is_err());
         assert!(
             validate("x", "1234567").is_err()
                 && validate(" ", "12345678").is_err()

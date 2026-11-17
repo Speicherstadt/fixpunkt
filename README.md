@@ -95,6 +95,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 
 ### 👷 Im Team
 - Benutzer mit Rollen: Admin, Bearbeiten, Nur lesen
+- Anmelden mit Passwort oder Passkey, API-Tokens für Programme
 - Live-Status: Prüfung und Berechnung aktualisieren sich von selbst
 - Auf Tablet und Handy installierbar, hell und dunkel
 - Oberfläche auf Deutsch und Englisch

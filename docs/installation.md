@@ -89,7 +89,8 @@ Installation ohne Klicken lässt er sich auch vorgeben: `FIXPUNKT_USER` und `FIX
 
 > [!IMPORTANT]
 > Fixpunkt gehört hinter einen Reverse-Proxy mit HTTPS (Caddy, Traefik, nginx), sobald es aus dem Internet
-> erreichbar ist – dann `FIXPUNKT_SECURE_COOKIES=true` setzen.
+> erreichbar ist – dann `FIXPUNKT_SECURE_COOKIES=true` setzen und für Passkeys die Adresse angeben:
+> `FIXPUNKT_PUBLIC_URL=https://fixpunkt.example.de`.
 
 ## Drohnenbilder auswerten
 

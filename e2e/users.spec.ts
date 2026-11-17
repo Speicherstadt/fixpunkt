@@ -13,10 +13,10 @@ test("Admin legt einen Leser an, der nur lesen darf", async ({ page, browser }) 
   await viewer.goto("/login");
   await viewer.getByLabel("Name").fill("leser");
   await viewer.getByLabel("Passwort").fill("falsch123");
-  await viewer.getByRole("button", { name: "Anmelden" }).click();
+  await viewer.getByRole("button", { name: "Anmelden", exact: true }).click();
   await expect(viewer.getByRole("alert")).toHaveText("Name oder Passwort stimmt nicht.");
   await viewer.getByLabel("Passwort").fill("nurlesen1");
-  await viewer.getByRole("button", { name: "Anmelden" }).click();
+  await viewer.getByRole("button", { name: "Anmelden", exact: true }).click();
   await expect(viewer.getByRole("heading", { name: "Baustellen", level: 1 })).toBeVisible();
   await expect(viewer.getByRole("button", { name: "Neue Baustelle" })).toHaveCount(0);
   await expect(viewer.getByRole("link", { name: "Benutzer" })).toHaveCount(0);
@@ -30,7 +30,7 @@ test("Abmelden beendet die Sitzung", async ({ browser }) => {
   await page.goto("/login");
   await page.getByLabel("Name").fill("admin");
   await page.getByLabel("Passwort").fill("geheim123");
-  await page.getByRole("button", { name: "Anmelden" }).click();
+  await page.getByRole("button", { name: "Anmelden", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Baustellen", level: 1 })).toBeVisible();
   await page.getByRole("button", { name: "Abmelden" }).click();
   await expect(page).toHaveURL(/\/login$/);

@@ -26,6 +26,8 @@ pub struct Config {
     pub nodeodm_poll: std::time::Duration,
     /// Kacheln der Übersichtskarte (`{z}/{x}/{y}`) und Namensnennung; `None`: Karte ohne Hintergrund
     pub map_tiles: Option<(String, String)>,
+    /// öffentliche Adresse (`https://fixpunkt.example.de`); ohne gibt es keine Passkeys
+    pub public_url: Option<String>,
 }
 
 /// OpenStreetMap: frei mit Namensnennung, für wenige Nutzer im Rahmen der Tile Usage Policy
@@ -85,6 +87,7 @@ impl Config {
             nodeodm_token: var("FIXPUNKT_NODEODM_TOKEN"),
             nodeodm_poll: std::time::Duration::from_secs_f64(nodeodm_poll.max(0.01)),
             map_tiles: map_tiles(var("FIXPUNKT_MAP_TILES"), var("FIXPUNKT_MAP_ATTRIBUTION")),
+            public_url: var("FIXPUNKT_PUBLIC_URL").map(|u| u.trim_end_matches('/').to_string()),
         })
     }
 
@@ -114,6 +117,7 @@ impl Config {
             nodeodm_token: None,
             nodeodm_poll: std::time::Duration::from_millis(20),
             map_tiles: None,
+            public_url: None,
         }
     }
 }

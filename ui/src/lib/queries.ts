@@ -47,4 +47,6 @@ export const settingsQuery = queryOptions({
   queryFn: api.settings,
   staleTime: Number.POSITIVE_INFINITY,
 });
+export const tokensQuery = queryOptions({ queryKey: ["tokens"], queryFn: api.tokens });
+export const passkeysQuery = queryOptions({ queryKey: ["passkeys"], queryFn: api.passkeys });
 export const usersQuery = queryOptions({ queryKey: ["users"], queryFn: api.users });

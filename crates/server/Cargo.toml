@@ -46,6 +46,7 @@ kamadak-exif = "0.6.2"
 image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
 dxf = "0.6.2"
 base64 = "0.23.1"
+webauthn-rs = "0.6.2"
 
 [dev-dependencies]
 e57 = "0.11.13"

@@ -45,9 +45,17 @@ pub async fn init(cfg: Config) -> Result<AppRef> {
     let db = db::connect(&cfg.db_path())
         .await
         .context("Datenbank öffnen")?;
+    let webauthn = cfg
+        .public_url
+        .as_deref()
+        .map(auth::passkeys::webauthn)
+        .transpose()
+        .context("FIXPUNKT_PUBLIC_URL")?;
     let app = Arc::new(App {
         db,
         cfg,
+        webauthn,
+        ceremonies: Default::default(),
         events: Default::default(),
         jobs_wakeup: Default::default(),
         odm_wakeup: Default::default(),

@@ -1,5 +1,6 @@
 //! Routen der API unter `/api`.
 
+use crate::auth::{passkeys, tokens};
 use crate::state::AppRef;
 use crate::{
     auth, captures, compute, dashboard, flightplan, jobs, markers, odm, ortho, plans, points,
@@ -20,6 +21,12 @@ pub fn router(app: AppRef) -> Router {
         .route("/events", get(events))
         .route("/auth/password", post(auth::change_password))
         .route("/users", get(auth::list_users).post(auth::add_user))
+        .route("/me/tokens", get(tokens::list).post(tokens::create))
+        .route("/me/tokens/{id}", delete(tokens::delete))
+        .route("/me/passkeys", get(passkeys::list))
+        .route("/me/passkeys/start", post(passkeys::register_start))
+        .route("/me/passkeys/finish", post(passkeys::register_finish))
+        .route("/me/passkeys/{id}", delete(passkeys::delete))
         .route("/users/{id}", delete(auth::delete_user))
         .route("/sites", get(sites::list).post(sites::create))
         .route(
@@ -108,6 +115,8 @@ pub fn router(app: AppRef) -> Router {
         .route("/auth/setup", post(auth::setup))
         .route("/auth/login", post(auth::login))
         .route("/auth/logout", post(auth::logout))
+        .route("/auth/passkey/start", post(passkeys::login_start))
+        .route("/auth/passkey/finish", post(passkeys::login_finish))
         .merge(protected)
         .with_state(app)
 }

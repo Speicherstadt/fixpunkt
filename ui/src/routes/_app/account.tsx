@@ -1,11 +1,14 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { type FormEvent, useState } from "react";
+import { Passkeys } from "@/components/account/passkeys";
+import { Tokens } from "@/components/account/tokens";
 import { ErrorText, PageHeader, Section } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
 import { api } from "@/lib/api";
 import { errorText } from "@/lib/errors";
+import { authQuery } from "@/lib/queries";
 import { applyTheme, storedTheme, type Theme } from "@/lib/theme";
 import { m } from "@/paraglide/messages";
 import { getLocale, locales, setLocale } from "@/paraglide/runtime";
@@ -16,6 +19,7 @@ function AccountPage() {
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [theme, setTheme] = useState<Theme>(storedTheme);
+  const { data: auth } = useQuery(authQuery);
   const change = useMutation({
     mutationFn: () => api.changePassword(current, next),
     onSuccess: () => {
@@ -101,6 +105,8 @@ function AccountPage() {
             </div>
           </form>
         </Section>
+        {auth?.passkeys ? <Passkeys /> : null}
+        <Tokens />
       </div>
     </>
   );

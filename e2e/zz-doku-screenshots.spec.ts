@@ -242,6 +242,39 @@ test("Flugplanung @screenshots", async () => {
   await flight.screenshot({ path: `${DOCS}/screenshot-flugplanung.png` });
 });
 
+test("Passkeys und Tokens @screenshots", async () => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("WebAuthn.enable");
+  await cdp.send("WebAuthn.addVirtualAuthenticator", {
+    options: {
+      protocol: "ctap2",
+      transport: "internal",
+      hasResidentKey: true,
+      hasUserVerification: true,
+      isUserVerified: true,
+      automaticPresenceSimulation: true,
+    },
+  });
+  await go("/account");
+  const passkeys = page.getByRole("region", { name: "Passkeys" });
+  await passkeys.getByLabel("Bezeichnung").fill("iPhone Bauleitung");
+  await passkeys.getByRole("button", { name: "Passkey hinzufügen" }).click();
+  await expect(passkeys.getByRole("listitem")).toHaveCount(1);
+  const tokens = page.getByRole("region", { name: "API-Tokens" });
+  await tokens.getByLabel("Wofür").fill("iPad Polier");
+  await tokens.getByRole("button", { name: "Token anlegen" }).click();
+  await expect(tokens.getByRole("status")).toBeVisible();
+  // boundingBox misst im Fenster, clip mit fullPage im Dokument
+  const [a, b] = [await passkeys.boundingBox(), await tokens.boundingBox()];
+  const scroll = await page.evaluate(() => window.scrollY);
+  await page.screenshot({
+    path: `${DOCS}/screenshot-passkeys.png`,
+    fullPage: true,
+    clip: { x: a!.x, y: a!.y + scroll, width: a!.width, height: b!.y + b!.height - a!.y },
+  });
+  await cdp.detach();
+});
+
 test("Überblick @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const overview = page.getByRole("region", { name: "Überblick" });

@@ -68,8 +68,20 @@ export const AuthState = z.object({
   setupRequired: z.boolean(),
   user: CurrentUser.nullable(),
   csrf: z.string().nullable(),
+  passkeys: z.boolean().default(false),
 });
 export type AuthState = z.infer<typeof AuthState>;
+
+/** Passkey oder API-Token im eigenen Konto */
+export const Credential = z.object({
+  id: z.number(),
+  name: z.string(),
+  createdAt: z.number(),
+  lastUsedAt: z.number().nullable(),
+});
+export type Credential = z.infer<typeof Credential>;
+
+const Ceremony = z.object({ id: z.string(), options: z.record(z.string(), z.unknown()) });
 
 export const User = z.object({
   id: z.number(),
@@ -413,6 +425,25 @@ export const api = {
   changePassword: (current: string, next: string) =>
     request("POST", "/auth/password", Empty, { current, new: next }),
   users: () => request("GET", "/users", z.array(User)),
+  tokens: () => request("GET", "/me/tokens", z.array(Credential)),
+  createToken: (name: string) =>
+    request(
+      "POST",
+      "/me/tokens",
+      z.object({ id: z.number(), name: z.string(), token: z.string() }),
+      {
+        name,
+      },
+    ),
+  deleteToken: (id: number) => request("DELETE", `/me/tokens/${id}`, Empty),
+  passkeys: () => request("GET", "/me/passkeys", z.array(Credential)),
+  passkeyRegisterStart: () => request("POST", "/me/passkeys/start", Ceremony, {}),
+  passkeyRegisterFinish: (id: string, name: string, credential: unknown) =>
+    request("POST", "/me/passkeys/finish", z.object({ id: z.number() }), { id, name, credential }),
+  deletePasskey: (id: number) => request("DELETE", `/me/passkeys/${id}`, Empty),
+  passkeyLoginStart: (name: string) => request("POST", "/auth/passkey/start", Ceremony, { name }),
+  passkeyLoginFinish: (id: string, credential: unknown) =>
+    request("POST", "/auth/passkey/finish", Empty, { id, credential }),
   addUser: (name: string, password: string, role: Role) =>
     request("POST", "/users", z.object({ id: z.number() }), { name, password, role }),
   deleteUser: (id: number) => request("DELETE", `/users/${id}`, Empty),
