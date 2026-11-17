@@ -2,8 +2,12 @@
 
 ## Documentation
 
-Projektplan, Hardware, Kosten und Phasen: `docs/PLAN.md` – vor jeder Änderung die betroffenen
-Abschnitte lesen (Architektur: Abschnitt 5). Rechenkern: `crates/processing/README.md`.
+Die Doku ist in `docs/` (<https://firsttris.github.io/fixpunkt/>), gebaut mit Zensical wie firsttris/haben
+(`mkdocs.yml`, `requirements-docs.txt`, `.github/workflows/docs.yml`). Vor einer Änderung die betroffenen Seiten
+lesen: `architektur.md`, `methode.md`, `aushub.md`, Projektplan `PLAN.md` (Architektur: Abschnitt 5).
+Rechenkern: `crates/processing/README.md`. Links in README und Doku zeigen auf die Website, nicht auf `docs/*.md`.
+Jede Seite braucht `description:` im Front Matter (docs.yml prüft das). Doku auf Deutsch; Englisch, sobald
+Zensical mehrsprachig kann.
 
 ## Reference implementations
 
@@ -21,7 +25,9 @@ ein Detail entscheidet.
 
 - Tests für das Geänderte (Unit-Tests im Modul, End-to-End in `crates/processing/tests/cli.rs`);
   Rechenergebnisse gegen unabhängig bekannte Werte prüfen (Formel, numerische Kontrolle).
-- `docs/PLAN.md` und die READMEs, wenn sich Funktionen, Architektur oder Stand ändern.
+- die Doku in `docs/` und die README, wenn sich Funktionen, Architektur oder Stand ändern;
+- die Screenshots nach einer Änderung am Aussehen: **Actions → Update screenshots → Run workflow**
+  (lokal `bun run docs:screenshots`), dann die neuen Bilder ansehen.
 
 ## Checks
 
@@ -34,6 +40,7 @@ cargo test --workspace
 bun run lint && bun run typecheck && bun run test && bun run build
 bun run e2e    # baut UI + Server und startet Playwright; lokal ohne passenden Browser:
                # PW_CHROMIUM_PATH=/pfad/zu/chrome bun run e2e
+zensical build --strict   # wenn docs/ oder mkdocs.yml geändert
 ```
 
 ## Working rules

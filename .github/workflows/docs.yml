@@ -1,0 +1,92 @@
+# Baut docs/ mit Zensical und veröffentlicht sie auf GitHub Pages: https://firsttris.github.io/fixpunkt/
+# Wie firsttris/haben .github/workflows/docs.yml. In Pull Requests nur bauen, nicht veröffentlichen, damit ein
+# kaputter Link oder eine fehlende Seite vor dem Merge auffällt.
+# Voraussetzung einmalig: Settings → Pages → Source "GitHub Actions" (configure-pages mit enablement schaltet das
+# beim ersten Lauf selbst ein).
+name: Docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "overrides/**"
+      - "requirements-docs.txt"
+      - "scripts/doku-*/**"
+      - ".github/workflows/docs.yml"
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths:
+      - "docs/**"
+      - "mkdocs.yml"
+      - "overrides/**"
+      - "requirements-docs.txt"
+      - "scripts/doku-*/**"
+      - ".github/workflows/docs.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('docs-{0}', github.ref) || 'pages' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # Ganze Historie: das Änderungsdatum unter jeder Seite kommt aus dem letzten Commit ihrer Datei
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.15"
+          cache: pip
+          cache-dependency-path: requirements-docs.txt
+      - run: pip install -r requirements-docs.txt
+      - run: python -m unittest discover -s scripts/doku-aenderungsdatum
+      - run: python -m unittest discover -s scripts/doku-hinweise
+      - uses: actions/configure-pages@v6
+        if: github.event_name != 'pull_request'
+        with:
+          enablement: true
+      - run: zensical build --strict
+      # Ohne git-Historie fehlt das Datum, ohne dass der Build scheitert; hier fällt es auf
+      - run: grep -q 'class="aenderungsdatum"' site/index.html
+      # Jeder Hinweis im GitHub-Stil ist ein Kasten (pymdownx.quotes)
+      - run: "! grep -rlE '<p>\\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\\]' site --include='*.html'"
+      # Jede Seite mit eigener Beschreibung und Vorschaubild, strukturierte Daten auf der Startseite
+      - run: test -z "$(grep -L '^description:' docs/*.md)"
+      - run: test -z "$(grep -L 'property="og:image"' site/*.html)"
+      - run: grep -q 'application/ld+json' site/index.html
+      # Alle Bilder, auf die die Seiten verweisen, sind da
+      - run: |
+          missing=0
+          for img in $(grep -ohE '\(screenshot-[a-z-]+\.png' docs/*.md | tr -d '(' | sort -u); do
+            test -f "docs/$img" || { echo "::error::docs/$img fehlt"; missing=1; }
+          done
+          exit $missing
+      - uses: actions/upload-pages-artifact@v5
+        if: github.event_name != 'pull_request'
+        with:
+          path: site
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

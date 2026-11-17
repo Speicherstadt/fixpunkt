@@ -16,7 +16,8 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "bun run --cwd ui test",
-    "e2e": "bun run build && cargo build -p fixpunkt-server && bun --bun playwright test"
+    "e2e": "bun run build && cargo build -p fixpunkt-server && bun --bun playwright test --project=setup --project=desktop --project=phone",
+    "docs:screenshots": "bun run build && cargo build -p fixpunkt-server && DOKU_SCREENSHOTS=1 bun --bun playwright test --project=screenshots"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",

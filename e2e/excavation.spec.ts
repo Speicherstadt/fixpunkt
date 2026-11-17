@@ -31,7 +31,7 @@ test("Aushub einer Baugrube berechnen", async ({ page }, info) => {
   await page.getByRole("button", { name: "Aushub berechnen" }).click();
 
   // Ergebnis in der Liste, dann der Bericht
-  const job = page.getByRole("link", { name: /Berechnung \d+/ });
+  const job = page.getByRole("link", { name: /Urgelaende → Nach Aushub/ });
   await expect(job.getByText("Fertig")).toBeVisible({ timeout: 45_000 });
   await job.click();
   await expect(page.getByRole("heading", { name: "Mengenbericht" })).toBeVisible();

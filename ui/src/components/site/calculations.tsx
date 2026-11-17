@@ -14,6 +14,10 @@ import { m } from "@/paraglide/messages";
 
 export const CELL_SIZES = [0.1, 0.25, 0.5, 1] as const;
 
+/** Name einer Aufnahme für die Liste der Berechnungen; gelöschte zeigen einen Strich */
+export const nameOf = (captures: Capture[] | undefined, id: unknown): string =>
+  captures?.find((c) => c.id === id)?.name ?? "–";
+
 /** Vorauswahl: älteste Aufnahme als Urgelände, jüngste als Stand nach dem Aushub */
 export const defaultPair = (ready: Capture[]): [number | undefined, number | undefined] => {
   const sorted = [...ready].sort((a, b) => a.capturedAt - b.capturedAt);
@@ -147,7 +151,12 @@ export function Calculations({ siteId, canEdit }: { siteId: number; canEdit: boo
                   className="flex items-center gap-3 px-4 py-3 hover:bg-hover"
                 >
                   <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                    <span className="font-medium">{m.calc_job_title({ id: j.id })}</span>
+                    <span className="font-medium">
+                      {m.report_compare({
+                        before: nameOf(captures.data, j.params.before),
+                        after: nameOf(captures.data, j.params.after),
+                      })}
+                    </span>
                     <span className="text-[12px] text-muted">{formatDateTime(j.createdAt)}</span>
                   </div>
                   {result.success ? (

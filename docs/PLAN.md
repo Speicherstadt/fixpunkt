@@ -1,3 +1,9 @@
+---
+description: >-
+  Projektplan von Fixpunkt: Ziel, Funktionsumfang nach dem Vorbild SDX-PocketScan, Hardware und Kosten,
+  Architektur, Phasen, Risiken und offene Fragen.
+---
+
 # Fixpunkt – Projektplan
 
 Stand: 11.11.2026 · Preise sind Richtwerte (Recherche Nov. 2026), vor dem Kauf prüfen.
@@ -463,6 +469,8 @@ Wie in allen Projekten (`firsttris/workflows`):
 - [x] Jobs rufen den Rechenkern auf: Prüfen beim Upload, Aushub je Bereich, Haufwerk, DGM
 - [x] Web-UI im Kontext-Stil: Baustellen, Aufnahmen, Grenzen, Aushub berechnen, Mengenbericht (CSV, GeoTIFF, Drucken), Benutzer, Konto
 - [x] Tests auf allen Schichten in der CI: Rust-Unit, API-Integration, Vitest, Playwright gegen die Binärdatei (inkl. axe), Docker-Smoke-Test
+- [x] Doku mit Zensical (GitHub Pages), Startseite als Rundgang, Screenshots aus Playwright, README nach Vorlage
+- [x] Release bereit: Docker-Image, statische musl-Programmdateien (mit mimalloc so schnell wie glibc), install.sh
 - [ ] Upload großer Fotomengen fortsetzbar (tus) für die Drohnenbilder
 - [ ] Browser-Kacheln (3D Tiles/Potree) aus dem Rechenkern, E57 vom BLK2GO
 - [ ] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung

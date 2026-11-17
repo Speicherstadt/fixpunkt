@@ -3,6 +3,10 @@
 
 use tracing_subscriber::EnvFilter;
 
+#[cfg(target_env = "musl")]
+#[global_allocator]
+static GLOBAL: mimalloc::MiMalloc = mimalloc::MiMalloc;
+
 fn main() {
     let args: Vec<std::ffi::OsString> = std::env::args_os().collect();
     let first = args.get(1).and_then(|a| a.to_str()).unwrap_or("serve");

@@ -3,6 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Download, FileSpreadsheet, Printer, TriangleAlert } from "lucide-react";
 import { ErrorText, PageHeader, Section } from "@/components/page";
 import { VolumeTable } from "@/components/report/volume-table";
+import { nameOf } from "@/components/site/calculations";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { PlaceholderRows } from "@/components/ui/placeholder";
 import { StatusBadge } from "@/components/ui/status";
@@ -24,7 +25,7 @@ function JobPage() {
   if (job.isPending) return <PlaceholderRows />;
   if (job.error) return <ErrorText>{errorText(job.error)}</ErrorText>;
   const j = job.data;
-  const nameOf = (id: unknown) => captures.data?.find((c) => c.id === id)?.name ?? "–";
+  const names = (id: unknown) => nameOf(captures.data, id);
   const result = VolumeResult.safeParse(j.result);
   const back = (
     <Link
@@ -40,7 +41,10 @@ function JobPage() {
   if (!result.success) {
     return (
       <>
-        <PageHeader title={m.calc_job_title({ id: j.id })} actions={back} />
+        <PageHeader
+          title={m.report_compare({ before: names(j.params.before), after: names(j.params.after) })}
+          actions={back}
+        />
         <Section title={m.report_status()}>
           <StatusBadge status={j.status} />
           {j.error ? <ErrorText>{j.error}</ErrorText> : null}
@@ -65,7 +69,7 @@ function JobPage() {
     <>
       <PageHeader
         title={m.report_title()}
-        subtitle={`${site.data?.name ?? ""} · ${m.report_compare({ before: nameOf(j.params.before), after: nameOf(j.params.after) })} · ${formatDateTime(j.finishedAt ?? j.createdAt)}`}
+        subtitle={`${site.data?.name ?? ""} · ${m.report_compare({ before: names(j.params.before), after: names(j.params.after) })} · ${formatDateTime(j.finishedAt ?? j.createdAt)}`}
         actions={
           <div className="flex flex-wrap gap-2 print:hidden">
             {back}
@@ -87,15 +91,18 @@ function JobPage() {
         }
       />
       <div className="flex flex-col gap-6">
-        <dl className="m-0 grid gap-4 sm:grid-cols-3">
+        <dl className="m-0 grid grid-cols-3 gap-2 md:gap-4">
           {[
             { label: m.report_cut(), value: total.cut, className: "text-cut" },
             { label: m.report_fill(), value: total.fill, className: "text-fill" },
             { label: m.report_net(), value: total.net, className: "" },
           ].map((k) => (
-            <div key={k.label} className="flex flex-col gap-1 rounded-xl border border-border p-4">
+            <div
+              key={k.label}
+              className="flex min-w-0 flex-col gap-1 rounded-xl border border-border p-3 md:p-4"
+            >
               <dt className="text-[13px] text-muted">{k.label}</dt>
-              <dd className={`tabular m-0 text-[22px] font-semibold ${k.className}`}>
+              <dd className={`tabular m-0 text-[16px] font-semibold md:text-[22px] ${k.className}`}>
                 {formatVolume(k.value)}
               </dd>
             </div>

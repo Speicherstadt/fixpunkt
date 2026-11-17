@@ -43,12 +43,18 @@ export default defineConfig({
         storageState: "e2e/.auth/admin.json",
         serviceWorkers: "block",
       },
-      grepInvert: /@phone/,
+      grepInvert: /@phone|@screenshots/,
+    },
+    {
+      // Bilder für README und Doku: nur mit DOKU_SCREENSHOTS=1 (bun run docs:screenshots)
+      name: "screenshots",
+      dependencies: ["setup"],
+      testMatch: /zz-doku-screenshots\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], launchOptions },
     },
     {
       name: "phone",
       dependencies: ["setup"],
-      testIgnore: /setup\.spec\.ts/,
       use: {
         ...devices["Pixel 7"],
         launchOptions,
@@ -56,6 +62,7 @@ export default defineConfig({
         serviceWorkers: "block",
       },
       grep: /@phone/,
+      testIgnore: /setup\.spec\.ts|zz-doku-screenshots\.spec\.ts/,
     },
   ],
   webServer: {

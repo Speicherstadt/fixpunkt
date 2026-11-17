@@ -1,0 +1,128 @@
+# Dokumentation als Website: https://firsttris.github.io/fixpunkt/
+# Quelle ist docs/, gebaut mit Zensical (.github/workflows/docs.yml) wie firsttris/haben; Zensical liest
+# diese Datei unverändert (https://zensical.org/docs/setup/basics/).
+# Lokal: pip install -r requirements-docs.txt && zensical serve
+site_name: Fixpunkt
+site_description: >-
+  Fixpunkt: Aushub und Haufwerke aus Drohnenflügen berechnen, selbst gehostet. Punktwolken und
+  Höhenmodelle aus OpenDroneMap hochladen, Abrechnungsgrenzen setzen, Mengenbericht in m³ – eine
+  Programmdatei, ETRS89/UTM32, Bodenfilter für Bagger und Bewuchs.
+site_url: https://firsttris.github.io/fixpunkt/
+repo_url: https://github.com/firsttris/fixpunkt
+repo_name: firsttris/fixpunkt
+edit_uri: edit/main/docs/
+copyright: >-
+  Fixpunkt ersetzt kein amtliches Aufmaß. Ergebnisse vor der Abrechnung mit Lieferscheinen oder
+  einem Aufmaß plausibilisieren.
+
+docs_dir: docs
+# Seiten als installation.html statt installation/: so stimmen die relativen Bildpfade
+# der <img>-Tags, die auch auf GitHub funktionieren müssen
+use_directory_urls: false
+
+nav:
+  - Start: index.md
+  - Betrieb:
+      - Installation: installation.md
+      - Konfiguration: konfiguration.md
+      - Backup und Updates: backup.md
+  - Bedienung:
+      - Erste Schritte: erste-schritte.md
+      - Aushub berechnen: aushub.md
+      - Daten vorbereiten: daten.md
+      - Benutzer und Rollen: benutzer.md
+  - Hintergrund:
+      - Methode und Genauigkeit: methode.md
+      - Kommandozeile: kommandozeile.md
+      - Architektur: architektur.md
+      - Entwicklung und Tests: entwicklung.md
+      - Projektplan: PLAN.md
+
+theme:
+  name: material
+  # Vorschaubild beim Teilen eines Links (overrides/main.html)
+  custom_dir: overrides
+  language: de
+  logo: assets/icon.svg
+  favicon: assets/icon.svg
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    # Folgt der Systemeinstellung, umschaltbar wie in der App
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-night
+        name: Dunkles Design
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: custom
+      accent: custom
+      toggle:
+        icon: material/weather-sunny
+        name: Helles Design
+  font:
+    text: Geist
+    code: Geist Mono
+  features:
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - toc.follow
+    - content.code.copy
+    - content.action.edit
+    - content.tabs.link
+
+extra_css:
+  - assets/stylesheets/extra.css
+  - assets/stylesheets/startseite.css
+
+plugins:
+  - search
+
+markdown_extensions:
+  # Änderungsdatum aus git unter jeder Seite (scripts/doku-aenderungsdatum, über requirements-docs.txt)
+  - fixpunkt_doku_aenderungsdatum
+  - admonition
+  # Hinweise im Stil von GitHub (> [!NOTE]) als Kasten, auf GitHub wie auf der Website
+  - pymdownx.quotes:
+      callouts: true
+  # Deutsche Titel der Kästen statt „Note“, „Important“ (scripts/doku-hinweise)
+  - fixpunkt_doku_hinweise
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+      permalink_title: Link zu diesem Abschnitt
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/firsttris/fixpunkt
+      name: Quellcode auf GitHub
+    - icon: fontawesome/brands/docker
+      link: https://hub.docker.com/r/tristanteu/fixpunkt
+      name: Image auf Docker Hub

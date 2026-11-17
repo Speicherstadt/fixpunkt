@@ -1,0 +1,55 @@
+/* Farben der App (ui/src/styles.css): Zink wie Kontext und Belegt, Akzent Blau */
+:root {
+  --md-primary-fg-color: #18181b;
+  --md-primary-fg-color--light: #3f3f46;
+  --md-primary-fg-color--dark: #09090b;
+  --md-accent-fg-color: #2563eb;
+  --md-accent-fg-color--transparent: rgba(37, 99, 235, 0.1);
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #09090b;
+  --md-accent-fg-color: #3b82f6;
+  --md-accent-fg-color--transparent: rgba(59, 130, 246, 0.15);
+  --md-default-bg-color: #09090b;
+}
+/* Links im Text im Akzent, nicht im (fast schwarzen) Primärton */
+.md-typeset a {
+  color: var(--md-accent-fg-color);
+}
+.md-typeset .md-button--primary {
+  background-color: var(--md-primary-fg-color);
+  border-color: var(--md-primary-fg-color);
+  color: #fafafa;
+}
+[data-md-color-scheme="slate"] .md-typeset .md-button--primary {
+  background-color: #fafafa;
+  border-color: #fafafa;
+  color: #09090b;
+}
+/* Bilder: Ecken und feine Kante, nie breiter als der Text */
+.md-typeset img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid #e4e4e7;
+}
+[data-md-color-scheme="slate"] .md-typeset img {
+  border-color: #27272a;
+}
+.md-typeset img[src$=".svg"] {
+  border: 0;
+}
+.md-typeset table:not([class]) {
+  font-size: 0.75rem;
+}
+/* Änderungsdatum unter jeder Seite (scripts/doku-aenderungsdatum) */
+.md-typeset .aenderungsdatum {
+  margin-top: 2.5em;
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+}
+/* Das Bild des anderen Farbschemas bleibt aus (#only-light, #only-dark) */
+[data-md-color-scheme="default"] .md-typeset img[src$="#only-dark"],
+[data-md-color-scheme="slate"] .md-typeset img[src$="#only-light"] {
+  display: none;
+}

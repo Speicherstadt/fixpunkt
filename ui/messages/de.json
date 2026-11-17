@@ -18,7 +18,6 @@
   "calc_cell_option": "{cm} cm",
   "calc_cut_short": "Abtrag {value}",
   "calc_filter_ground": "Bagger, Container und Bewuchs herausfiltern",
-  "calc_job_title": "Berechnung {id}",
   "calc_need_two": "Für eine Berechnung braucht es zwei geprüfte Aufnahmen: vor und nach dem Aushub.",
   "calc_no_regions": "Ohne Bereich wird die ganze Überlappung der beiden Aufnahmen gerechnet.",
   "calc_regions": "Abrechnungsbereiche",

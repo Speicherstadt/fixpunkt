@@ -18,7 +18,6 @@
   "calc_cell_option": "{cm} cm",
   "calc_cut_short": "Cut {value}",
   "calc_filter_ground": "Filter out excavators, containers and vegetation",
-  "calc_job_title": "Calculation {id}",
   "calc_need_two": "A calculation needs two checked captures: before and after excavation.",
   "calc_no_regions": "Without an area, the whole overlap of both captures is calculated.",
   "calc_regions": "Billing areas",

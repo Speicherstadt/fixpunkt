@@ -1,0 +1,56 @@
+name: Update screenshots
+
+# Nimmt die Bilder in README und Doku (docs/screenshot-*.png, hell und dunkel, docs/social-preview.png) mit der
+# echten Programmdatei neu auf und committet, was sich geändert hat (e2e/zz-doku-screenshots.spec.ts,
+# bun run docs:screenshots). Nach einer Änderung am Aussehen von Hand starten.
+# Wie firsttris/haul .github/workflows/screenshots.yml: eigener Job statt des gemeinsamen Workflows, weil vorher
+# der Rust-Server gebaut wird.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.playwright.outputs.image }}
+    steps:
+      - id: playwright
+        uses: firsttris/workflows/actions/playwright-image@v1
+        with:
+          lockfile: bun.lock
+
+  screenshots:
+    needs: image
+    runs-on: ubuntu-latest
+    # Browser und Schriften der @playwright/test-Version aus bun.lock: gleiches Bild bei gleicher Seite
+    container:
+      image: ${{ needs.image.outputs.image }}
+      options: --ipc=host
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      # C-Compiler für SQLite im Rust-Build, curl für rustup
+      - name: Build-Werkzeuge
+        run: apt-get update && apt-get install -y --no-install-recommends build-essential curl
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: screenshots
+      # Das npm-Paket bringt Bun ohne unzip, das dem Image fehlt; node liest die Version (kein jq im Image)
+      - name: Installieren
+        run: |
+          version=$(node -p 'require("./package.json").packageManager.split("@")[1]')
+          npm install --global "bun@$version"
+          bun install --frozen-lockfile
+      - name: Screenshots aufnehmen
+        run: bun run docs:screenshots
+      - uses: firsttris/workflows/actions/commit-changes@v1
+        with:
+          paths: |
+            docs/screenshot-*.png
+            docs/social-preview.png
+          message: Screenshots erneuert

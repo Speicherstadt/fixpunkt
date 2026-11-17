@@ -1,0 +1,45 @@
+{#- Für Suchmaschinen und die Vorschau beim Teilen eines Links. Titel und Beschreibung kommen aus dem
+    Front Matter jeder Seite (`title:`, `description:`), sonst aus site_name und site_description.
+    Das Bild ist social-preview.png (1280 × 640). Vorbild: firsttris/haben overrides/main.html -#}
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {%- set seo_title = (page.meta.title if page and page.meta and page.meta.title else page.title) if page else config.site_name -%}
+  {%- set seo_description = page.meta.description if page and page.meta and page.meta.description else config.site_description -%}
+  {%- set seo_image = config.site_url ~ (page.meta.image if page and page.meta and page.meta.image else "social-preview.png") -%}
+  {%- set seo_url = page.canonical_url if page and page.canonical_url else config.site_url -%}
+  {%- set is_home = page and page.url == "index.html" -%}
+  {%- if not page or not page.canonical_url %}
+    <meta name="robots" content="noindex">
+  {%- endif %}
+  <meta property="og:type" content="{{ 'website' if is_home else 'article' }}">
+  <meta property="og:locale" content="de_DE">
+  <meta property="og:site_name" content="{{ config.site_name }}">
+  <meta property="og:title" content="{{ config.site_name }}: {{ seo_title }}">
+  <meta property="og:description" content="{{ seo_description }}">
+  <meta property="og:url" content="{{ seo_url }}">
+  <meta property="og:image" content="{{ seo_image }}">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="640">
+  <meta property="og:image:alt" content="{{ config.site_name }}: Mengenbericht einer Baugrube mit Abtrag je Bereich">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ config.site_name }}: {{ seo_title }}">
+  <meta name="twitter:description" content="{{ seo_description }}">
+  <meta name="twitter:image" content="{{ seo_image }}">
+  {%- if is_home %}
+  <script type="application/ld+json">
+    {{ {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": config.site_name,
+      "url": config.site_url,
+      "description": config.site_description,
+      "applicationCategory": "BusinessApplication",
+      "applicationSubCategory": "Vermessung, Massenermittlung",
+      "operatingSystem": "Linux, Docker",
+      "inLanguage": "de",
+      "image": seo_image
+    } | tojson }}
+  </script>
+  {%- endif %}
+{% endblock %}

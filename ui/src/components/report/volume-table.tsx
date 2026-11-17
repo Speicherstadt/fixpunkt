@@ -20,33 +20,59 @@ export function VolumeTable({ rows, total }: { rows: ReportRow[]; total: ReportR
     </tr>
   );
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full border-collapse text-[14px]">
-        <caption className="sr-only">{m.report_table_caption()}</caption>
-        <thead>
-          <tr className="text-left text-[12px] text-muted">
-            <th scope="col" className="py-2 pr-3 font-medium">
-              {m.report_region()}
-            </th>
-            <th scope="col" className="py-2 pl-4 text-right font-medium">
-              {m.report_area()}
-            </th>
-            <th scope="col" className="py-2 pl-4 text-right font-medium">
-              {m.report_cut()}
-            </th>
-            <th scope="col" className="py-2 pl-4 text-right font-medium">
-              {m.report_fill()}
-            </th>
-            <th scope="col" className="py-2 pl-4 text-right font-medium">
-              {m.report_net()}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => line(r))}
-          {line(total, true)}
-        </tbody>
-      </table>
-    </div>
+    <>
+      {/* Am Handy eine Karte je Bereich statt einer Tabelle, die über den Rand ragt */}
+      <ul
+        className="m-0 flex list-none flex-col gap-3 p-0 md:hidden"
+        aria-label={m.report_table_caption()}
+      >
+        {[...rows, total].map((r, i) => (
+          <li
+            key={r.name}
+            className={`rounded-lg border p-3 ${i === rows.length ? "border-fg" : "border-border"}`}
+          >
+            <div className="mb-2 font-semibold">{r.name}</div>
+            <dl className="m-0 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px]">
+              <dt className="text-muted">{m.report_area()}</dt>
+              <dd className="tabular m-0 text-right">{formatArea(r.area)}</dd>
+              <dt className="text-muted">{m.report_cut()}</dt>
+              <dd className="tabular m-0 text-right text-cut">{formatVolume(r.cut)}</dd>
+              <dt className="text-muted">{m.report_fill()}</dt>
+              <dd className="tabular m-0 text-right text-fill">{formatVolume(r.fill)}</dd>
+              <dt className="text-muted">{m.report_net()}</dt>
+              <dd className="tabular m-0 text-right font-medium">{formatVolume(r.net)}</dd>
+            </dl>
+          </li>
+        ))}
+      </ul>
+      <div className="hidden overflow-x-auto md:block">
+        <table className="w-full border-collapse text-[14px]">
+          <caption className="sr-only">{m.report_table_caption()}</caption>
+          <thead>
+            <tr className="text-left text-[12px] text-muted">
+              <th scope="col" className="py-2 pr-3 font-medium">
+                {m.report_region()}
+              </th>
+              <th scope="col" className="py-2 pl-4 text-right font-medium">
+                {m.report_area()}
+              </th>
+              <th scope="col" className="py-2 pl-4 text-right font-medium">
+                {m.report_cut()}
+              </th>
+              <th scope="col" className="py-2 pl-4 text-right font-medium">
+                {m.report_fill()}
+              </th>
+              <th scope="col" className="py-2 pl-4 text-right font-medium">
+                {m.report_net()}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => line(r))}
+            {line(total, true)}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
