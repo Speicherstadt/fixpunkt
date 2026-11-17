@@ -49,6 +49,9 @@ pub fn targets(regions: &[RegionRow], latest: Option<&Value>) -> Vec<Target> {
         .collect()
 }
 
+/// Messungen eines Lagers: (Aufnahmezeit, m³)
+type Series = Vec<(i64, f64)>;
+
 /// Bestand eines Lagers (Haufwerk-Bereich) je Aufnahme: (Aufnahmezeit, m³), zeitlich geordnet, je Aufnahme die
 /// neueste Haufwerk-Berechnung
 pub fn stock_series(region: &str, captures: &[Capture], jobs: &[Job]) -> Vec<(i64, f64)> {
@@ -127,7 +130,7 @@ pub fn stock(regions: &[RegionRow], captures: &[Capture], jobs: &[Job]) -> Vec<V
 /// Verlauf je Material: zu jeder Befliegung mit einer Messung die Summe der Lager; ein Lager ohne neue Messung
 /// zählt mit seinem letzten Wert, eins ohne bisherige Messung gar nicht
 pub fn stock_history(regions: &[RegionRow], captures: &[Capture], jobs: &[Job]) -> Vec<Value> {
-    let mut by_material: Vec<(&str, Vec<Vec<(i64, f64)>>)> = Vec::new();
+    let mut by_material: Vec<(&str, Vec<Series>)> = Vec::new();
     for r in regions
         .iter()
         .filter(|r| r.target_kind.as_deref() == Some("stock"))
