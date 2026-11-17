@@ -66,6 +66,8 @@ fixpunkt export boden.laz --ground-only --boundary grenze.geojson \
 | `transform` | Passpunkt-Transformation (Umeyama/Helmert), Restklaffen |
 | `crs` | ETRS89 ↔ UTM (Krüger-Reihen 6. Ordnung), Quasigeoid (GRAVSOFT- oder Spaltenformat) |
 | `export` | Höhenlinien (Marching Squares), Mesh/TIN, DXF R12, LandXML 1.2, OBJ, PLY, CSV |
+| `flightplan` | Kartierflug: Flughöhe aus GSD, Bahnen über einem Bereich, Foto- und Bahnabstand, Flugzeit |
+| `wpml` | Flugplan als KMZ (DJI WPML) für DJI Pilot 2 |
 | `geom` | Polygon, BBox, GeoJSON (mehrere benannte Bereiche, Linien) |
 
 ## Tests

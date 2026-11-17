@@ -444,7 +444,7 @@ Wie in allen Projekten (`firsttris/workflows`):
 1. Mapping-Mission in **DJI Pilot 2** (Fläche zeichnen, Überlappung 75–80 %, ggf. Schrägaufnahmen)
 2. Fotos hochladen → **NodeODM** → Orthofoto, DSM/DTM, Punktwolke, Mesh
 3. Ergebnis landet im selben Koordinatensystem wie Handscans
-4. Später: Flugplan in Fixpunkt zeichnen → **WPML/KMZ** exportieren
+4. ✅ Flugplan in Fixpunkt aus einem Bereich → **WPML/KMZ** für Pilot 2 ([Flugplanung](flugplanung.md))
 5. Noch später: **DJI Cloud API** (MQTT, selbst gehostet) – Mission pushen, Fotos automatisch empfangen
 
 ---
@@ -510,7 +510,7 @@ Wie in allen Projekten (`firsttris/workflows`):
 - [x] Zeitreihen, PDF-Berichte
 - [x] Dashboards
 - [ ] Exporte DXF, LandXML, CSV, GeoTIFF
-- [ ] Flugplanung in Fixpunkt (WPML), danach DJI Cloud API
+- [x] Flugplanung in Fixpunkt (WPML) – DJI Cloud API offen
 - [ ] Android-PWA (Photogrammetrie + Web Bluetooth)
 - [ ] Optional: leichter Unicore-Empfänger im Sodex-Stil statt Reach RX2
 - [ ] Optional: eigener Handscanner (Livox Mid-360 + FAST-LIO2)

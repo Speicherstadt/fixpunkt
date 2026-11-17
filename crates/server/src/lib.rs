@@ -10,6 +10,7 @@ pub mod dashboard;
 pub mod db;
 pub mod error;
 pub mod events;
+pub mod flightplan;
 pub mod jobs;
 pub mod location;
 pub mod markers;

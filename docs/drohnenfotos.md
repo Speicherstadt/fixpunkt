@@ -11,6 +11,9 @@ Fixpunkt rechnet selbst keine Photogrammetrie, gibt die Fotos aber an
 ausgewertet, holt Fixpunkt die Punktwolke ab, bringt sie in das Bezugssystem der Baustelle und legt sie als neue
 **Aufnahme** an – geprüft und bereit für die Berechnung.
 
+Den Flug selbst plant Fixpunkt auf Wunsch mit: [Flugplanung](flugplanung.md) erzeugt aus einem Bereich eine
+Mission für DJI Pilot 2.
+
 ![Abschnitt „Drohnenfotos auswerten“: 40 Fotos ausgewählt, Name, Flugdatum, Qualität und Höhenversatz](screenshot-drohnenfotos.png){ width="1024" height="451" }
 
 ## NodeODM einrichten

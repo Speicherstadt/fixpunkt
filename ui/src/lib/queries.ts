@@ -31,6 +31,12 @@ export const planGeometryQuery = (id: number) =>
     queryFn: () => api.planGeometry(id),
     staleTime: Number.POSITIVE_INFINITY,
   });
+export const flightPlanQuery = (regionId: number, query: string) =>
+  queryOptions({
+    queryKey: ["flightplan", regionId, query],
+    queryFn: () => api.flightPlan(regionId, query),
+    placeholderData: (prev) => prev,
+  });
 export const dashboardQuery = (siteId: number) =>
   queryOptions({ queryKey: ["dashboard", siteId], queryFn: () => api.dashboard(siteId) });
 export const markersQuery = (siteId: number) =>

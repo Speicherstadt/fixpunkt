@@ -166,6 +166,30 @@ export const PlanGeometry = z.object({
 export type PlanGeometry = z.infer<typeof PlanGeometry>;
 
 /** Überblick einer Baustelle (crates/server/src/dashboard.rs) */
+const FlightLine = z.object({
+  start: z.tuple([z.number(), z.number()]),
+  end: z.tuple([z.number(), z.number()]),
+});
+
+/** Flugplan je Bereich (crates/server/src/flightplan.rs) */
+export const FlightPlan = z.object({
+  region: z.string(),
+  camera: z.string(),
+  plan: z.object({
+    altitude: z.number(),
+    lineSpacing: z.number(),
+    photoSpacing: z.number(),
+    speed: z.number(),
+    lines: z.array(FlightLine),
+    length: z.number(),
+    duration: z.number(),
+    photos: z.number(),
+    area: z.number(),
+  }),
+  terrain: z.object({ capture: z.string(), min: z.number(), max: z.number() }).nullable(),
+});
+export type FlightPlan = z.infer<typeof FlightPlan>;
+
 export const Dashboard = z.object({
   captures: z.object({
     count: z.number(),
@@ -411,6 +435,8 @@ export const api = {
   deleteJob: (id: number) => request("DELETE", `/jobs/${id}`, Empty),
   odmStatus: () => request("GET", "/odm", OdmStatus),
   settings: () => request("GET", "/settings", Settings),
+  flightPlan: (regionId: number, query: string) =>
+    request("GET", `/regions/${regionId}/flightplan?${query}`, FlightPlan),
   dashboard: (siteId: number) => request("GET", `/sites/${siteId}/dashboard`, Dashboard),
   markers: (siteId: number) => request("GET", `/sites/${siteId}/markers`, z.array(Marker)),
   createMarker: (siteId: number, m: NewMarker) =>

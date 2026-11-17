@@ -31,6 +31,7 @@ nav:
       - Aushub berechnen: aushub.md
       - Haufwerk, Soll/Ist, Zeitreihe, Export, Passpunkte: berechnungen.md
       - Ansicht, 3D und Messen: ansicht.md
+      - Flugplanung: flugplanung.md
       - Drohnenfotos auswerten: drohnenfotos.md
       - Pläne (DXF): plaene.md
       - Dokumentation: dokumentation.md

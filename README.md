@@ -70,6 +70,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 ### 🛰️ Daten
 - Punktwolken: LAS, LAZ, E57 (Laserscanner wie Leica BLK2GO), XYZ, CSV
 - Höhenmodelle: GeoTIFF (OpenDroneMap), ASC
+- Flugplanung: Kartierflug als KMZ für DJI Pilot 2
 - Drohnenfotos direkt auswerten über NodeODM
 - Abrechnungsgrenzen als GeoJSON aus QGIS, mehrere Bereiche je Datei
 - Grenzen in Länge/Breite werden nach UTM32 umgerechnet

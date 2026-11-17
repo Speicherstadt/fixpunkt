@@ -233,6 +233,15 @@ test("Baustelle @screenshots", async () => {
   await shot("baustelle", true);
 });
 
+test("Flugplanung @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const flight = page.getByRole("region", { name: "Flugplanung" });
+  await flight.getByLabel("Bereich").selectOption({ label: "Grube" });
+  await expect(flight.getByRole("img", { name: /Bahnen über „Grube“/ })).toBeVisible();
+  await flight.scrollIntoViewIfNeeded();
+  await flight.screenshot({ path: `${DOCS}/screenshot-flugplanung.png` });
+});
+
 test("Überblick @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const overview = page.getByRole("region", { name: "Überblick" });

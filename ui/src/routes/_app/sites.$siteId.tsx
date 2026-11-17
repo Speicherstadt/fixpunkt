@@ -7,6 +7,7 @@ import { Calculations } from "@/components/site/calculations";
 import { Captures } from "@/components/site/captures";
 import { Documentation } from "@/components/site/documentation";
 import { DronePhotos } from "@/components/site/drone-photos";
+import { FlightPlanning } from "@/components/site/flight-plan";
 import { Overview } from "@/components/site/overview";
 import { Plans } from "@/components/site/plans";
 import { Regions } from "@/components/site/regions";
@@ -57,6 +58,7 @@ function SitePage() {
           <Regions siteId={siteId} canEdit={canEdit} />
           <Calculations siteId={siteId} canEdit={canEdit} />
         </div>
+        <FlightPlanning siteId={siteId} />
         <Plans siteId={siteId} canEdit={canEdit} />
         <Documentation siteId={siteId} canEdit={canEdit} />
       </div>

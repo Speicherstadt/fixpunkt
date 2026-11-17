@@ -29,7 +29,7 @@ test("Haufwerk, Soll/Ist, Zeitreihe und Export", async ({ page }) => {
   await choose("Soll/Ist");
   await calc.getByLabel("Ist-Aufnahme").selectOption({ label: "Aushub" });
   await calc.getByLabel("Sollhöhe in m").fill("298,2");
-  await page
+  await calc
     .getByRole("combobox", { name: "Bereich", exact: true })
     .selectOption({ label: "Grube" });
   await calc.getByLabel("Toleranz in cm").fill("5");
