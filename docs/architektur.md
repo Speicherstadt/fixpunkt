@@ -41,6 +41,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `odm/` | Drohnenfotos über NodeODM: REST-Client (`client.rs`, reqwest mit rustls/ring), Ablauf mit Fortschritt und Wiederaufnahme nach Neustart (`run.rs`), Umrechnung in die Zone der Baustelle und Höhenversatz (`cloud.rs`) |
 | `compute/` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, Zeitreihe (`volume.rs`), Soll/Ist (`compare.rs`), Exporte (`export.rs`), Passpunkte (`georef.rs`, Vorschau unter `/api/georef/fit`) |
 | `view.rs` | Höhenraster für die 2D-Ansicht als Float32 (`/api/captures/{id}/grid`, `/api/jobs/{id}/grid/{name}`), je Aufnahme zwischengespeichert |
+| `markers/` | Dokumentation: Zwangspunkte, Notizen, Fotos (Position und Zeit aus EXIF, Vorschaubild) unter `markers/<id>/` |
 | `location.rs` | Lage der Baustellen für die Karte: Mitte der geprüften Aufnahmen (sonst der Bereiche), UTM → Breite/Länge |
 | `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer) |
 | `ui.rs` | eingebettete UI mit ETag, Weiterleitung auf Vite in der Entwicklung |
@@ -56,5 +57,5 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 
 ## Datenmodell
 
-Baustelle → Aufnahmen, Bereiche, Aufträge; Benutzer mit Rolle und Sitzungen. Eine Instanz gehört einer Firma;
+Baustelle → Aufnahmen, Bereiche, Aufträge, Markierungen (Dokumentation); Benutzer mit Rolle und Sitzungen. Eine Instanz gehört einer Firma;
 Mandanten kommen erst, wenn eine Instanz mehrere Firmen bedienen soll.

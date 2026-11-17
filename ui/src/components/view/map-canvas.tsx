@@ -20,12 +20,15 @@ import { m } from "@/paraglide/messages";
 
 export type Shape = { points: Pt[]; closed: boolean };
 export type Outline = { name: string; points: Pt[] };
+/** Markierung der Dokumentation: Raute für Zwangspunkte, Kreis für Fotos und Notizen */
+export type Pin = { label: string; at: Pt; diamond: boolean };
 
 type Props = {
   grid: HeightGrid;
   range: [number, number];
   overlay: { grid: HeightGrid; limit: number; removedIsNegative: boolean } | null;
   outlines: Outline[];
+  pins: Pin[];
   shape: Shape;
   /** Klick oder Enter setzt Punkte; im Werkzeug „Verschieben“ nicht */
   picking: boolean;
@@ -77,6 +80,7 @@ export function MapCanvas({
   range,
   overlay,
   outlines,
+  pins,
   shape,
   picking,
   onPick,
@@ -172,6 +176,26 @@ export function MapCanvas({
       ctx.fillText(o.name, sx + 4, sy - 4);
     }
     const accent = cssVar("--accent") || "blue";
+    for (const p of pins) {
+      const [sx, sy] = toScreen(view, p.at[0], p.at[1]);
+      ctx.beginPath();
+      if (p.diamond) {
+        ctx.moveTo(sx, sy - 7);
+        ctx.lineTo(sx + 7, sy);
+        ctx.lineTo(sx, sy + 7);
+        ctx.lineTo(sx - 7, sy);
+        ctx.closePath();
+      } else ctx.arc(sx, sy, 5.5, 0, Math.PI * 2);
+      ctx.fillStyle = accent;
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = bg;
+      ctx.stroke();
+      ctx.lineWidth = 3;
+      ctx.strokeText(p.label, sx + 9, sy + 4);
+      ctx.fillStyle = fg;
+      ctx.fillText(p.label, sx + 9, sy + 4);
+    }
     if (shape.points.length) {
       path(shape.points, shape.closed && shape.points.length > 2);
       if (shape.closed && shape.points.length > 2) {
@@ -202,7 +226,7 @@ export function MapCanvas({
       ctx.lineTo(cx, cy + 8);
       ctx.stroke();
     }
-  }, [view, base, over, grid, overlay, outlines, shape, picking]);
+  }, [view, base, over, grid, overlay, outlines, pins, shape, picking]);
 
   if (!view) return <div ref={wrap} className="h-72 w-full" />;
   const bar = scaleBar(view);

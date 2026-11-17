@@ -26,6 +26,7 @@ pub enum Topic {
     Regions,
     Jobs,
     Users,
+    Markers,
 }
 
 #[derive(Clone)]

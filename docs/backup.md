@@ -14,7 +14,8 @@ Alles liegt im Datenverzeichnis (`/data` im Container, `/var/lib/fixpunkt` ohne 
 |---|---|
 | `fixpunkt.db`, `fixpunkt.db-wal`, `fixpunkt.db-shm` | Baustellen, Benutzer, Bereiche, Berechnungen (SQLite) |
 | `captures/<id>/` | hochgeladene Punktwolken und Höhenmodelle |
-| `jobs/<id>/` | Ergebnisse der Berechnungen (z. B. `diff.tif`) |
+| `jobs/<id>/` | Ergebnisse der Berechnungen (z. B. `diff.tif`), bei Drohnenfotos auch die Fotos |
+| `markers/<id>/` | Fotos der Dokumentation mit Vorschaubild |
 
 ## Backup
 

@@ -129,6 +129,7 @@ pub async fn delete(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult
         .bind(id)
         .fetch_all(&app.db)
         .await?;
+    let marker_dirs = crate::markers::dirs_of_site(&app, id).await?;
     sqlx::query("DELETE FROM sites WHERE id = ?")
         .bind(id)
         .execute(&app.db)
@@ -138,6 +139,9 @@ pub async fn delete(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult
     }
     for j in jobs {
         let _ = tokio::fs::remove_dir_all(app.cfg.job_dir(j)).await;
+    }
+    for d in marker_dirs {
+        let _ = tokio::fs::remove_dir_all(d).await;
     }
     app.events.changed(Topic::Sites, None);
     Ok(StatusCode::NO_CONTENT)

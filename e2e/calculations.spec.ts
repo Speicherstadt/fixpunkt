@@ -27,13 +27,13 @@ test("Haufwerk, Soll/Ist, Zeitreihe und Export", async ({ page }) => {
 
   // Soll/Ist: Grubensohle bei 298,0 + 1 % Gefälle gegen Sollhöhe 298,2 im Bereich „Grube“
   await choose("Soll/Ist");
-  await page.getByLabel("Ist-Aufnahme").selectOption({ label: "Aushub" });
-  await page.getByLabel("Sollhöhe in m").fill("298,2");
+  await calc.getByLabel("Ist-Aufnahme").selectOption({ label: "Aushub" });
+  await calc.getByLabel("Sollhöhe in m").fill("298,2");
   await page
     .getByRole("combobox", { name: "Bereich", exact: true })
     .selectOption({ label: "Grube" });
-  await page.getByLabel("Toleranz in cm").fill("5");
-  await page.getByRole("button", { name: "Soll/Ist vergleichen" }).click();
+  await calc.getByLabel("Toleranz in cm").fill("5");
+  await calc.getByRole("button", { name: "Soll/Ist vergleichen" }).click();
   await expect(jobs.filter({ hasText: "Soll/Ist · Aushub" }).getByText("Fertig")).toBeVisible({
     timeout: 45_000,
   });
@@ -43,25 +43,25 @@ test("Haufwerk, Soll/Ist, Zeitreihe und Export", async ({ page }) => {
   await calc
     .getByRole("combobox", { name: "Aufnahme", exact: true })
     .selectOption({ label: "Urgelände" });
-  await page.getByLabel("Basisfläche").selectOption("height");
-  await page.getByLabel("Höhe der Basis in m").fill("299");
-  await page.getByRole("checkbox", { name: "Bagger", exact: true }).uncheck();
-  await page.getByRole("button", { name: "Haufwerk berechnen" }).click();
+  await calc.getByLabel("Basisfläche").selectOption("height");
+  await calc.getByLabel("Höhe der Basis in m").fill("299");
+  await calc.getByRole("checkbox", { name: "Bagger", exact: true }).uncheck();
+  await calc.getByRole("button", { name: "Haufwerk berechnen" }).click();
   await expect(jobs.filter({ hasText: "Haufwerk · Urgelände" }).getByText("Fertig")).toBeVisible({
     timeout: 45_000,
   });
 
   // Zeitreihe aus beiden Aufnahmen
   await choose("Zeitreihe");
-  await page.getByRole("button", { name: "Zeitreihe berechnen" }).click();
+  await calc.getByRole("button", { name: "Zeitreihe berechnen" }).click();
   await expect(
     jobs.filter({ hasText: "Zeitreihe aus 2 Aufnahmen" }).getByText("Fertig"),
   ).toBeVisible({ timeout: 45_000 });
 
   // Export
   await choose("Export");
-  await page.getByLabel("Rasterpunkte (CSV)").check();
-  await page.getByRole("button", { name: "Exportieren" }).click();
+  await calc.getByLabel("Rasterpunkte (CSV)").check();
+  await calc.getByRole("button", { name: "Exportieren" }).click();
   await expect(jobs.filter({ hasText: "Export · Aushub" }).getByText("Fertig")).toBeVisible({
     timeout: 45_000,
   });

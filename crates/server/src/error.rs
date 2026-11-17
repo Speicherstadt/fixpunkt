@@ -31,6 +31,8 @@ pub mod code {
     pub const ODM_TOO_FEW_IMAGES: &str = "odm.tooFewImages";
     pub const ODM_UNSUPPORTED_IMAGE: &str = "odm.unsupportedImage";
     pub const GEOREF_INVALID: &str = "georef.invalid";
+    pub const MARKER_NEEDS_POSITION: &str = "markers.needsPosition";
+    pub const MARKER_NOT_AN_IMAGE: &str = "markers.notAnImage";
 
     pub const ALL: &[&str] = &[
         NOT_LOGGED_IN,
@@ -57,6 +59,8 @@ pub mod code {
         ODM_TOO_FEW_IMAGES,
         ODM_UNSUPPORTED_IMAGE,
         GEOREF_INVALID,
+        MARKER_NEEDS_POSITION,
+        MARKER_NOT_AN_IMAGE,
     ];
 }
 

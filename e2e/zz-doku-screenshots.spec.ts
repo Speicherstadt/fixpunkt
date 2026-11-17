@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { mkdirSync } from "node:fs";
+import { mkdirSync, readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import { type Api, apiFor } from "./api";
 import { boundaries, terrainXyz, X0, Y0 } from "./fixtures";
@@ -109,6 +109,29 @@ test.beforeAll(async ({ browser }) => {
       },
     })
   ).id;
+  // Dokumentation: Zwangspunkt am Kanal, Notiz, Foto mit GPS (Stelle E 512 025, N 5 403 015)
+  await api("POST", `/sites/${siteId}/markers`, {
+    kind: "constraint",
+    title: "Kanal Bestand",
+    note: "DN 300, Sohle nicht unterschreiten",
+    x: X0 + 32,
+    y: Y0 + 20,
+    z: 300.3,
+  });
+  await api("POST", `/sites/${siteId}/markers`, {
+    kind: "note",
+    title: "Bodenprobe BP 2",
+    note: "Labor, Ergebnis Z0",
+    x: X0 + 15,
+    y: Y0 + 34,
+  });
+  await page.request.put(`/api/sites/${siteId}/photos?file=Schacht.jpg`, {
+    data: readFileSync("e2e/data/foto-gps.jpg"),
+    headers: {
+      "content-type": "application/octet-stream",
+      "x-csrf-token": (await (await page.request.get("/api/auth/state")).json()).csrf,
+    },
+  });
   // weitere Baustellen für die Übersicht
   // je eine eigene Lage (Ost, Nord in m), damit die Karte vier Punkte zeigt
   const others = [
@@ -289,6 +312,14 @@ test("Passpunkte @screenshots", async () => {
   await calc.scrollIntoViewIfNeeded();
   await calc.screenshot({ path: `${DOCS}/screenshot-passpunkte.png` });
   await page.reload();
+});
+
+test("Dokumentation @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const doc = page.getByRole("region", { name: "Dokumentation" });
+  await expect(doc.getByRole("img", { name: "Schacht" })).toBeVisible();
+  await doc.scrollIntoViewIfNeeded();
+  await doc.screenshot({ path: `${DOCS}/screenshot-dokumentation.png` });
 });
 
 test("Soll/Ist @screenshots", async () => {

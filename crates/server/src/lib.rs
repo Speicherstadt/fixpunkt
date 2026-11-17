@@ -11,6 +11,7 @@ pub mod error;
 pub mod events;
 pub mod jobs;
 pub mod location;
+pub mod markers;
 pub mod odm;
 pub mod report;
 pub mod sites;

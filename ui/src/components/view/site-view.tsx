@@ -14,7 +14,8 @@ import { api, FilesResult, type Job } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatHeight } from "@/lib/format";
 import { chronological, jobTitle } from "@/lib/jobs";
-import { capturesQuery, jobsQuery, regionsQuery, siteQuery } from "@/lib/queries";
+import { pinsOf } from "@/lib/markers";
+import { capturesQuery, jobsQuery, markersQuery, regionsQuery, siteQuery } from "@/lib/queries";
 import { deviationColor, deviationLimit, heightColor, terrainColor } from "@/lib/view/colors";
 import { type Pt, polygonGeojson, ringOf } from "@/lib/view/geometry";
 import { fetchGrid, robustRange, sampleAt } from "@/lib/view/grid";
@@ -96,6 +97,8 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
         : null,
     [mode, grid.data, range, overlayProp, exaggeration],
   );
+  const markers = useQuery(markersQuery(siteId));
+  const pins = useMemo(() => pinsOf(markers.data ?? []), [markers.data]);
   const outlines = useMemo(
     () => (regions.data ?? []).map((r) => ({ name: r.name, points: ringOf(r.geojson) })),
     [regions.data],
@@ -200,6 +203,7 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
             range={range}
             overlay={overlayProp}
             outlines={outlines}
+            pins={pins}
             shape={{ points, closed: tool === "area" || tool === "draw" }}
             picking={tool !== "pan"}
             onPick={(p) => setPoints((ps) => (tool === "point" ? [p] : [...ps, p]))}

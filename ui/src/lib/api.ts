@@ -95,6 +95,34 @@ export const SiteItem = Site.extend({
   center: z.tuple([z.number(), z.number()]).nullable().optional(),
 });
 
+export const MarkerKind = z.enum(["constraint", "photo", "note"]);
+export type MarkerKind = z.infer<typeof MarkerKind>;
+
+/** Markierung der Dokumentation (Zwangspunkt, Foto, Notiz) */
+export const Marker = z.object({
+  id: z.number(),
+  siteId: z.number(),
+  kind: MarkerKind,
+  title: z.string(),
+  note: z.string(),
+  x: z.number().nullable(),
+  y: z.number().nullable(),
+  z: z.number().nullable(),
+  photo: z.string().nullable(),
+  takenAt: z.number().nullable(),
+  createdAt: z.number(),
+});
+export type Marker = z.infer<typeof Marker>;
+
+export type NewMarker = {
+  kind: MarkerKind;
+  title: string;
+  note: string;
+  x?: number;
+  y?: number;
+  z?: number;
+};
+
 export const Settings = z.object({
   mapTiles: z.object({ url: z.string(), attribution: z.string() }).nullable(),
 });
@@ -289,6 +317,10 @@ export const api = {
   deleteJob: (id: number) => request("DELETE", `/jobs/${id}`, Empty),
   odmStatus: () => request("GET", "/odm", OdmStatus),
   settings: () => request("GET", "/settings", Settings),
+  markers: (siteId: number) => request("GET", `/sites/${siteId}/markers`, z.array(Marker)),
+  createMarker: (siteId: number, m: NewMarker) =>
+    request("POST", `/sites/${siteId}/markers`, Marker, m),
+  deleteMarker: (id: number) => request("DELETE", `/markers/${id}`, Empty),
   georefFit: (mode: string, points: unknown[]) =>
     request("POST", "/georef/fit", FitReport, { mode, points }),
   createOdm: (siteId: number, params: OdmParams) =>
@@ -343,5 +375,18 @@ export const uploadImage = (
     `/api/jobs/${jobId}/images?${new URLSearchParams({ file: file.name })}`,
     file,
     z.object({ images: z.number() }),
+    onProgress,
+  );
+
+/** Foto zur Dokumentation hochladen; Lage aus GPS, falls vorhanden */
+export const uploadPhoto = (
+  siteId: number,
+  file: File,
+  onProgress: (fraction: number) => void,
+): Promise<Marker> =>
+  putFile(
+    `/api/sites/${siteId}/photos?${new URLSearchParams({ file: file.name })}`,
+    file,
+    Marker,
     onProgress,
   );

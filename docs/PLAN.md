@@ -531,7 +531,7 @@ Was im Vergleich zu SDX-Cloud/PocketScan noch fehlt, geordnet nach Nutzen für d
 5. [x] Karte aller Baustellen (Leaflet, Lage aus den Aufnahmen)
 6. [x] 3D-Ansicht (Geländenetz mit Höhen- oder Abweichungsfarben, Überhöhung)
 7. [x] Passpunkte und Georeferenzierung in der UI (Vorschau mit Restklaffen, neue Aufnahme)
-8. [ ] Dokumentieren: Zwangspunkte, Fotos mit Position, Notizen
+8. [x] Dokumentieren: Zwangspunkte, Fotos mit Position, Notizen
 9. [ ] DXF-Pläne als Hintergrund, Plan/Ist
 10. iOS-App mit RTK-Rover (Phase 4, braucht Mac und Xcode)
 

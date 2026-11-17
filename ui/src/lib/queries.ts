@@ -22,6 +22,8 @@ export const jobsQuery = (siteId: number) =>
   queryOptions({ queryKey: ["jobs", siteId], queryFn: () => api.jobs(siteId) });
 export const jobQuery = (id: number) =>
   queryOptions({ queryKey: ["job", id], queryFn: () => api.job(id) });
+export const markersQuery = (siteId: number) =>
+  queryOptions({ queryKey: ["markers", siteId], queryFn: () => api.markers(siteId) });
 /** Einstellungen ändern sich nur mit einem Neustart des Servers */
 export const settingsQuery = queryOptions({
   queryKey: ["settings"],

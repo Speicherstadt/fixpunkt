@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ErrorText, PageHeader } from "@/components/page";
 import { Calculations } from "@/components/site/calculations";
 import { Captures } from "@/components/site/captures";
+import { Documentation } from "@/components/site/documentation";
 import { DronePhotos } from "@/components/site/drone-photos";
 import { Regions } from "@/components/site/regions";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,7 @@ function SitePage() {
           <Regions siteId={siteId} canEdit={canEdit} />
           <Calculations siteId={siteId} canEdit={canEdit} />
         </div>
+        <Documentation siteId={siteId} canEdit={canEdit} />
       </div>
       <Dialog
         open={confirm}
