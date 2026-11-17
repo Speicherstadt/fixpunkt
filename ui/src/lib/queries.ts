@@ -22,6 +22,15 @@ export const jobsQuery = (siteId: number) =>
   queryOptions({ queryKey: ["jobs", siteId], queryFn: () => api.jobs(siteId) });
 export const jobQuery = (id: number) =>
   queryOptions({ queryKey: ["job", id], queryFn: () => api.job(id) });
+export const plansQuery = (siteId: number) =>
+  queryOptions({ queryKey: ["plans", siteId], queryFn: () => api.plans(siteId) });
+/** Geometrie eines Plans ändert sich nie (neue Fassung = neuer Plan) */
+export const planGeometryQuery = (id: number) =>
+  queryOptions({
+    queryKey: ["plan-geometry", id],
+    queryFn: () => api.planGeometry(id),
+    staleTime: Number.POSITIVE_INFINITY,
+  });
 export const markersQuery = (siteId: number) =>
   queryOptions({ queryKey: ["markers", siteId], queryFn: () => api.markers(siteId) });
 /** Einstellungen ändern sich nur mit einem Neustart des Servers */

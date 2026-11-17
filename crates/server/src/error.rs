@@ -33,6 +33,7 @@ pub mod code {
     pub const GEOREF_INVALID: &str = "georef.invalid";
     pub const MARKER_NEEDS_POSITION: &str = "markers.needsPosition";
     pub const MARKER_NOT_AN_IMAGE: &str = "markers.notAnImage";
+    pub const PLAN_INVALID: &str = "plans.invalid";
 
     pub const ALL: &[&str] = &[
         NOT_LOGGED_IN,
@@ -61,6 +62,7 @@ pub mod code {
         GEOREF_INVALID,
         MARKER_NEEDS_POSITION,
         MARKER_NOT_AN_IMAGE,
+        PLAN_INVALID,
     ];
 }
 

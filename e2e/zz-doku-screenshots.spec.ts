@@ -132,6 +132,14 @@ test.beforeAll(async ({ browser }) => {
       "x-csrf-token": (await (await page.request.get("/api/auth/state")).json()).csrf,
     },
   });
+  // Lageplan der Grube (DXF mit Zonenkennung, Höhenpunkte)
+  await page.request.put(`/api/sites/${siteId}/plans?file=Lageplan.dxf`, {
+    data: readFileSync("e2e/data/lageplan.dxf"),
+    headers: {
+      "content-type": "application/octet-stream",
+      "x-csrf-token": (await (await page.request.get("/api/auth/state")).json()).csrf,
+    },
+  });
   // weitere Baustellen für die Übersicht
   // je eine eigene Lage (Ost, Nord in m), damit die Karte vier Punkte zeigt
   const others = [
@@ -311,6 +319,20 @@ test("Passpunkte @screenshots", async () => {
   await expect(calc.getByRole("table", { name: "Restklaffen je Punkt" })).toBeVisible();
   await calc.scrollIntoViewIfNeeded();
   await calc.screenshot({ path: `${DOCS}/screenshot-passpunkte.png` });
+  await page.reload();
+});
+
+test("Pläne @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const plans = page.getByRole("region", { name: "Pläne" });
+  await expect(plans.getByRole("table", { name: "Plan/Ist" })).toBeVisible();
+  await plans.scrollIntoViewIfNeeded();
+  await plans.screenshot({ path: `${DOCS}/screenshot-plaene.png` });
+  const view = page.getByRole("region", { name: "Ansicht" });
+  await view.getByLabel("Plan darüber").selectOption({ label: "Lageplan" });
+  await page.waitForTimeout(300);
+  await view.getByRole("application").scrollIntoViewIfNeeded();
+  await view.getByRole("application").screenshot({ path: `${DOCS}/screenshot-ansicht-plan.png` });
   await page.reload();
 });
 

@@ -7,6 +7,7 @@ import { Calculations } from "@/components/site/calculations";
 import { Captures } from "@/components/site/captures";
 import { Documentation } from "@/components/site/documentation";
 import { DronePhotos } from "@/components/site/drone-photos";
+import { Plans } from "@/components/site/plans";
 import { Regions } from "@/components/site/regions";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
@@ -54,6 +55,7 @@ function SitePage() {
           <Regions siteId={siteId} canEdit={canEdit} />
           <Calculations siteId={siteId} canEdit={canEdit} />
         </div>
+        <Plans siteId={siteId} canEdit={canEdit} />
         <Documentation siteId={siteId} canEdit={canEdit} />
       </div>
       <Dialog

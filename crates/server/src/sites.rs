@@ -129,7 +129,8 @@ pub async fn delete(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult
         .bind(id)
         .fetch_all(&app.db)
         .await?;
-    let marker_dirs = crate::markers::dirs_of_site(&app, id).await?;
+    let mut marker_dirs = crate::markers::dirs_of_site(&app, id).await?;
+    marker_dirs.extend(crate::plans::dirs_of_site(&app, id).await?);
     sqlx::query("DELETE FROM sites WHERE id = ?")
         .bind(id)
         .execute(&app.db)

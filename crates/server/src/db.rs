@@ -107,7 +107,7 @@ fn raw_json<S: serde::Serializer>(v: &Option<String>, s: S) -> Result<S::Ok, S::
     }
 }
 
-fn raw_json_required<S: serde::Serializer>(v: &str, s: S) -> Result<S::Ok, S::Error> {
+pub fn raw_json_required<S: serde::Serializer>(v: &str, s: S) -> Result<S::Ok, S::Error> {
     let j: serde_json::Value = serde_json::from_str(v).unwrap_or(serde_json::Value::Null);
     serde::Serialize::serialize(&j, s)
 }

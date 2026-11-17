@@ -4,7 +4,7 @@ import { z } from "zod";
 const ServerEvent = z.discriminatedUnion("type", [
   z.object({
     type: z.literal("changed"),
-    topic: z.enum(["sites", "captures", "regions", "jobs", "users", "markers"]),
+    topic: z.enum(["sites", "captures", "regions", "jobs", "users", "markers", "plans"]),
     siteId: z.number().nullable().optional(),
   }),
   z.object({ type: z.literal("job"), id: z.number(), siteId: z.number(), status: z.string() }),

@@ -15,7 +15,15 @@ import { errorText } from "@/lib/errors";
 import { formatHeight } from "@/lib/format";
 import { chronological, jobTitle } from "@/lib/jobs";
 import { pinsOf } from "@/lib/markers";
-import { capturesQuery, jobsQuery, markersQuery, regionsQuery, siteQuery } from "@/lib/queries";
+import {
+  capturesQuery,
+  jobsQuery,
+  markersQuery,
+  planGeometryQuery,
+  plansQuery,
+  regionsQuery,
+  siteQuery,
+} from "@/lib/queries";
 import { deviationColor, deviationLimit, heightColor, terrainColor } from "@/lib/view/colors";
 import { type Pt, polygonGeojson, ringOf } from "@/lib/view/geometry";
 import { fetchGrid, robustRange, sampleAt } from "@/lib/view/grid";
@@ -98,6 +106,9 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
     [mode, grid.data, range, overlayProp, exaggeration],
   );
   const markers = useQuery(markersQuery(siteId));
+  const plans = useQuery(plansQuery(siteId));
+  const [planId, setPlanId] = useState<number | null>(null);
+  const planGeometry = useQuery({ ...planGeometryQuery(planId ?? 0), enabled: planId !== null });
   const pins = useMemo(() => pinsOf(markers.data ?? []), [markers.data]);
   const outlines = useMemo(
     () => (regions.data ?? []).map((r) => ({ name: r.name, points: ringOf(r.geojson) })),
@@ -151,6 +162,22 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
           </Select>
         </Label>
       </div>
+      {plans.data?.length ? (
+        <Label className="max-w-sm">
+          {m.view_plan()}
+          <Select
+            value={planId ?? ""}
+            onChange={(e) => setPlanId(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="">{m.view_plan_none()}</option>
+            {plans.data.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </Select>
+        </Label>
+      ) : null}
       <div className="flex flex-wrap items-center gap-3">
         <Segmented
           name="mode"
@@ -204,6 +231,7 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
             overlay={overlayProp}
             outlines={outlines}
             pins={pins}
+            plan={planId !== null ? (planGeometry.data ?? null) : null}
             shape={{ points, closed: tool === "area" || tool === "draw" }}
             picking={tool !== "pan"}
             onPick={(p) => setPoints((ps) => (tool === "point" ? [p] : [...ps, p]))}

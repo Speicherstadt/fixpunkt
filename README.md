@@ -85,6 +85,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Abrechnungsbereiche direkt im Browser zeichnen
 - Karte aller Baustellen
 - Zwangspunkte mit Soll/Ist, Fotos mit GPS-Position, Notizen
+- DXF-Pläne als Hintergrund, Höhen aus dem Plan gegen das Gelände
 - Bedienbar mit Maus und Tastatur
 
 </td>
@@ -162,8 +163,8 @@ Punktwolke aus WebODM hoch.
 
 **Ist Fixpunkt eine Alternative zu SDX-Cloud, Propeller oder DroneDeploy?**<br>
 Für die Massenermittlung von Baugruben und Haufwerken: ja, selbst gehostet und ohne Abo – mit 2D- und 3D-Ansicht,
-Messen, PDF-Bericht, Passpunkten und Drohnenfotos über NodeODM. Pläne als Hintergrund und die
-iPhone-App mit RTK-Rover folgen ([Projektplan](https://firsttris.github.io/fixpunkt/PLAN.html)).
+Messen, PDF-Bericht, Passpunkten, Plänen und Drohnenfotos über NodeODM. Die iPhone-App mit RTK-Rover
+folgt ([Projektplan](https://firsttris.github.io/fixpunkt/PLAN.html)).
 
 **Welche Koordinatensysteme werden unterstützt?**<br>
 ETRS89/UTM Zone 32 (EPSG:25832) als Standard, andere UTM-Zonen auf der Kommandozeile. Höhen DHHN2016 über GCG2016.

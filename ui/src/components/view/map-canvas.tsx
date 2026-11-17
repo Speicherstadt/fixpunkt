@@ -4,6 +4,7 @@
  * zoomen, Enter setzt einen Punkt am Fadenkreuz in der Mitte.
  */
 import { type KeyboardEvent, type PointerEvent, useEffect, useMemo, useRef, useState } from "react";
+import type { PlanGeometry } from "@/lib/api";
 import { renderDeviation, renderHeights } from "@/lib/view/colors";
 import type { Pt } from "@/lib/view/geometry";
 import { bboxOf, type HeightGrid } from "@/lib/view/grid";
@@ -29,6 +30,8 @@ type Props = {
   overlay: { grid: HeightGrid; limit: number; removedIsNegative: boolean } | null;
   outlines: Outline[];
   pins: Pin[];
+  /** DXF-Plan als Strichzeichnung über dem Höhenbild */
+  plan: PlanGeometry | null;
   shape: Shape;
   /** Klick oder Enter setzt Punkte; im Werkzeug „Verschieben“ nicht */
   picking: boolean;
@@ -81,6 +84,7 @@ export function MapCanvas({
   overlay,
   outlines,
   pins,
+  plan,
   shape,
   picking,
   onPick,
@@ -157,6 +161,23 @@ export function MapCanvas({
       if (closed) ctx.closePath();
     };
     ctx.font = "12px Geist Variable, system-ui, sans-serif";
+    if (plan) {
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = fg;
+      ctx.globalAlpha = 0.75;
+      for (const pth of plan.paths) {
+        path(pth.points, pth.closed);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      // Texte erst, wenn sie groß genug sind (Plan-Texthöhe in m × Maßstab)
+      ctx.fillStyle = fg;
+      for (const l of plan.labels) {
+        if (l.height * view.scale < 9) continue;
+        const [sx, sy] = toScreen(view, l.at[0], l.at[1]);
+        ctx.fillText(l.text, sx, sy);
+      }
+    }
     for (const o of outlines) {
       if (o.points.length < 3) continue;
       path(o.points, true);
@@ -226,7 +247,7 @@ export function MapCanvas({
       ctx.lineTo(cx, cy + 8);
       ctx.stroke();
     }
-  }, [view, base, over, grid, overlay, outlines, pins, shape, picking]);
+  }, [view, base, over, grid, overlay, outlines, pins, plan, shape, picking]);
 
   if (!view) return <div ref={wrap} className="h-72 w-full" />;
   const bar = scaleBar(view);

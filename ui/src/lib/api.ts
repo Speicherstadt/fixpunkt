@@ -123,6 +123,47 @@ export type NewMarker = {
   z?: number;
 };
 
+export const Plan = z.object({
+  id: z.number(),
+  siteId: z.number(),
+  name: z.string(),
+  fileName: z.string(),
+  info: z.object({
+    layers: z.array(z.string()),
+    paths: z.number(),
+    spots: z.number(),
+    labels: z.number(),
+    zoneOffset: z.number(),
+    bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).nullable(),
+  }),
+  createdAt: z.number(),
+});
+export type Plan = z.infer<typeof Plan>;
+
+/** Aufbereiteter DXF-Plan: Linienzüge, Texte, Höhen (Koordinaten ohne Zonenkennung) */
+export const PlanGeometry = z.object({
+  paths: z.array(
+    z.object({
+      layer: z.string(),
+      points: z.array(z.tuple([z.number(), z.number()])),
+      closed: z.boolean(),
+    }),
+  ),
+  labels: z.array(
+    z.object({
+      layer: z.string(),
+      at: z.tuple([z.number(), z.number()]),
+      text: z.string(),
+      height: z.number(),
+    }),
+  ),
+  spots: z.array(
+    z.object({ layer: z.string(), at: z.tuple([z.number(), z.number(), z.number()]) }),
+  ),
+  layers: z.array(z.string()),
+});
+export type PlanGeometry = z.infer<typeof PlanGeometry>;
+
 export const Settings = z.object({
   mapTiles: z.object({ url: z.string(), attribution: z.string() }).nullable(),
 });
@@ -321,6 +362,9 @@ export const api = {
   createMarker: (siteId: number, m: NewMarker) =>
     request("POST", `/sites/${siteId}/markers`, Marker, m),
   deleteMarker: (id: number) => request("DELETE", `/markers/${id}`, Empty),
+  plans: (siteId: number) => request("GET", `/sites/${siteId}/plans`, z.array(Plan)),
+  planGeometry: (id: number) => request("GET", `/plans/${id}/geometry`, PlanGeometry),
+  deletePlan: (id: number) => request("DELETE", `/plans/${id}`, Empty),
   georefFit: (mode: string, points: unknown[]) =>
     request("POST", "/georef/fit", FitReport, { mode, points }),
   createOdm: (siteId: number, params: OdmParams) =>
@@ -389,4 +433,13 @@ export const uploadPhoto = (
     file,
     Marker,
     onProgress,
+  );
+
+/** DXF-Plan hochladen */
+export const uploadPlan = (siteId: number, file: File): Promise<Plan> =>
+  putFile(
+    `/api/sites/${siteId}/plans?${new URLSearchParams({ file: file.name })}`,
+    file,
+    Plan,
+    () => {},
   );

@@ -13,6 +13,7 @@ pub mod jobs;
 pub mod location;
 pub mod markers;
 pub mod odm;
+pub mod plans;
 pub mod report;
 pub mod sites;
 pub mod state;

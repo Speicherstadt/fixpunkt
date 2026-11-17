@@ -1,7 +1,7 @@
 //! Routen der API unter `/api`.
 
 use crate::state::AppRef;
-use crate::{auth, captures, compute, jobs, markers, odm, report, sites, view};
+use crate::{auth, captures, compute, jobs, markers, odm, plans, report, sites, view};
 use axum::extract::{DefaultBodyLimit, State};
 use axum::middleware;
 use axum::response::sse::{Event as SseEvent, KeepAlive, Sse};
@@ -61,6 +61,14 @@ pub fn router(app: AppRef) -> Router {
         )
         .route("/markers/{id}/photo", get(markers::photo))
         .route("/markers/{id}/thumb", get(markers::thumb))
+        .route(
+            "/sites/{id}/plans",
+            get(plans::list)
+                .put(plans::upload)
+                .layer(DefaultBodyLimit::max(plans::MAX_PLAN)),
+        )
+        .route("/plans/{id}", delete(plans::delete))
+        .route("/plans/{id}/geometry", get(plans::geometry))
         .route("/sites/{id}/odm", post(odm::create))
         .route(
             "/jobs/{id}/images",
