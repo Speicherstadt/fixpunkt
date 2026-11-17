@@ -1,28 +1,26 @@
 //! Job-Warteschlange in SQLite, abgearbeitet im Prozess. Übersteht Neustarts: Aufträge, die beim
-//! Beenden liefen, werden beim Start wieder eingereiht.
+//! Beenden liefen, werden beim Start wieder eingereiht. Die Auftragsarten stehen in `spec.rs`.
+
+pub mod spec;
+
+pub use spec::capture_path;
 
 use crate::auth::CurrentUser;
-use crate::compute::{self, SurfaceParams};
 use crate::db::{self, now_ms, status, Job};
 use crate::error::{code, ApiError, ApiResult};
 use crate::events::{Event, Topic};
 use crate::state::AppRef;
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use axum::body::Body;
 use axum::extract::{Path, State};
 use axum::http::{header, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::{Extension, Json};
-use fixpunkt::geom::Region;
 use serde::Deserialize;
-use serde_json::{json, Value};
-use std::path::PathBuf;
+use serde_json::Value;
 use std::time::Duration;
 
 pub const INSPECT: &str = "inspect";
-pub const VOLUME: &str = "volume";
-pub const STOCKPILE: &str = "stockpile";
-pub const DEM: &str = "dem";
 
 /// Auftrag einreihen und einen Worker wecken
 pub async fn enqueue(
@@ -114,7 +112,10 @@ pub async fn run_next(app: &AppRef) -> Result<bool> {
     let Some(job) = job else { return Ok(false) };
     notify(app, job.id, job.site_id, status::RUNNING);
     tracing::info!("Auftrag {} ({}) gestartet", job.id, job.kind);
-    let outcome = execute(app, &job).await;
+    let outcome = match spec::JobSpec::parse(&job.kind, &serde_json::from_str(&job.params)?) {
+        Ok(spec) => spec::execute(app, job.site_id, spec, app.cfg.job_dir(job.id)).await,
+        Err(e) => Err(e),
+    };
     let (st, result, error) = match &outcome {
         Ok(v) => (status::DONE, Some(v.to_string()), None),
         Err(e) => (status::FAILED, None, Some(format!("{e:#}"))),
@@ -156,90 +157,6 @@ async fn finish_inspect(app: &AppRef, job: &Job, outcome: &Result<Value>) -> Res
     Ok(())
 }
 
-pub fn capture_path(app: &AppRef, c: &db::Capture) -> PathBuf {
-    app.cfg.capture_dir(c.id).join(&c.file_name)
-}
-
-async fn capture_file(app: &AppRef, site_id: i64, id: i64) -> Result<PathBuf> {
-    let c = db::get_capture(&app.db, id)
-        .await?
-        .filter(|c| c.site_id == site_id)
-        .ok_or_else(|| anyhow!("Aufnahme {id} gibt es nicht"))?;
-    Ok(capture_path(app, &c))
-}
-
-async fn regions(app: &AppRef, site_id: i64, ids: &[i64]) -> Result<Vec<Region>> {
-    let mut out = Vec::new();
-    for id in ids {
-        let (name, gj): (String, String) =
-            sqlx::query_as("SELECT name, geojson FROM regions WHERE id = ? AND site_id = ?")
-                .bind(id)
-                .bind(site_id)
-                .fetch_optional(&app.db)
-                .await?
-                .ok_or_else(|| anyhow!("Bereich {id} gibt es nicht"))?;
-        out.push(compute::parse_region(&name, &gj)?);
-    }
-    Ok(out)
-}
-
-fn ids(v: &Value) -> Vec<i64> {
-    v.as_array()
-        .map(|a| a.iter().filter_map(Value::as_i64).collect())
-        .unwrap_or_default()
-}
-
-fn surface_params(p: &Value) -> Result<SurfaceParams> {
-    Ok(match p.get("surface") {
-        Some(s) => serde_json::from_value(s.clone()).context("surface")?,
-        None => SurfaceParams::default(),
-    })
-}
-
-async fn execute(app: &AppRef, job: &Job) -> Result<Value> {
-    let p: Value = serde_json::from_str(&job.params)?;
-    let site = db::get_site(&app.db, job.site_id)
-        .await?
-        .context("Baustelle fehlt")?;
-    let epsg = u16::try_from(site.epsg).unwrap_or(25832);
-    let out_dir = app.cfg.job_dir(job.id);
-    let s = job.site_id;
-    let run = |f: Box<dyn FnOnce() -> Result<Value> + Send>| async move {
-        tokio::task::spawn_blocking(f)
-            .await
-            .map_err(|e| anyhow!("{e}"))?
-    };
-    match job.kind.as_str() {
-        INSPECT => {
-            let c = capture_file(app, s, p["captureId"].as_i64().context("captureId")?).await?;
-            run(Box::new(move || compute::inspect(&c))).await
-        }
-        VOLUME => {
-            let before = capture_file(app, s, p["before"].as_i64().context("before")?).await?;
-            let after = capture_file(app, s, p["after"].as_i64().context("after")?).await?;
-            let rs = regions(app, s, &ids(&p["regionIds"])).await?;
-            let sp = surface_params(&p)?;
-            run(Box::new(move || {
-                compute::volume(&before, &after, &rs, &sp, epsg, &out_dir)
-            }))
-            .await
-        }
-        STOCKPILE => {
-            let c = capture_file(app, s, p["captureId"].as_i64().context("captureId")?).await?;
-            let rs = regions(app, s, &ids(&p["regionIds"])).await?;
-            let base = compute::parse_base(p.get("base").unwrap_or(&json!("plane")))?;
-            let sp = surface_params(&p)?;
-            run(Box::new(move || compute::stockpile(&c, &rs, base, &sp))).await
-        }
-        DEM => {
-            let c = capture_file(app, s, p["captureId"].as_i64().context("captureId")?).await?;
-            let sp = surface_params(&p)?;
-            run(Box::new(move || compute::dem(&c, &sp, epsg, &out_dir))).await
-        }
-        k => Err(anyhow!("unbekannte Auftragsart {k}")),
-    }
-}
-
 // ---- API ------------------------------------------------------------------------------
 
 #[derive(Deserialize)]
@@ -247,53 +164,6 @@ pub struct NewJob {
     kind: String,
     #[serde(default)]
     params: Value,
-}
-
-/// Prüft die Parameter beim Anlegen, damit Fehler sofort und nicht erst im Worker auffallen.
-async fn check_params(app: &AppRef, site_id: i64, kind: &str, p: &Value) -> ApiResult<()> {
-    let ready = |id: Option<i64>| async move {
-        let id = id.ok_or_else(|| ApiError::bad_request(code::INVALID_INPUT))?;
-        let c = db::get_capture(&app.db, id)
-            .await?
-            .ok_or_else(ApiError::not_found)?;
-        if c.site_id != site_id {
-            return Err(ApiError::bad_request(code::WRONG_SITE));
-        }
-        if c.status != status::READY {
-            return Err(ApiError::new(StatusCode::CONFLICT, code::CAPTURE_NOT_READY));
-        }
-        Ok(())
-    };
-    match kind {
-        VOLUME => {
-            ready(p["before"].as_i64()).await?;
-            ready(p["after"].as_i64()).await?;
-        }
-        STOCKPILE | DEM => ready(p["captureId"].as_i64()).await?,
-        _ => return Err(ApiError::bad_request(code::UNKNOWN_JOB)),
-    }
-    if kind == STOCKPILE {
-        if ids(&p["regionIds"]).is_empty() {
-            return Err(ApiError::bad_request(code::INVALID_INPUT).with_detail("regionIds"));
-        }
-        compute::parse_base(p.get("base").unwrap_or(&json!("plane")))
-            .map_err(|e| ApiError::bad_request(code::INVALID_INPUT).with_detail(e.to_string()))?;
-    }
-    for id in ids(&p["regionIds"]) {
-        let found: Option<i64> =
-            sqlx::query_scalar("SELECT id FROM regions WHERE id = ? AND site_id = ?")
-                .bind(id)
-                .bind(site_id)
-                .fetch_optional(&app.db)
-                .await?;
-        if found.is_none() {
-            return Err(ApiError::bad_request(code::WRONG_SITE));
-        }
-    }
-    surface_params(p)
-        .and_then(|s| s.validate())
-        .map_err(|e| ApiError::bad_request(code::INVALID_INPUT).with_detail(e.to_string()))?;
-    Ok(())
 }
 
 pub async fn create(
@@ -305,7 +175,7 @@ pub async fn create(
     db::get_site(&app.db, site_id)
         .await?
         .ok_or_else(ApiError::not_found)?;
-    check_params(&app, site_id, &j.kind, &j.params).await?;
+    spec::check(&app, site_id, &j.kind, &j.params).await?;
     let id = enqueue(&app, site_id, &j.kind, &j.params, Some(me.id)).await?;
     Ok((
         StatusCode::CREATED,
@@ -381,10 +251,36 @@ pub async fn file(
     let disposition = format!("attachment; filename=\"auftrag-{id}-{name}\"");
     Ok((
         [
-            (header::CONTENT_TYPE, "image/tiff".to_string()),
+            (header::CONTENT_TYPE, content_type(&name).to_string()),
             (header::CONTENT_DISPOSITION, disposition),
         ],
         Body::from_stream(tokio_util::io::ReaderStream::new(f)),
     )
         .into_response())
+}
+
+/// Inhaltstyp einer Ergebnisdatei nach Endung
+pub fn content_type(name: &str) -> &'static str {
+    match name.rsplit('.').next().unwrap_or("") {
+        "tif" | "tiff" => "image/tiff",
+        "dxf" => "image/vnd.dxf",
+        "xml" => "application/xml",
+        "csv" => "text/csv; charset=utf-8",
+        "obj" => "model/obj",
+        "pdf" => "application/pdf",
+        _ => "application/octet-stream",
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::content_type;
+
+    #[test]
+    fn content_types() {
+        assert_eq!(content_type("diff.tif"), "image/tiff");
+        assert_eq!(content_type("dgm.xml"), "application/xml");
+        assert_eq!(content_type("dgm.dxf"), "image/vnd.dxf");
+        assert_eq!(content_type("x"), "application/octet-stream");
+    }
 }

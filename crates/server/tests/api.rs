@@ -723,3 +723,126 @@ impl Client {
             .to_string()
     }
 }
+
+#[tokio::test]
+async fn compare_series_and_export() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": "Grube Süd"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let up = |pit: bool, name: &'static str, at: i64| (pit, name, at);
+    let mut ids = Vec::new();
+    for (pit, name, at) in [up(false, "Urgelände", 1), up(true, "Aushub", 2)] {
+        let r = c
+            .upload(
+                &format!("/api/sites/{sid}/captures?file={name}.xyz&capturedAt={at}"),
+                terrain_xyz(pit),
+            )
+            .await;
+        ids.push(r.json()["id"].as_i64().unwrap());
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    let fc = json!({"type": "FeatureCollection",
+        "crs": {"type": "name", "properties": {"name": "urn:ogc:def:crs:EPSG::25832"}},
+        "features": [rect("Sohle", 12.0, 12.0, 28.0, 28.0)]});
+    let region = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/regions"),
+            json!({"geojson": fc}),
+        )
+        .await
+        .json()[0]["id"]
+        .as_i64()
+        .unwrap();
+    let start = |kind: &str, params: Value| (kind.to_string(), params);
+    let specs = [
+        // Sohle soll bei 298,10 liegen; Ist 298,0 + 1 % Gefälle → im Mittel 0,1 m zu hoch
+        start(
+            "compare",
+            json!({"captureId": ids[1], "regionId": region, "tolerance": 0.05,
+            "design": {"type": "height", "height": 298.1}}),
+        ),
+        start("series", json!({"captureIds": ids, "regionId": region})),
+        start(
+            "export",
+            json!({"captureId": ids[1], "formats": ["tif", "dxf", "landxml", "csv"], "regionIds": [region]}),
+        ),
+    ];
+    let mut jobs_ = Vec::new();
+    for (kind, params) in specs {
+        let r = c
+            .json(
+                Method::POST,
+                &format!("/api/sites/{sid}/jobs"),
+                json!({"kind": kind, "params": params}),
+            )
+            .await;
+        assert_eq!(r.status, StatusCode::CREATED, "{kind}: {}", r.json());
+        jobs_.push(r.json()["id"].as_i64().unwrap());
+    }
+    jobs::run_pending(&c.app).await.unwrap();
+    let get = |id: i64| format!("/api/jobs/{id}");
+
+    let cmp = c.get(&get(jobs_[0])).await.json();
+    assert_eq!(cmp["status"], "done", "{cmp}");
+    let d = &cmp["result"]["deviation"];
+    // Ist = 298,0 + 0,01·dx, dx 12…28 → Mittel 298,2; gegen 298,1 also +0,1 m
+    assert!((d["mean"].as_f64().unwrap() - 0.1).abs() < 0.01, "{cmp}");
+    // Abweichung 0,01·dx − 0,1 liegt über 5 cm, sobald dx > 15 m: 13 von 16 m = 81,25 %
+    let above = d["above_tolerance_percent"].as_f64().unwrap();
+    assert!((above - 81.25).abs() < 3.0, "{above}");
+    let tif = c
+        .get(&format!("/api/jobs/{}/files/abweichung.tif", jobs_[0]))
+        .await;
+    assert_eq!(tif.headers[header::CONTENT_TYPE], "image/tiff");
+
+    let ser = c.get(&get(jobs_[1])).await.json();
+    assert_eq!(
+        ser["result"]["base"], "Urgelände.xyz",
+        "ohne Namen heißt die Aufnahme nach der Datei"
+    );
+    // die Sohle (16 × 16 m) liegt ganz in der Grube: 256 m² × 2 m
+    let cut = ser["result"]["steps"][0]["since_start"]["cut_m3"]
+        .as_f64()
+        .unwrap();
+    assert!((cut - 512.0).abs() < 6.0, "{ser}");
+
+    let exp = c.get(&get(jobs_[2])).await.json();
+    assert_eq!(
+        exp["result"]["files"],
+        json!(["dgm.tif", "dgm.dxf", "dgm.xml", "dgm.csv"]),
+        "{exp}"
+    );
+    let xml = c
+        .get(&format!("/api/jobs/{}/files/dgm.xml", jobs_[2]))
+        .await;
+    assert_eq!(xml.headers[header::CONTENT_TYPE], "application/xml");
+    assert!(String::from_utf8_lossy(&xml.body).contains("<LandXML"));
+    let csv = c
+        .get(&format!("/api/jobs/{}/files/dgm.csv", jobs_[2]))
+        .await;
+    assert!(String::from_utf8_lossy(&csv.body).starts_with("x;y;z"));
+
+    // ungültige Parameter werden sofort abgelehnt
+    let bad = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/jobs"),
+            json!({"kind": "series", "params": {"captureIds": [ids[0]]}}),
+        )
+        .await;
+    assert_eq!(bad.json()["error"], "api.invalidInput");
+    let bad = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/jobs"),
+            json!({"kind": "export", "params": {"captureId": ids[0], "formats": ["pdf"]}}),
+        )
+        .await;
+    assert_eq!(bad.json()["error"], "api.invalidInput");
+}

@@ -149,6 +149,54 @@ export const VolumeResult = z.object({
 });
 export type VolumeResult = z.infer<typeof VolumeResult>;
 
+export const HistogramBin = z.object({
+  from: z.number().nullable(),
+  to: z.number().nullable(),
+  cells: z.number(),
+  percent: z.number(),
+});
+
+export const Deviation = z.object({
+  min: z.number(),
+  max: z.number(),
+  mean: z.number(),
+  rms: z.number(),
+  std_dev: z.number(),
+  tolerance: z.number(),
+  within_tolerance_percent: z.number(),
+  above_tolerance_percent: z.number(),
+  below_tolerance_percent: z.number(),
+  histogram: z.array(HistogramBin),
+  volume: VolumeReport,
+});
+export type Deviation = z.infer<typeof Deviation>;
+
+export const CompareResult = z.object({
+  deviation: Deviation,
+  region: z.string().nullable(),
+  cell: z.number(),
+  files: z.array(z.string()),
+});
+export type CompareResult = z.infer<typeof CompareResult>;
+
+export const SeriesStep = z.object({
+  label: z.string(),
+  since_start: VolumeReport,
+  since_previous: VolumeReport,
+});
+export type SeriesStep = z.infer<typeof SeriesStep>;
+
+export const SeriesResult = z.object({
+  base: z.string(),
+  region: z.string().nullable(),
+  steps: z.array(SeriesStep),
+  cell: z.number(),
+});
+export type SeriesResult = z.infer<typeof SeriesResult>;
+
+export const FilesResult = z.object({ files: z.array(z.string()) }).loose();
+export type FilesResult = z.infer<typeof FilesResult>;
+
 export const Job = z.object({
   id: z.number(),
   siteId: z.number(),

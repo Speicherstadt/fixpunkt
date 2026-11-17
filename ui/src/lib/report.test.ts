@@ -60,3 +60,39 @@ describe("report", () => {
     ]);
   });
 });
+
+describe("Soll/Ist und Zeitreihe", () => {
+  it("Histogramm-Beschriftung in cm", async () => {
+    const { binLabel, binSide } = await import("@/lib/report");
+    expect(binLabel(null, -0.48)).toBe("< −48");
+    expect(binLabel(-0.03, 0.03)).toBe("−3 … 3");
+    expect(binLabel(0.48, null)).toBe("> 48");
+    expect(binLabel(0.015, 0.03)).toBe("1,5 … 3");
+    expect(binSide(-0.03, 0.03, 0.03)).toBe("ok");
+    expect(binSide(0.03, 0.06, 0.03)).toBe("high");
+    expect(binSide(null, -0.48, 0.03)).toBe("low");
+    expect(binSide(0.48, null, 0.03)).toBe("high");
+  });
+
+  it("Zeitreihe mit Anteil für die Balken", async () => {
+    const { seriesRows } = await import("@/lib/report");
+    const rows = seriesRows([
+      { label: "KW 10", since_start: vol(400, 0), since_previous: vol(400, 0) },
+      { label: "KW 12", since_start: vol(800, 0), since_previous: vol(400, 0) },
+    ]);
+    expect(rows.map((r) => [r.label, r.total, r.step, r.share])).toEqual([
+      ["KW 10", 400, 400, 0.5],
+      ["KW 12", 800, 400, 1],
+    ]);
+    expect(seriesRows([])).toEqual([]);
+  });
+});
+
+describe("Zentimeter", () => {
+  it("ohne negative Null", async () => {
+    const { cm } = await import("@/components/report/compare-report");
+    expect(cm(-0.0001)).toBe("0,0 cm");
+    expect(cm(0.053)).toBe("5,3 cm");
+    expect(cm(-0.079)).toBe("-7,9 cm");
+  });
+});

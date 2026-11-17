@@ -3,7 +3,18 @@ import type { ReportRow } from "@/lib/report";
 import { m } from "@/paraglide/messages";
 
 /** Mengenbericht als Tabelle: je Bereich Fläche, Abtrag, Auftrag, Bilanz */
-export function VolumeTable({ rows, total }: { rows: ReportRow[]; total: ReportRow }) {
+/** Spaltennamen; beim Haufwerk heißen Abtrag und Auftrag „unter Basis“ und „Volumen“ */
+export type VolumeLabels = { cut: string; fill: string };
+
+export function VolumeTable({
+  rows,
+  total,
+  labels = { cut: m.report_cut(), fill: m.report_fill() },
+}: {
+  rows: ReportRow[];
+  total: ReportRow;
+  labels?: VolumeLabels;
+}) {
   const cell = "tabular py-2.5 pl-4 text-right whitespace-nowrap";
   const line = (r: ReportRow, strong = false) => (
     <tr
@@ -35,9 +46,9 @@ export function VolumeTable({ rows, total }: { rows: ReportRow[]; total: ReportR
             <dl className="m-0 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px]">
               <dt className="text-muted">{m.report_area()}</dt>
               <dd className="tabular m-0 text-right">{formatArea(r.area)}</dd>
-              <dt className="text-muted">{m.report_cut()}</dt>
+              <dt className="text-muted">{labels.cut}</dt>
               <dd className="tabular m-0 text-right text-cut">{formatVolume(r.cut)}</dd>
-              <dt className="text-muted">{m.report_fill()}</dt>
+              <dt className="text-muted">{labels.fill}</dt>
               <dd className="tabular m-0 text-right text-fill">{formatVolume(r.fill)}</dd>
               <dt className="text-muted">{m.report_net()}</dt>
               <dd className="tabular m-0 text-right font-medium">{formatVolume(r.net)}</dd>
@@ -57,10 +68,10 @@ export function VolumeTable({ rows, total }: { rows: ReportRow[]; total: ReportR
                 {m.report_area()}
               </th>
               <th scope="col" className="py-2 pl-4 text-right font-medium">
-                {m.report_cut()}
+                {labels.cut}
               </th>
               <th scope="col" className="py-2 pl-4 text-right font-medium">
-                {m.report_fill()}
+                {labels.fill}
               </th>
               <th scope="col" className="py-2 pl-4 text-right font-medium">
                 {m.report_net()}

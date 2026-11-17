@@ -29,7 +29,8 @@ gemessen wurde**. Was keine Aufnahme gesehen hat, bleibt eine Lücke und erschei
 
 ## Haufwerke und Soll/Ist
 
-Über die [Kommandozeile](kommandozeile.md) (in der Web-UI folgt es):
+In der Web-UI unter **Berechnungen** ([Haufwerk, Soll/Ist, Zeitreihe, Export](berechnungen.md)) und auf der
+[Kommandozeile](kommandozeile.md):
 
 - **Haufwerk** gegen eine Basisfläche: Ausgleichsebene durch die Höhen entlang der Grenze, tiefster Punkt der
   Grenze oder eine feste Höhe.

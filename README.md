@@ -58,9 +58,10 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus.
 
 ### 📐 Massenermittlung
 - Aushub und Auftrag aus zwei Aufnahmen, je Bereich
+- Haufwerke gegen Basisfläche, Zeitreihe über die Bauphase
+- Soll/Ist gegen Sohlhöhe, geneigte Ebene oder Soll-DGM
 - Bodenfilter für Bagger, Container und Bewuchs
-- Warnung, wenn ein Bereich nicht ganz erfasst ist
-- Bericht als CSV, Differenzraster (GeoTIFF), Ausdruck
+- Bericht als CSV, GeoTIFF, Ausdruck
 
 </td>
 <td width="50%" valign="top">
@@ -85,10 +86,10 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus.
 </td>
 <td width="50%" valign="top">
 
-### 🧮 Kommandozeile
-- Haufwerke gegen Ausgleichsebene, Soll/Ist gegen Sohle oder Soll-DGM, Zeitreihen
+### 🧮 Exporte und Kommandozeile
+- GeoTIFF, DXF mit Höhenlinien, LandXML, CSV, OBJ – aus der Web-UI
 - Passpunkt-Transformation (Helmert), Koordinaten und Höhen umrechnen
-- Exporte: GeoTIFF, DXF mit Höhenlinien, LandXML, OBJ, PLY, CSV
+- Bodenfilter, Ausreißer, Profile auf der Kommandozeile
 - [Alle Befehle](https://firsttris.github.io/fixpunkt/kommandozeile.html)
 
 </td>

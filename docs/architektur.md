@@ -37,8 +37,8 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `auth.rs` | Einrichten, Anmelden, Sitzungen, CSRF, Rollen, Benutzer |
 | `sites.rs` | Baustellen und Bereiche (GeoJSON) |
 | `captures.rs` | Hochladen (gestreamt), Herunterladen, Löschen |
-| `jobs.rs` | Warteschlange in SQLite, Worker im Prozess, übersteht Neustarts |
-| `compute.rs` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, DGM |
+| `jobs/` | Warteschlange in SQLite, Worker im Prozess, übersteht Neustarts; `spec.rs`: Auftragsarten mit typisierten Parametern |
+| `compute/` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, Zeitreihe (`volume.rs`), Soll/Ist (`compare.rs`), Exporte (`export.rs`) |
 | `ui.rs` | eingebettete UI mit ETag, Weiterleitung auf Vite in der Entwicklung |
 | `error.rs` | Fehler als Schlüssel; die UI zeigt den Text in der gewählten Sprache |
 

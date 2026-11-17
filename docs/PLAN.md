@@ -35,6 +35,8 @@ Später: Leitungsgräben, Haufwerke, kleine Flächen (per iPhone + RTK-Rover).
 
 Abgeleitet aus dem, was SDX-Cloud/PocketScan anbieten:
 
+Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reihenfolge-nach-nutzen).
+
 ### Messen
 - [ ] Einzelpunkt mit Koordinate (Rechts-/Hochwert, Höhe)
 - [ ] **Längen** / Strecken (3D und horizontal), Polylinien
@@ -43,15 +45,15 @@ Abgeleitet aus dem, was SDX-Cloud/PocketScan anbieten:
 - [ ] Querprofile / Längsschnitte durch einen Graben
 
 ### Massenermittlung
-- [ ] **Volumen von Haufwerken** (gegen interpolierte Basisfläche)
-- [ ] **Aushub-/Auftragsmassen** (Differenz zweier Aufnahmen: Urgelände ↔ Aushub)
-- [ ] Volumen innerhalb frei gezeichneter Bereiche (Geofences)
-- [ ] Fortlaufende Aktualisierung über die Bauphase (Zeitreihe)
+- [x] **Volumen von Haufwerken** (gegen interpolierte Basisfläche)
+- [x] **Aushub-/Auftragsmassen** (Differenz zweier Aufnahmen: Urgelände ↔ Aushub)
+- [ ] Volumen innerhalb frei gezeichneter Bereiche (Geofences) – Bereiche als GeoJSON ✅, Zeichnen im Browser offen
+- [x] Fortlaufende Aktualisierung über die Bauphase (Zeitreihe)
 
 ### Vergleichen
 - [ ] Plan/Ist-Vergleich mit hinterlegten DXF-Plänen
-- [ ] Zwei Zeitpunkte vergleichen (Abweichungs-Heatmap)
-- [ ] Soll-Höhe / Sollfläche gegen Scan
+- [ ] Zwei Zeitpunkte vergleichen (Abweichungs-Heatmap) – Raster als GeoTIFF ✅, Anzeige im Browser offen
+- [x] Soll-Höhe / Sollfläche gegen Scan
 
 ### Dokumentieren
 - [ ] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte, Leitungsverlauf
@@ -64,7 +66,7 @@ Abgeleitet aus dem, was SDX-Cloud/PocketScan anbieten:
 - [ ] Einfärbung nach RGB, Höhe, Intensität, Abweichung
 
 ### Export
-- [ ] LAS/LAZ (Punktwolke), DXF (Linien/Punkte), LandXML (Flächen), CSV (Punkte), OBJ/PLY (Mesh), GeoTIFF (Orthofoto/DGM)
+- [x] LAS/LAZ (Punktwolke), DXF (Linien/Punkte), LandXML (Flächen), CSV (Punkte), OBJ/PLY (Mesh), GeoTIFF (DGM) – Orthofoto offen
 
 ---
 
@@ -514,6 +516,22 @@ Wie in allen Projekten (`firsttris/workflows`):
 **Realistisch:** Erste nutzbare Aushubberechnung per Drohne in **ca. 2 Monaten** nebenher – vorausgesetzt, die Firma hat bis dahin Drohne und Führerschein.
 
 ---
+
+### 6a. Reihenfolge nach Nutzen
+
+Was im Vergleich zu SDX-Cloud/PocketScan noch fehlt, geordnet nach Nutzen für den ersten Anwendungsfall
+(Baugrube per Drohne):
+
+1. [x] Haufwerk, Soll/Ist, Zeitreihe und Exporte in der Web-UI
+2. [ ] 2D-Ansicht der Baustelle: Höhenbild, Abweichungs-Heatmap, Bereiche zeichnen, messen (Punkt, Strecke, Fläche, Profil)
+3. [ ] PDF-Bericht
+4. [ ] NodeODM-Anbindung: Drohnenfotos → Punktwolke in Fixpunkt
+5. [ ] Karte aller Baustellen
+6. [ ] 3D-Ansicht
+7. [ ] Passpunkte und Georeferenzierung in der UI
+8. [ ] Dokumentieren: Zwangspunkte, Fotos mit Position, Notizen
+9. [ ] DXF-Pläne als Hintergrund, Plan/Ist
+10. iOS-App mit RTK-Rover (Phase 4, braucht Mac und Xcode)
 
 ## 7. Machbarkeit
 

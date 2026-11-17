@@ -1,5 +1,6 @@
 import { mkdirSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
+import { type Api, apiFor } from "./api";
 import { boundaries, terrainXyz, X0, Y0 } from "./fixtures";
 
 /**
@@ -17,33 +18,9 @@ const DAY = 86_400_000;
 const START = Date.UTC(2026, 10, 3, 9);
 
 let page: Page;
-let csrf = "";
-
-const api = async (method: string, path: string, data?: unknown) => {
-  const res = await page.request.fetch(`/api${path}`, {
-    method,
-    headers: { "x-csrf-token": csrf, "content-type": "application/json" },
-    data: data === undefined ? undefined : JSON.stringify(data),
-  });
-  expect(res.ok(), `${method} ${path}: ${await res.text()}`).toBe(true);
-  return res.status() === 204 ? null : res.json();
-};
-
-const upload = async (
-  siteId: number,
-  file: string,
-  name: string,
-  capturedAt: number,
-  body: string,
-) => {
-  const q = new URLSearchParams({ file, name, capturedAt: String(capturedAt) });
-  const res = await page.request.put(`/api/sites/${siteId}/captures?${q}`, {
-    headers: { "x-csrf-token": csrf, "content-type": "application/octet-stream" },
-    data: Buffer.from(body),
-  });
-  expect(res.ok()).toBe(true);
-  return (await res.json()).id as number;
-};
+let api: Api["call"];
+let upload: Api["upload"];
+let waitForJobs: Api["settled"];
 
 /** Zwischenstand: Grube erst zur Hälfte ausgehoben */
 const halfway = () =>
@@ -59,20 +36,8 @@ const halfway = () =>
     })
     .join("\n");
 
-const waitForJobs = async (siteId: number) => {
-  await expect
-    .poll(
-      async () => {
-        const caps = (await api("GET", `/sites/${siteId}/captures`)) as { status: string }[];
-        const jobs = (await api("GET", `/sites/${siteId}/jobs`)) as { status: string }[];
-        return [...caps, ...jobs].every((x) => x.status === "ready" || x.status === "done");
-      },
-      { timeout: 60_000 },
-    )
-    .toBe(true);
-};
-
 let reportJob = 0;
+let compareJob = 0;
 let siteId = 0;
 
 test.beforeAll(async ({ browser }) => {
@@ -86,7 +51,7 @@ test.beforeAll(async ({ browser }) => {
     reducedMotion: "reduce",
   });
   await page.goto("/");
-  csrf = (await api("GET", "/auth/state")).csrf;
+  ({ call: api, upload, settled: waitForJobs } = await apiFor(page));
 
   const site = await api("POST", "/sites", {
     name: "Baugrube Kirchstraße 12",
@@ -115,6 +80,34 @@ test.beforeAll(async ({ browser }) => {
     },
   });
   reportJob = job.id;
+  // Soll/Ist prüft man auf der Sohle, nicht über den Grubenrand
+  const [sohle] = await api("POST", `/sites/${siteId}/regions`, {
+    name: "Sohle",
+    geojson: {
+      type: "Polygon",
+      crs: { type: "name", properties: { name: "urn:ogc:def:crs:EPSG::25832" } },
+      coordinates: [
+        [
+          [X0 + 12, Y0 + 12],
+          [X0 + 28, Y0 + 12],
+          [X0 + 28, Y0 + 28],
+          [X0 + 12, Y0 + 28],
+          [X0 + 12, Y0 + 12],
+        ],
+      ],
+    },
+  });
+  compareJob = (
+    await api("POST", `/sites/${siteId}/jobs`, {
+      kind: "compare",
+      params: {
+        captureId: after,
+        regionId: sohle.id,
+        tolerance: 0.05,
+        design: { type: "height", height: 298.2 },
+      },
+    })
+  ).id;
   // weitere Baustellen für die Übersicht
   const others = [
     ["Kanal Bahnhofstraße", "Leitungsgraben DN 300, 140 m", 1],
@@ -190,6 +183,12 @@ test("Mengenbericht und Vorschaubild @screenshots", async () => {
   await setTheme("light");
   await page.screenshot({ path: `${DOCS}/social-preview.png` });
   await page.setViewportSize(DESKTOP);
+});
+
+test("Soll/Ist @screenshots", async () => {
+  await go(`/jobs/${compareJob}`);
+  await expect(page.getByRole("list", { name: "Verteilung der Abweichung" })).toBeVisible();
+  await shot("soll-ist", true);
 });
 
 test("Anmeldung @screenshots", async ({ browser }) => {

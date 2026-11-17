@@ -1,12 +1,20 @@
 //! Rechenaufträge: ruft den Rechenkern (`crates/processing`) direkt als Bibliothek auf.
 //! Reine Funktionen über Dateien – ohne Datenbank, damit sie für sich testbar sind.
+//! Je Auftragsart ein Modul; hier das Gemeinsame (Rasteroptionen, Prüfen, Bereiche).
+
+pub mod compare;
+pub mod export;
+pub mod volume;
+
+#[cfg(test)]
+pub(crate) mod testdata;
 
 use anyhow::{bail, Context, Result};
 use fixpunkt::geom::{BBox, Polygon, Region};
 use fixpunkt::grid::{Aggregate, Grid, GridSpec};
 use fixpunkt::pointcloud::{PointCloud, ReadOptions};
 use fixpunkt::surface::{self, SurfaceOptions};
-use fixpunkt::volume::{self, Base};
+use fixpunkt::volume::Base;
 use fixpunkt::{filter, geotiff};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -51,7 +59,7 @@ impl SurfaceParams {
         Ok(())
     }
 
-    fn options(&self) -> SurfaceOptions {
+    pub(crate) fn options(&self) -> SurfaceOptions {
         SurfaceOptions {
             cell: self.cell,
             ground_only: self.ground_only,
@@ -95,7 +103,7 @@ fn bbox_json(b: &BBox) -> Value {
     json!({ "minX": b.min_x, "minY": b.min_y, "maxX": b.max_x, "maxY": b.max_y })
 }
 
-fn union_bbox(rs: &[Region]) -> Option<BBox> {
+pub(crate) fn union_bbox(rs: &[Region]) -> Option<BBox> {
     let mut b = BBox::empty();
     for r in rs {
         let rb = r.polygon.bbox();
@@ -105,8 +113,34 @@ fn union_bbox(rs: &[Region]) -> Option<BBox> {
     (!rs.is_empty()).then_some(b)
 }
 
+/// Zellen außerhalb aller Bereiche auf „keine Daten“ setzen (ohne Bereiche: nichts).
+pub(crate) fn mask_to_regions(g: &mut Grid, regions: &[Region]) {
+    if regions.is_empty() {
+        return;
+    }
+    let mut mask = vec![false; g.spec.len()];
+    for r in regions {
+        for (m, k) in mask.iter_mut().zip(g.spec.mask(Some(&r.polygon))) {
+            *m |= k;
+        }
+    }
+    g.data.iter_mut().zip(mask).for_each(|(v, k)| {
+        if !k {
+            *v = f32::NAN
+        }
+    });
+}
+
+/// Ausdehnung für eine Aufnahme: die Bereiche, sonst die ganze Aufnahme.
+pub(crate) fn surface_box(input: &Path, rs: &[Region], o: &SurfaceOptions) -> Result<BBox> {
+    match union_bbox(rs) {
+        Some(b) => Ok(b),
+        None => surface::extent(input, o),
+    }
+}
+
 /// Gemeinsames Raster: Bereiche, sonst Überlappung der Aufnahmen.
-fn common_spec(inputs: &[&Path], rs: &[Region], o: &SurfaceOptions) -> Result<GridSpec> {
+pub(crate) fn common_spec(inputs: &[&Path], rs: &[Region], o: &SurfaceOptions) -> Result<GridSpec> {
     if let Some(b) = union_bbox(rs) {
         return GridSpec::covering(&b, o.cell);
     }
@@ -116,81 +150,6 @@ fn common_spec(inputs: &[&Path], rs: &[Region], o: &SurfaceOptions) -> Result<Gr
         bb = Some(bb.map_or(e, |b| b.intersection(&e)));
     }
     GridSpec::covering(&bb.context("keine Eingabe")?, o.cell)
-}
-
-/// Aushub/Auftrag zwischen zwei Aufnahmen, je Bereich; schreibt `diff.tif` nach `out_dir`.
-pub fn volume(
-    before: &Path,
-    after: &Path,
-    regions: &[Region],
-    p: &SurfaceParams,
-    epsg: u16,
-    out_dir: &Path,
-) -> Result<Value> {
-    p.validate()?;
-    let o = p.options();
-    let spec = common_spec(&[before, after], regions, &o)?;
-    let g0 = surface::load(before, Some(spec), None, &o)?;
-    let g1 = surface::load(after, Some(spec), None, &o)?;
-    let (whole, mut diff) = volume::difference(&g0, &g1, None)?;
-    if !regions.is_empty() {
-        let mut mask = vec![false; spec.len()];
-        for r in regions {
-            for (m, k) in mask.iter_mut().zip(spec.mask(Some(&r.polygon))) {
-                *m |= k;
-            }
-        }
-        diff.data.iter_mut().zip(mask).for_each(|(v, k)| {
-            if !k {
-                *v = f32::NAN
-            }
-        });
-    }
-    std::fs::create_dir_all(out_dir)?;
-    geotiff::write(&diff, &out_dir.join("diff.tif"), Some(epsg), None)?;
-    let (per, total) = if regions.is_empty() {
-        (Vec::new(), whole)
-    } else {
-        volume::difference_regions(&g0, &g1, regions)?
-    };
-    Ok(json!({ "regions": per, "total": total, "cell": p.cell, "files": ["diff.tif"] }))
-}
-
-/// Haufwerk(e) gegen eine Basisfläche
-pub fn stockpile(
-    surface_path: &Path,
-    regions: &[Region],
-    base: Base,
-    p: &SurfaceParams,
-) -> Result<Value> {
-    p.validate()?;
-    if regions.is_empty() {
-        bail!("mindestens ein Bereich nötig");
-    }
-    let g = surface::load(surface_path, None, union_bbox(regions), &p.options())?;
-    let mut per = Vec::new();
-    for r in regions {
-        per.push(volume::RegionReport {
-            name: r.name.clone(),
-            boundary_area_m2: r.polygon.area(),
-            volume: volume::stockpile(&g, &r.polygon, base)?,
-        });
-    }
-    let total = volume::sum(per.iter().map(|r| &r.volume));
-    Ok(json!({ "regions": per, "total": total, "cell": p.cell }))
-}
-
-/// Höhenraster als GeoTIFF (`dem.tif`)
-pub fn dem(input: &Path, p: &SurfaceParams, epsg: u16, out_dir: &Path) -> Result<Value> {
-    p.validate()?;
-    let g = surface::load(input, None, None, &p.options())?;
-    std::fs::create_dir_all(out_dir)?;
-    geotiff::write(&g, &out_dir.join("dem.tif"), Some(epsg), None)?;
-    let st = g.z_stats();
-    Ok(json!({
-        "cols": g.spec.cols, "rows": g.spec.rows, "cell": g.spec.cell, "validCells": g.valid_cells(),
-        "zMin": st.map(|s| s.0), "zMax": st.map(|s| s.1), "files": ["dem.tif"],
-    }))
 }
 
 /// Basis eines Haufwerks aus JSON: `"plane"`, `"lowest"` oder eine Zahl
@@ -232,36 +191,17 @@ pub fn parse_region(name: &str, geojson: &str) -> Result<Region> {
 
 #[cfg(test)]
 mod tests {
+    use super::testdata::{write_cloud, X0, Y0};
     use super::*;
-    use fixpunkt::pointcloud::Point3;
-
-    const X0: f64 = 512_000.0;
-    const Y0: f64 = 5_403_000.0;
-
-    fn write_cloud(path: &Path, pit: bool) {
-        let pts: Vec<Point3> = (0..200)
-            .flat_map(|j| (0..200).map(move |i| (i, j)))
-            .map(|(i, j)| {
-                let (dx, dy) = ((i as f64 + 0.5) * 0.2, (j as f64 + 0.5) * 0.2);
-                let deep = pit && (10.0..30.0).contains(&dx) && (10.0..30.0).contains(&dy);
-                Point3 {
-                    x: X0 + dx,
-                    y: Y0 + dy,
-                    z: 300.0 - if deep { 2.0 } else { 0.0 },
-                }
-            })
-            .collect();
-        PointCloud::new(pts).write(path, None).unwrap();
-    }
 
     #[test]
-    fn volume_dem_stockpile_inspect() {
+    fn inspect_regions_and_inputs() {
         let dir = tempfile::tempdir().unwrap();
-        let (a, b) = (dir.path().join("a.laz"), dir.path().join("b.laz"));
-        write_cloud(&a, false);
+        let b = dir.path().join("b.laz");
         write_cloud(&b, true);
         let info = inspect(&b).unwrap();
         assert_eq!(info["points"], 40_000);
+        assert_eq!(info["type"], "pointcloud");
 
         let poly = Polygon::rect(X0 + 5.0, Y0 + 5.0, X0 + 35.0, Y0 + 35.0);
         let gj = region_geojson("Grube", &poly, 25832).to_string();
@@ -271,49 +211,10 @@ mod tests {
             "metrisches GeoJSON darf nicht umgerechnet werden"
         );
 
-        let out = dir.path().join("job");
-        let v = volume(
-            &a,
-            &b,
-            std::slice::from_ref(&region),
-            &SurfaceParams::default(),
-            25832,
-            &out,
-        )
-        .unwrap();
-        // 20 × 20 × 2 = 800 m³
-        let cut = v["regions"][0]["cut_m3"].as_f64().unwrap();
-        assert!((cut - 800.0).abs() < 8.0, "{v}");
-        assert!(out.join("diff.tif").exists());
-        assert_eq!(
-            geotiff::read(&out.join("diff.tif")).unwrap().epsg,
-            Some(25832)
-        );
-
-        let d = dem(
-            &a,
-            &SurfaceParams {
-                cell: 1.0,
-                ..Default::default()
-            },
-            25832,
-            &out,
-        )
-        .unwrap();
-        assert_eq!(d["cols"], 40);
-
-        let s = stockpile(
-            &b,
-            &[region],
-            Base::Height(299.0),
-            &SurfaceParams::default(),
-        )
-        .unwrap();
-        // 30 × 30 × 1 m über 299 minus Grube (20 × 20 × 1 m unter 299 zählt als Abtrag)
-        assert!(
-            (s["total"]["fill_m3"].as_f64().unwrap() - 500.0).abs() < 8.0,
-            "{s}"
-        );
+        let mut g = surface::load(&b, None, None, &SurfaceParams::default().options()).unwrap();
+        let all = g.valid_cells();
+        mask_to_regions(&mut g, &[region]);
+        assert!(g.valid_cells() < all && g.valid_cells() > 0);
 
         assert!(SurfaceParams {
             cell: 0.0,

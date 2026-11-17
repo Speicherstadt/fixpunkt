@@ -62,6 +62,9 @@ Weitergeben:
 - **Differenzraster (GeoTIFF)** – Höhenänderung je Rasterzelle, zum Ansehen in QGIS oder im CAD
 - **Drucken** – der Bericht als PDF über den Druckdialog des Browsers
 
+Haufwerke, Soll/Ist-Vergleiche, Zeitreihen und Exporte stehen unter
+[Haufwerk, Soll/Ist, Zeitreihe, Export](berechnungen.md).
+
 > [!WARNING]
 > Für die Abrechnung den Bericht mit Lieferscheinen, LKW-Ladungen oder einem Aufmaß plausibilisieren, bis die
 > Genauigkeit auf euren Baustellen belegt ist ([Methode und Genauigkeit](methode.md)).

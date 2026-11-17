@@ -29,6 +29,7 @@ nav:
   - Bedienung:
       - Erste Schritte: erste-schritte.md
       - Aushub berechnen: aushub.md
+      - Haufwerk, Soll/Ist, Zeitreihe, Export: berechnungen.md
       - Daten vorbereiten: daten.md
       - Benutzer und Rollen: benutzer.md
   - Hintergrund:
