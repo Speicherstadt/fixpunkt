@@ -1,0 +1,21 @@
+name: Bump version
+
+# Hebt die Version in Cargo.toml (und Cargo.lock), taggt vX.Y.Z und startet release.yml.
+# Wie in jedem Projekt: https://github.com/firsttris/workflows#bump-version
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+
+jobs:
+  bump:
+    uses: firsttris/workflows/.github/workflows/bump-version.yml@v1
+    with:
+      bump: ${{ inputs.bump }}
+      version-file: Cargo.toml
+    permissions:
+      contents: write
+      actions: write

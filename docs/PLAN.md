@@ -450,17 +450,21 @@ Wie in allen Projekten (`firsttris/workflows`):
       Bodenfilter (SMRF), Ausreißer, Passpunkt-Transformation (Helmert), UTM32 + GCG2016, Messen/Profile,
       Exporte GeoTIFF/DXF/LandXML/OBJ/PLY/CSV, ODM-GeoTIFF als Eingabe – 43 Tests
 - [x] CI (`ci.yml`), Renovate, `CLAUDE.md` nach den Vorlagen aus `firsttris/workflows`
-- [ ] Weitere Struktur: `crates/server` (Rust, axum), `ui/` (Bun, Vite, React, TanStack, shadcn/ui, Paraglide), `docker/`, `bump.yml` + `release.yml` (`apps/ios` erst ab Phase 4)
+- [x] Weitere Struktur: `crates/server`, `ui/`, `e2e/`, `docker/`, `bump.yml` + `release.yml`, `scripts/install.sh` (`apps/ios` erst ab Phase 4)
 - [ ] netcup RS 2000 aufsetzen, NodeODM testen
 - [ ] SAPOS-Zugang (BW) beantragen
 - [ ] **Mit der Firma klären:** Drohne (Matrice 4E) oder BLK2GO (+ Rover)? Matrice 4E kaufen? Wer macht A1/A3 + A2? Betreiberregistrierung, Versicherung
 - [ ] Erste Baugrube als Pilotprojekt aussuchen (Termin vor dem Aushub!)
 
 ### Phase 1 – Backend + Viewer (3–4 Wochen)
-- [ ] Server-Gerüst: axum, SQLite/sqlx, Login, UI per rust-embed, eine Binärdatei + Docker-Image
-- [ ] Datenmodell: Mandant, Baustelle, Aufnahme, Rohdaten, Ergebnis, Passpunkt, Messung, Bereich
-- [ ] Upload großer Fotomengen (fortsetzbar) + Job-Warteschlange mit Live-Fortschritt (SSE)
-- [ ] Jobs rufen den Rechenkern auf: LAS/LAZ (und E57 vom BLK2GO) einlesen, transformieren, Browser-Kacheln erzeugen
+- [x] Server-Gerüst: axum, SQLite/sqlx, Login (argon2id, CSRF, Rollen), UI per rust-embed, eine Binärdatei + Docker-Image
+- [x] Datenmodell: Baustelle, Aufnahme, Bereich, Auftrag, Benutzer (eine Instanz je Firma; Mandanten erst bei Bedarf)
+- [x] Upload (gestreamt, mit Fortschritt) + Job-Warteschlange mit Live-Status (SSE), übersteht Neustarts
+- [x] Jobs rufen den Rechenkern auf: Prüfen beim Upload, Aushub je Bereich, Haufwerk, DGM
+- [x] Web-UI im Kontext-Stil: Baustellen, Aufnahmen, Grenzen, Aushub berechnen, Mengenbericht (CSV, GeoTIFF, Drucken), Benutzer, Konto
+- [x] Tests auf allen Schichten in der CI: Rust-Unit, API-Integration, Vitest, Playwright gegen die Binärdatei (inkl. axe), Docker-Smoke-Test
+- [ ] Upload großer Fotomengen fortsetzbar (tus) für die Drohnenbilder
+- [ ] Browser-Kacheln (3D Tiles/Potree) aus dem Rechenkern, E57 vom BLK2GO
 - [ ] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung
 - [ ] Mit öffentlichen OpenDroneMap-Datensätzen arbeiten, bis eigene Flüge da sind
 

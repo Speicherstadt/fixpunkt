@@ -52,7 +52,9 @@ test("Aushub einer Baugrube berechnen", async ({ page }, info) => {
   const csv = page.waitForEvent("download");
   await page.getByRole("link", { name: "Als CSV" }).click();
   expect((await csv).suggestedFilename()).toMatch(/^mengen-\d+\.csv$/);
-  const tif = await page.request.get(await page.getByRole("link", { name: /Differenzraster/ }).getAttribute("href") ?? "");
+  const tif = await page.request.get(
+    (await page.getByRole("link", { name: /Differenzraster/ }).getAttribute("href")) ?? "",
+  );
   expect(tif.status()).toBe(200);
   expect((await tif.body()).subarray(0, 2).toString()).toMatch(/II|MM/);
   await page.screenshot({ path: info.outputPath("bericht.png"), fullPage: true });

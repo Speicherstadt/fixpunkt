@@ -31,7 +31,9 @@ Grün vor jedem Push, danach die CI ansehen:
 cargo fmt --all --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
-# sobald es ui/ gibt: bun run typecheck && bun run test && bun run build
+bun run lint && bun run typecheck && bun run test && bun run build
+bun run e2e    # baut UI + Server und startet Playwright; lokal ohne passenden Browser:
+               # PW_CHROMIUM_PATH=/pfad/zu/chrome bun run e2e
 ```
 
 ## Working rules
@@ -56,6 +58,23 @@ Technik nach `tech-stack.md` in firsttris/workflows. Abweichungen und warum:
 Clean Code, funktional: klare Namen, kleine Funktionen, Abhängigkeiten übergeben, keine
 Duplikate; reine Funktionen, Seiteneffekte an den Rändern, Fehler als Werte. Eine Datei macht eine
 Sache: ab ~400 Zeilen teilen, Funktionen ab ~80 Zeilen.
+
+## Tests (Schichten)
+
+- **Rechenkern** (`crates/processing`): Unit-Tests je Modul gegen bekannte Werte, `tests/cli.rs` End-to-End.
+- **Server** (`crates/server`): Unit-Tests je Modul, `tests/api.rs` mit echtem Router, SQLite und Rechenkern;
+  Aufträge deterministisch mit `jobs::run_pending`.
+- **UI** (`ui/src/**/*.test.ts(x)`): Vitest + Testing Library; Texte (de/en vollständig, alle genutzt, alle
+  Server-Fehler übersetzt) und Gestaltungsregeln (`design-rules.test.ts`, wie Kontext).
+- **E2E** (`e2e/`): Playwright gegen `target/debug/fixpunkt` mit eingebetteter UI, frisches Datenverzeichnis;
+  axe hell/dunkel, Tastatur, Handy. Elemente nach Rolle und Name suchen.
+- **Docker** (CI): Image bauen, als Nicht-root starten, Health, UI und erster Admin.
+
+## UI
+
+Gestaltung wie **Kontext** und **Belegt**: Zink-Tokens als CSS-Variablen (`ui/src/styles.css`), Geist,
+eigene Komponenten im shadcn/ui-Stil auf Radix mit `cva` (`ui/src/components/ui`), lucide mit einer
+Linienstärke, WCAG 2.2 AA. Farben nur als Token, Schrift- und Symbolgrößen auf der Skala.
 
 ## Project specifics
 

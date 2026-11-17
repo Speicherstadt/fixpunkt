@@ -7,8 +7,12 @@ const PAGES = ["/", "/users", "/account"];
 const check = async (page: Page, path: string) => {
   await page.goto(path);
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  const result = await new AxeBuilder({ page }).withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"]).analyze();
-  expect(result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(", ")}`)).toEqual([]);
+  const result = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  expect(
+    result.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(", ")}`),
+  ).toEqual([]);
 };
 
 for (const scheme of ["light", "dark"] as const) {

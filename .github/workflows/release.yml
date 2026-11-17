@@ -1,0 +1,96 @@
+name: Release
+
+# Ein Tag vX.Y.Z veröffentlicht diese Version (wie firsttris/haul): erst die CI (außer main hat diesen
+# Code schon getestet), dann das Docker-Image aus firsttris/workflows (amd64 + arm64, :x.y.z, :x.y,
+# :latest, GitHub-Release), danach die statischen Linux-Programmdateien für scripts/install.sh.
+# Von Hand auf main: dieselben Prüfungen, Image als :edge, Programmdateien als Artefakte.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+jobs:
+  tested:
+    uses: firsttris/workflows/.github/workflows/tested-on-main.yml@v1
+    permissions:
+      actions: read
+      contents: read
+
+  checks:
+    needs: tested
+    if: needs.tested.outputs.tested != 'true'
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+      packages: write
+
+  # Statische Linux-Programmdateien (musl) mit eingebetteter UI, je auf ihrem eigenen Runner
+  binaries:
+    strategy:
+      matrix:
+        include:
+          - arch: x86_64
+            runner: ubuntu-latest
+          - arch: aarch64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.arch }}-unknown-linux-musl
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: musl-${{ matrix.arch }}
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq musl-tools
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: cargo build --release --locked -p fixpunkt-server --target ${{ matrix.arch }}-unknown-linux-musl
+      - name: Packen
+        env:
+          ARCH: ${{ matrix.arch }}
+        run: |
+          mkdir -p out pack
+          cp "target/$ARCH-unknown-linux-musl/release/fixpunkt" pack/
+          ./pack/fixpunkt --version
+          tar -czf "out/fixpunkt-linux-$ARCH.tar.gz" -C pack .
+          (cd out && sha256sum "fixpunkt-linux-$ARCH.tar.gz" > "fixpunkt-linux-$ARCH.tar.gz.sha256")
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fixpunkt-linux-${{ matrix.arch }}
+          path: out/*
+
+  docker:
+    needs: [tested, checks, binaries]
+    if: ${{ !cancelled() && needs.tested.result == 'success' && needs.checks.result != 'failure' && needs.binaries.result == 'success' }}
+    uses: firsttris/workflows/.github/workflows/docker-release.yml@v1
+    with:
+      image: tristanteu/fixpunkt
+      description: Georeferenzierte 3D-Baustellendokumentation und Massenermittlung aus Drohnenflügen
+      version-file: Cargo.toml
+    secrets: inherit
+    permissions:
+      contents: write
+      packages: write
+
+  # Der Docker-Job legt das GitHub-Release an; die Programmdateien und install.sh kommen dazu
+  release-binaries:
+    needs: docker
+    if: ${{ !cancelled() && needs.docker.result == 'success' && startsWith(github.ref, 'refs/tags/v') }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: fixpunkt-linux-*
+          merge-multiple: true
+          path: out
+      - run: cp scripts/install.sh out/install.sh
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" out/* --repo "$GITHUB_REPOSITORY" --clobber

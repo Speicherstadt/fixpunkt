@@ -8,7 +8,9 @@ import { defineConfig, devices } from "@playwright/test";
 const PORT = 28080;
 const DATA = ".e2e-data";
 
-const launchOptions = process.env.PW_CHROMIUM_PATH ? { executablePath: process.env.PW_CHROMIUM_PATH } : {};
+const launchOptions = process.env.PW_CHROMIUM_PATH
+  ? { executablePath: process.env.PW_CHROMIUM_PATH }
+  : {};
 
 export default defineConfig({
   testDir: "./e2e",
@@ -47,7 +49,12 @@ export default defineConfig({
       name: "phone",
       dependencies: ["setup"],
       testIgnore: /setup\.spec\.ts/,
-      use: { ...devices["Pixel 7"], launchOptions, storageState: "e2e/.auth/admin.json", serviceWorkers: "block" },
+      use: {
+        ...devices["Pixel 7"],
+        launchOptions,
+        storageState: "e2e/.auth/admin.json",
+        serviceWorkers: "block",
+      },
       grep: /@phone/,
     },
   ],

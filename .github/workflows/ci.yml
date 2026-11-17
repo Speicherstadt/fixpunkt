@@ -1,7 +1,8 @@
 name: CI
 
 # Kopf wie in jedem Projekt: https://github.com/firsttris/workflows#ci-in-every-project
-# Bun-Schritte (typecheck, test, build der UI) kommen dazu, sobald es ui/ gibt.
+# Schichten: Rust (Rechenkern + Server: Unit- und API-Integrationstests), Web (Biome, Typecheck,
+# Vitest, Build), E2E (Playwright gegen die echte Programmdatei, axe), Docker-Image (Smoke-Test).
 on:
   push:
     branches: [main]
@@ -11,6 +12,9 @@ on:
     paths-ignore: ["**.md", "docs/**", "LICENSE"]
   workflow_call:
   workflow_dispatch:
+  # Wöchentlich auf main: neue Clippy-Regeln des neuesten Rust, neue Basis-Images
+  schedule:
+    - cron: "17 3 * * 1"
 
 permissions:
   contents: read
@@ -20,11 +24,12 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  check:
+  rust:
+    name: Rust (fmt, clippy, Tests)
     # Entwurfs-Pull-Requests bauen nicht; „Ready for review“ startet den Lauf
     if: ${{ !github.event.pull_request.draft }}
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
@@ -34,3 +39,134 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       - run: cargo test --workspace
+
+  web:
+    name: Web (Biome, Typecheck, Vitest, Build)
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - run: bun install --frozen-lockfile
+      - run: bun run lint
+      - run: bun run typecheck
+      - run: bun run test
+      - run: bun run build
+      - run: shellcheck scripts/install.sh
+
+  # Die Programmdatei mit eingebetteter UI, so wie sie ausgeliefert wird – für die E2E-Tests
+  binary:
+    name: Programmdatei für E2E
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: cargo build -p fixpunkt-server
+      - uses: actions/upload-artifact@v7
+        with:
+          name: fixpunkt-e2e
+          path: target/debug/fixpunkt
+          retention-days: 1
+
+  e2e:
+    name: E2E (Playwright, axe)
+    needs: binary
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Das offizielle Playwright-Image (tech-stack.md); Version wie @playwright/test in package.json
+    container:
+      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      options: --ipc=host
+    steps:
+      - uses: actions/checkout@v7
+      # Das Image hat Node, aber weder unzip noch jq: Bun über npm (tech-stack.md)
+      - run: npm install --global "bun@$(node -p "require('./package.json').packageManager.split('@')[1]")"
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        with:
+          name: fixpunkt-e2e
+          path: target/debug
+      - run: chmod +x target/debug/fixpunkt
+      - run: bun --bun playwright test
+      - if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
+  # Ob dieser Push etwas am Image ändert, das die anderen Jobs nicht schon bauen: dann baut der
+  # Docker-Job. Von Hand und wöchentlich immer; nie für Release-Tags (die baut release.yml).
+  changes:
+    if: ${{ !github.event.pull_request.draft }}
+    runs-on: ubuntu-latest
+    outputs:
+      docker: ${{ steps.diff.outputs.docker }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          filter: blob:none
+      - id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            echo "docker=false" | tee -a "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          case "$EVENT" in
+            push) from="$BEFORE" ;;
+            pull_request) from="$BASE" ;;
+            *) from="" ;;
+          esac
+          if [ -z "$from" ] || ! git cat-file -e "$from^{commit}" 2>/dev/null; then
+            docker=true
+          elif git diff --name-only "$from" HEAD | grep -qE '^(docker/|\.dockerignore|Cargo\.(toml|lock)|crates/[^/]+/Cargo\.toml|package\.json|bun\.lock|bunfig\.toml|ui/package\.json)'; then
+            docker=true
+          else
+            docker=false
+          fi
+          echo "docker=$docker" | tee -a "$GITHUB_OUTPUT"
+
+  docker:
+    name: Docker-Image (Build + Smoke-Test)
+    needs: changes
+    if: ${{ needs.changes.outputs.docker == 'true' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: firsttris/workflows/actions/docker-build@v1
+        with:
+          dockerfile: docker/Dockerfile
+          tags: fixpunkt:ci
+      - run: docker run --rm fixpunkt:ci --version
+      # Startet als Nicht-root mit Volume, legt den ersten Admin an, liefert UI und API aus
+      - run: |
+          docker run -d --name fixpunkt -p 8080:8080 \
+            -e FIXPUNKT_USER=admin -e FIXPUNKT_PASSWORD=geheim123 fixpunkt:ci
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8080/api/health && break; sleep 1; done
+          curl -fsS http://127.0.0.1:8080/ | grep -q "<title>Fixpunkt</title>"
+          curl -fsS http://127.0.0.1:8080/api/auth/state | grep -q '"setupRequired":false'
+          test "$(docker inspect -f '{{.Config.User}}' fixpunkt)" = fixpunkt
+      - if: always()
+        run: docker logs fixpunkt || true
