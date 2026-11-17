@@ -138,15 +138,17 @@ fn cached(dir: &FsPath, make: impl FnOnce() -> Result<Grid>) -> Result<Grid> {
     Ok(g)
 }
 
+/// Höhenraster einer Aufnahme wie in der Ansicht (zwischengespeichert)
+pub async fn capture_view(app: &AppRef, c: &db::Capture) -> Result<Grid> {
+    let (path, dir) = (capture_path(app, c), app.cfg.capture_dir(c.id));
+    tokio::task::spawn_blocking(move || cached(&dir, || surface_view(&path, MAX_CELLS))).await?
+}
+
 pub async fn capture_grid(State(app): State<AppRef>, Path(id): Path<i64>) -> ApiResult<Response> {
     let c = db::get_capture(&app.db, id)
         .await?
         .ok_or_else(ApiError::not_found)?;
-    let (path, dir) = (capture_path(&app, &c), app.cfg.capture_dir(id));
-    let g = tokio::task::spawn_blocking(move || cached(&dir, || surface_view(&path, MAX_CELLS)))
-        .await
-        .map_err(anyhow::Error::from)??;
-    Ok(respond(&g))
+    Ok(respond(&capture_view(&app, &c).await?))
 }
 
 /// Raster eines Ergebnisses (Differenz, Abweichung) als Überlagerung

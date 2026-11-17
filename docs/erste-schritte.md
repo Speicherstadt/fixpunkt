@@ -27,6 +27,22 @@ Baustelle. Den Kartenhintergrund liefert OpenStreetMap, ein eigener Kachelserver
 ![Karte und Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen.png#only-light){ width="1440" height="900" }
 ![Karte und Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen-dunkel.png#only-dark){ width="1440" height="900" }
 
+## Überblick einer Baustelle
+
+Oben auf der Seite einer Baustelle steht, sobald es eine Aufnahme gibt, der **Überblick**:
+
+- **Aufnahmen** und wann zuletzt geflogen wurde, dazu Fotos, Notizen und Pläne;
+- **Aushub bisher**: der Abtrag der neuesten Aufnahme gegen das Urgelände (die älteste Aufnahme);
+- **Letzter Soll/Ist in Toleranz**: der Anteil der Fläche innerhalb der Toleranz beim jüngsten Vergleich;
+- **Zwangspunkte eingehalten**: jeder Zwangspunkt mit Höhe wird gegen die letzte Aufnahme geprüft, bis 3 cm
+  Abweichung gilt er als eingehalten.
+
+Darunter der **Aushub je Befliegung** als Balken – jede Aushub-Berechnung gegen das Urgelände zählt, je Aufnahme die
+neueste. Ein Klick öffnet die Berechnung. Verletzte Zwangspunkte und fehlgeschlagene Berechnungen stehen am Ende
+unter „Braucht Aufmerksamkeit“. Der Überblick aktualisiert sich von selbst, sobald eine Berechnung fertig ist.
+
+![Überblick mit Kennzahlen und Aushub je Befliegung](screenshot-ueberblick.png)
+
 Weiter geht es mit [Aushub berechnen](aushub.md).
 
 ## Sprache und Farbschema

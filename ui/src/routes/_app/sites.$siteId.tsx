@@ -7,6 +7,7 @@ import { Calculations } from "@/components/site/calculations";
 import { Captures } from "@/components/site/captures";
 import { Documentation } from "@/components/site/documentation";
 import { DronePhotos } from "@/components/site/drone-photos";
+import { Overview } from "@/components/site/overview";
 import { Plans } from "@/components/site/plans";
 import { Regions } from "@/components/site/regions";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,7 @@ function SitePage() {
         }
       />
       <div className="flex flex-col gap-6">
+        <Overview siteId={siteId} />
         <Captures siteId={siteId} canEdit={canEdit} />
         {canEdit ? <DronePhotos siteId={siteId} /> : null}
         <SiteView siteId={siteId} canEdit={canEdit} />

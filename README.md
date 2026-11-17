@@ -62,6 +62,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Soll/Ist gegen Sohlhöhe, geneigte Ebene oder Soll-DGM
 - Bodenfilter für Bagger, Container und Bewuchs
 - Bericht als PDF mit Karte, als CSV oder GeoTIFF
+- Überblick je Baustelle: Aushub je Befliegung, Soll/Ist, Zwangspunkte
 
 </td>
 <td width="50%" valign="top">

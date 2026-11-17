@@ -165,6 +165,44 @@ export const PlanGeometry = z.object({
 });
 export type PlanGeometry = z.infer<typeof PlanGeometry>;
 
+/** Überblick einer Baustelle (crates/server/src/dashboard.rs) */
+export const Dashboard = z.object({
+  captures: z.object({
+    count: z.number(),
+    ready: z.number(),
+    last: z.object({ id: z.number(), name: z.string(), at: z.number() }).nullable(),
+  }),
+  progress: z.array(
+    z.object({
+      jobId: z.number(),
+      captureId: z.number(),
+      name: z.string(),
+      at: z.number(),
+      cut: z.number(),
+      fill: z.number(),
+      net: z.number(),
+    }),
+  ),
+  latestCompare: z
+    .object({
+      jobId: z.number(),
+      at: z.number(),
+      within: z.number().nullable(),
+      tolerance: z.number().nullable(),
+    })
+    .nullable(),
+  jobs: z.object({ queued: z.number(), running: z.number(), failed: z.number() }),
+  constraints: z.object({
+    total: z.number(),
+    checked: z.number(),
+    violated: z.array(z.object({ id: z.number(), title: z.string(), diff: z.number() })),
+    against: z.string().nullable(),
+  }),
+  documentation: z.object({ photos: z.number(), notes: z.number() }),
+  plans: z.number(),
+});
+export type Dashboard = z.infer<typeof Dashboard>;
+
 export const Settings = z.object({
   mapTiles: z.object({ url: z.string(), attribution: z.string() }).nullable(),
 });
@@ -373,6 +411,7 @@ export const api = {
   deleteJob: (id: number) => request("DELETE", `/jobs/${id}`, Empty),
   odmStatus: () => request("GET", "/odm", OdmStatus),
   settings: () => request("GET", "/settings", Settings),
+  dashboard: (siteId: number) => request("GET", `/sites/${siteId}/dashboard`, Dashboard),
   markers: (siteId: number) => request("GET", `/sites/${siteId}/markers`, z.array(Marker)),
   createMarker: (siteId: number, m: NewMarker) =>
     request("POST", `/sites/${siteId}/markers`, Marker, m),

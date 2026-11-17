@@ -31,6 +31,8 @@ export const planGeometryQuery = (id: number) =>
     queryFn: () => api.planGeometry(id),
     staleTime: Number.POSITIVE_INFINITY,
   });
+export const dashboardQuery = (siteId: number) =>
+  queryOptions({ queryKey: ["dashboard", siteId], queryFn: () => api.dashboard(siteId) });
 export const markersQuery = (siteId: number) =>
   queryOptions({ queryKey: ["markers", siteId], queryFn: () => api.markers(siteId) });
 /** Einstellungen ändern sich nur mit einem Neustart des Servers */

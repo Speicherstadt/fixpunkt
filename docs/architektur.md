@@ -45,6 +45,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `plans/` | DXF-Pläne: einmal gelesen (`dxf.rs`: Linienzüge, Bögen, Texte, Höhenpunkte, Zonenkennung) und als JSON für die Ansicht abgelegt |
 | `ortho.rs` | Orthofoto je Aufnahme: GeoTIFF stückweise verkleinert (Rechenkern `ortho.rs`), als PNG mit Ecken in der Zone der Baustelle |
 | `uploads.rs` | Fortsetzbarer Upload nach tus 1.0 (Kern, creation, termination): Stücke nach `uploads/`, fertige Dateien an ihr Ziel (Aufnahme, Drohnenfoto, Orthofoto) |
+| `dashboard.rs` | Überblick einer Baustelle: Aushub je Befliegung gegen das Urgelände, letzter Soll/Ist, Zwangspunkte gegen die letzte Aufnahme |
 | `points.rs` | Punktwolke für 3D: höchstens 1 Mio. Punkte, Float32 relativ zum Ursprung plus RGB, als `punkte.bin` zwischengespeichert |
 | `location.rs` | Lage der Baustellen für die Karte: Mitte der geprüften Aufnahmen (sonst der Bereiche), UTM → Breite/Länge |
 | `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer) |

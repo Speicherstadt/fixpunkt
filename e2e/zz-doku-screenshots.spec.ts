@@ -60,7 +60,13 @@ test.beforeAll(async ({ browser }) => {
   });
   siteId = site.id;
   const before = await upload(siteId, "flug-2026-11-03.xyz", "Urgelände", START, terrainXyz(false));
-  await upload(siteId, "flug-2026-11-10.xyz", "Zwischenstand", START + 7 * DAY, halfway());
+  const middle = await upload(
+    siteId,
+    "flug-2026-11-10.xyz",
+    "Zwischenstand",
+    START + 7 * DAY,
+    halfway(),
+  );
   const after = await upload(
     siteId,
     "flug-2026-11-17.xyz",
@@ -81,6 +87,11 @@ test.beforeAll(async ({ browser }) => {
     },
   });
   reportJob = job.id;
+  // Zwischenstand für den Fortschritt im Überblick
+  await api("POST", `/sites/${siteId}/jobs`, {
+    kind: "volume",
+    params: { before, after: middle, regionIds: regions.map((r) => r.id), surface: { cell: 0.25 } },
+  });
   // Soll/Ist prüft man auf der Sohle, nicht über den Grubenrand
   const [sohle] = await api("POST", `/sites/${siteId}/regions`, {
     name: "Sohle",
@@ -220,6 +231,13 @@ test("Baustelle @screenshots", async () => {
       .getByText("Fertig", { exact: true }),
   ).toBeVisible();
   await shot("baustelle", true);
+});
+
+test("Überblick @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const overview = page.getByRole("region", { name: "Überblick" });
+  await expect(overview.getByRole("list").first().getByRole("listitem")).toHaveCount(2);
+  await overview.screenshot({ path: `${DOCS}/screenshot-ueberblick.png` });
 });
 
 test("Orthofoto @screenshots", async () => {

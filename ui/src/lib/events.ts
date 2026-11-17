@@ -13,7 +13,8 @@ type ServerEvent = z.infer<typeof ServerEvent>;
 
 /** Welche Abfragen ein Ereignis veraltet macht */
 export const staleKeys = (e: ServerEvent): unknown[][] => {
-  if (e.type === "job") return [["job", e.id], ["jobs", e.siteId], ["sites"]];
+  if (e.type === "job")
+    return [["job", e.id], ["jobs", e.siteId], ["dashboard", e.siteId], ["sites"]];
   const site = e.siteId ?? undefined;
   switch (e.topic) {
     case "sites":
@@ -21,7 +22,12 @@ export const staleKeys = (e: ServerEvent): unknown[][] => {
     case "users":
       return [["users"]];
     default:
-      return [[e.topic, ...(site === undefined ? [] : [site])], ["sites"]];
+      // alles, was zu einer Baustelle gehört, steht auch im Überblick
+      return [
+        [e.topic, ...(site === undefined ? [] : [site])],
+        ["dashboard", ...(site === undefined ? [] : [site])],
+        ["sites"],
+      ];
   }
 };
 

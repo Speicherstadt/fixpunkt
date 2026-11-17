@@ -59,7 +59,7 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 - [ ] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte, Leitungsverlauf
 - [ ] Fotos georeferenziert inkl. Blickrichtung, Notizen dazu
 - [x] Berichte (PDF) je Berechnung
-- [ ] Dashboards pro Baustelle
+- [x] Dashboards pro Baustelle (Überblick oben auf der Baustellenseite)
 - [ ] Kartenansicht aller Baustellen/Scans
 
 ### Ansichten
@@ -508,7 +508,7 @@ Wie in allen Projekten (`firsttris/workflows`):
 - [ ] Zwangspunkte / Leitungsdokumentation
 - [ ] Plan/Ist-Vergleich mit DXF, Abweichungs-Heatmap
 - [x] Zeitreihen, PDF-Berichte
-- [ ] Dashboards
+- [x] Dashboards
 - [ ] Exporte DXF, LandXML, CSV, GeoTIFF
 - [ ] Flugplanung in Fixpunkt (WPML), danach DJI Cloud API
 - [ ] Android-PWA (Photogrammetrie + Web Bluetooth)
