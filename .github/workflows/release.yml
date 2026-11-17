@@ -69,9 +69,12 @@ jobs:
     uses: firsttris/workflows/.github/workflows/docker-release.yml@v1
     with:
       image: tristanteu/fixpunkt
-      description: Selbst gehostete Massenermittlung für Baustellen: Aushub und Haufwerke aus Drohnenflügen
+      description: "Selbst gehostete Massenermittlung für Baustellen: Aushub und Haufwerke aus Drohnenflügen"
       version-file: Cargo.toml
-    secrets: inherit
+    # ausdrücklich statt „inherit“: das geht nur für Workflows derselben Organisation, und
+    # firsttris/workflows liegt außerhalb von Speicherstadt
+    secrets:
+      DOCKER_PAT: ${{ secrets.DOCKER_PAT }}
     permissions:
       contents: write
       packages: write
