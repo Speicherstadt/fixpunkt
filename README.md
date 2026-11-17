@@ -8,13 +8,13 @@
 Vergleicht Urgelände und Aushub je Abrechnungsbereich, rechnet Bagger und Bewuchs heraus und gibt den Bericht als PDF, CSV oder GeoTIFF weiter.<br>
 Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf deinem Server.
 
-[![CI](https://github.com/firsttris/fixpunkt/actions/workflows/ci.yml/badge.svg)](https://github.com/firsttris/fixpunkt/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/firsttris/fixpunkt?logo=github&label=release)](https://github.com/firsttris/fixpunkt/releases/latest)
-[![Doku](https://img.shields.io/badge/Doku-firsttris.github.io%2Ffixpunkt-4f46e5?logo=zensical&logoColor=white)](https://firsttris.github.io/fixpunkt/)
+[![CI](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml/badge.svg)](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/Speicherstadt/fixpunkt?logo=github&label=release)](https://github.com/Speicherstadt/fixpunkt/releases/latest)
+[![Doku](https://img.shields.io/badge/Doku-speicherstadt.github.io%2Ffixpunkt-4f46e5?logo=zensical&logoColor=white)](https://speicherstadt.github.io/fixpunkt/)
 [![Docker Pulls](https://img.shields.io/docker/pulls/tristanteu/fixpunkt?logo=docker&logoColor=white)](https://hub.docker.com/r/tristanteu/fixpunkt)
 [![Plattformen](https://img.shields.io/badge/platform-amd64%20%7C%20arm64-lightgrey)](https://hub.docker.com/r/tristanteu/fixpunkt/tags)
-[![Rust](https://img.shields.io/badge/Rust-axum%20%7C%20SQLite-b7410e?logo=rust&logoColor=white)](https://firsttris.github.io/fixpunkt/architektur.html)
-[![EPSG:25832](https://img.shields.io/badge/ETRS89-UTM32%20%C2%B7%20DHHN2016-1f6f5c)](https://firsttris.github.io/fixpunkt/daten.html)
+[![Rust](https://img.shields.io/badge/Rust-axum%20%7C%20SQLite-b7410e?logo=rust&logoColor=white)](https://speicherstadt.github.io/fixpunkt/architektur.html)
+[![EPSG:25832](https://img.shields.io/badge/ETRS89-UTM32%20%C2%B7%20DHHN2016-1f6f5c)](https://speicherstadt.github.io/fixpunkt/daten.html)
 
 ```bash
 docker run -d -p 8080:8080 -v fixpunkt:/data tristanteu/fixpunkt
@@ -24,7 +24,7 @@ docker run -d -p 8080:8080 -v fixpunkt:/data tristanteu/fixpunkt
 [Funktionen](#-funktionen) •
 [Installation](#-installation) •
 [FAQ](#-faq) •
-[Dokumentation](https://firsttris.github.io/fixpunkt/) •
+[Dokumentation](https://speicherstadt.github.io/fixpunkt/) •
 [Entwicklung](#️-entwicklung)
 
 <sub>English: self-hosted earthwork volume calculation from drone surveys – upload point clouds (LAS/LAZ) or elevation models (GeoTIFF, e.g. from OpenDroneMap), set billing boundaries, get cut and fill per area. One binary with web UI. The app is in German and English, the documentation in German.</sub>
@@ -109,7 +109,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - GeoTIFF, DXF mit Höhenlinien, LandXML, CSV, OBJ – aus der Web-UI
 - Passpunkte (Helmert) mit Restklaffen in der Web-UI, Koordinaten und Höhen umrechnen
 - Bodenfilter, Ausreißer, Profile auf der Kommandozeile
-- [Alle Befehle](https://firsttris.github.io/fixpunkt/kommandozeile.html)
+- [Alle Befehle](https://speicherstadt.github.io/fixpunkt/kommandozeile.html)
 
 </td>
 <td width="50%" valign="top">
@@ -118,7 +118,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Eine Programmdatei mit SQLite, kein Cloud-Abo
 - Docker-Image für amd64 und arm64, oder systemd ohne Container
 - Login mit argon2id, Schutz gegen CSRF
-- [Installation](https://firsttris.github.io/fixpunkt/installation.html)
+- [Installation](https://speicherstadt.github.io/fixpunkt/installation.html)
 
 </td>
 </tr>
@@ -140,19 +140,19 @@ docker run -d --name fixpunkt -p 8080:8080 -v fixpunkt:/data --restart unless-st
 **Ohne Container** – eine Programmdatei als systemd-Dienst:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/firsttris/fixpunkt/main/scripts/install.sh | sudo sh
+curl -fsSL https://raw.githubusercontent.com/Speicherstadt/fixpunkt/main/scripts/install.sh | sudo sh
 ```
 
 Dann `http://<server>:8080` öffnen und den ersten Zugang anlegen. Compose, Podman Quadlet, Einstellungen und
-Reverse-Proxy: [Installation](https://firsttris.github.io/fixpunkt/installation.html) ·
-[Konfiguration](https://firsttris.github.io/fixpunkt/konfiguration.html).
+Reverse-Proxy: [Installation](https://speicherstadt.github.io/fixpunkt/installation.html) ·
+[Konfiguration](https://speicherstadt.github.io/fixpunkt/konfiguration.html).
 
 ## ❓ FAQ
 
 **Wie genau ist die Massenberechnung aus Drohnendaten?**<br>
 Die Rechnung ist bis auf die Rasterweite exakt (geprüft gegen Kegel- und Pyramidenstumpfformel, 0,004 % bei
 4 Mio. Punkten). Die Genauigkeit kommt aus den Daten: eine RTK-Drohne misst Höhen auf 2–5 cm. Belastbar ist die
-Bilanz; mehr unter [Methode und Genauigkeit](https://firsttris.github.io/fixpunkt/methode.html).
+Bilanz; mehr unter [Methode und Genauigkeit](https://speicherstadt.github.io/fixpunkt/methode.html).
 
 **Brauche ich eine bestimmte Drohne?**<br>
 Nein. Fixpunkt rechnet mit Punktwolken und Höhenmodellen, egal woher. Für Ergebnisse ohne Passpunkte braucht die
@@ -161,13 +161,13 @@ Drohne RTK (z. B. DJI Matrice 4E mit SAPOS). Auch Laserscanner (LAS/LAZ) und iPh
 **Rechnet Fixpunkt die Drohnenfotos selbst?**<br>
 Über [NodeODM](https://github.com/OpenDroneMap/NodeODM): Fotos in Fixpunkt hochladen, NodeODM rechnet die
 Punktwolke, sie erscheint als Aufnahme – in der Zone der Baustelle
-([Drohnenfotos auswerten](https://firsttris.github.io/fixpunkt/drohnenfotos.html)). Ohne NodeODM lädt man die
+([Drohnenfotos auswerten](https://speicherstadt.github.io/fixpunkt/drohnenfotos.html)). Ohne NodeODM lädt man die
 Punktwolke aus WebODM hoch.
 
 **Ist Fixpunkt eine Alternative zu SDX-Cloud, Propeller oder DroneDeploy?**<br>
 Für die Massenermittlung von Baugruben und Haufwerken: ja, selbst gehostet und ohne Abo – mit 2D- und 3D-Ansicht,
 Messen, PDF-Bericht, Passpunkten, Plänen und Drohnenfotos über NodeODM. Die iPhone-App mit RTK-Rover
-folgt ([Projektplan](https://firsttris.github.io/fixpunkt/PLAN.html)).
+folgt ([Projektplan](https://speicherstadt.github.io/fixpunkt/PLAN.html)).
 
 **Welche Koordinatensysteme werden unterstützt?**<br>
 ETRS89/UTM Zone 32 (EPSG:25832) als Standard, andere UTM-Zonen auf der Kommandozeile. Höhen DHHN2016 über GCG2016.
@@ -183,9 +183,9 @@ bun install
 bun run dev    # Server auf :8080, UI mit Hot Reload auf http://localhost:5173 (admin / adminadmin)
 ```
 
-[Architektur](https://firsttris.github.io/fixpunkt/architektur.html) ·
-[Entwicklung und Tests](https://firsttris.github.io/fixpunkt/entwicklung.html) ·
-[Projektplan](https://firsttris.github.io/fixpunkt/PLAN.html)
+[Architektur](https://speicherstadt.github.io/fixpunkt/architektur.html) ·
+[Entwicklung und Tests](https://speicherstadt.github.io/fixpunkt/entwicklung.html) ·
+[Projektplan](https://speicherstadt.github.io/fixpunkt/PLAN.html)
 
 > [!NOTE]
 > Fixpunkt ersetzt kein amtliches Aufmaß. Bis die Genauigkeit auf euren Baustellen belegt ist, Ergebnisse vor der

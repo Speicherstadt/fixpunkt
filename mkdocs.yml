@@ -1,4 +1,4 @@
-# Dokumentation als Website: https://firsttris.github.io/fixpunkt/
+# Dokumentation als Website: https://speicherstadt.github.io/fixpunkt/
 # Quelle ist docs/, gebaut mit Zensical (.github/workflows/docs.yml) wie firsttris/haben; Zensical liest
 # diese Datei unverändert (https://zensical.org/docs/setup/basics/).
 # Lokal: pip install -r requirements-docs.txt && zensical serve
@@ -7,9 +7,9 @@ site_description: >-
   Fixpunkt: Aushub und Haufwerke aus Drohnenflügen berechnen, selbst gehostet. Punktwolken und
   Höhenmodelle aus OpenDroneMap hochladen, Abrechnungsgrenzen setzen, Mengenbericht in m³ – eine
   Programmdatei, ETRS89/UTM32, Bodenfilter für Bagger und Bewuchs.
-site_url: https://firsttris.github.io/fixpunkt/
-repo_url: https://github.com/firsttris/fixpunkt
-repo_name: firsttris/fixpunkt
+site_url: https://speicherstadt.github.io/fixpunkt/
+repo_url: https://github.com/Speicherstadt/fixpunkt
+repo_name: Speicherstadt/fixpunkt
 edit_uri: edit/main/docs/
 copyright: >-
   Fixpunkt ersetzt kein amtliches Aufmaß. Ergebnisse vor der Abrechnung mit Lieferscheinen oder
@@ -127,7 +127,7 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/firsttris/fixpunkt
+      link: https://github.com/Speicherstadt/fixpunkt
       name: Quellcode auf GitHub
     - icon: fontawesome/brands/docker
       link: https://hub.docker.com/r/tristanteu/fixpunkt

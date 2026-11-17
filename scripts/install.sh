@@ -1,7 +1,7 @@
 #!/bin/sh
 # Installiert oder aktualisiert Fixpunkt als systemd-Dienst, ohne Docker:
 #
-#   curl -fsSL https://raw.githubusercontent.com/firsttris/fixpunkt/main/scripts/install.sh | sudo sh
+#   curl -fsSL https://raw.githubusercontent.com/Speicherstadt/fixpunkt/main/scripts/install.sh | sudo sh
 #
 # Für ein Update einfach erneut ausführen. Was es einrichtet (Vorbild: firsttris/haul scripts/install.sh):
 #   /usr/local/bin/fixpunkt                 Server mit eingebauter Web-UI und Rechenkern
@@ -14,7 +14,7 @@
 #   FIXPUNKT_PORT=8080       Port der Web-UI bei der ersten Installation
 set -eu
 
-REPO=firsttris/fixpunkt
+REPO=Speicherstadt/fixpunkt
 BIN=/usr/local/bin/fixpunkt
 ENV_FILE=/etc/fixpunkt/fixpunkt.env
 UNIT=/etc/systemd/system/fixpunkt.service

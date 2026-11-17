@@ -2,7 +2,7 @@
 
 ## Documentation
 
-Die Doku ist in `docs/` (<https://firsttris.github.io/fixpunkt/>), gebaut mit Zensical wie firsttris/haben
+Die Doku ist in `docs/` (<https://speicherstadt.github.io/fixpunkt/>), gebaut mit Zensical wie firsttris/haben
 (`mkdocs.yml`, `requirements-docs.txt`, `.github/workflows/docs.yml`). Vor einer Änderung die betroffenen Seiten
 lesen: `architektur.md`, `methode.md`, `aushub.md`, Projektplan `PLAN.md` (Architektur: Abschnitt 5).
 Rechenkern: `crates/processing/README.md`. Links in README und Doku zeigen auf die Website, nicht auf `docs/*.md`.

@@ -1,4 +1,4 @@
-# Baut docs/ mit Zensical und veröffentlicht sie auf GitHub Pages: https://firsttris.github.io/fixpunkt/
+# Baut docs/ mit Zensical und veröffentlicht sie auf GitHub Pages: https://speicherstadt.github.io/fixpunkt/
 # Wie firsttris/haben .github/workflows/docs.yml. In Pull Requests nur bauen, nicht veröffentlichen, damit ein
 # kaputter Link oder eine fehlende Seite vor dem Merge auffällt.
 # Voraussetzung einmalig: Settings → Pages → Source "GitHub Actions" (configure-pages mit enablement schaltet das

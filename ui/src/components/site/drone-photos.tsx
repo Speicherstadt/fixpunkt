@@ -21,7 +21,7 @@ import {
 } from "@/lib/odm";
 import { m } from "@/paraglide/messages";
 
-const DOCS = "https://firsttris.github.io/fixpunkt/drohnenfotos.html";
+const DOCS = "https://speicherstadt.github.io/fixpunkt/drohnenfotos.html";
 
 const QUALITY: Record<OdmQuality, () => string> = {
   fast: m.odm_quality_fast,

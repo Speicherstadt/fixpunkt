@@ -6,7 +6,7 @@ members = ["crates/processing", "crates/server"]
 version = "0.1.0"
 edition = "2021"
 license = "UNLICENSED"
-repository = "https://github.com/firsttris/fixpunkt"
+repository = "https://github.com/Speicherstadt/fixpunkt"
 
 [profile.release]
 debug = false

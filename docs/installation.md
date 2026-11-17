@@ -66,7 +66,7 @@ Das Image läuft als Benutzer `fixpunkt` (UID 1000), nicht als root, und hat ein
 ## Ohne Container (systemd)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/firsttris/fixpunkt/main/scripts/install.sh | sudo sh
+curl -fsSL https://raw.githubusercontent.com/Speicherstadt/fixpunkt/main/scripts/install.sh | sudo sh
 ```
 
 Das Skript lädt die statische Programmdatei der neuesten Version (Prüfsumme wird kontrolliert) und richtet ein:

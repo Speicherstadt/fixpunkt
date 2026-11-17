@@ -148,6 +148,6 @@ Volumen gegen Kegel- und Pyramidenstumpfformel, 4 Mio. Punkte in Sekunden, Tests
 
 <div class="showcase-center" markdown>
 
-[Installieren](installation.md){ .md-button .md-button--primary } [Quellcode auf GitHub](https://github.com/firsttris/fixpunkt){ .md-button }
+[Installieren](installation.md){ .md-button .md-button--primary } [Quellcode auf GitHub](https://github.com/Speicherstadt/fixpunkt){ .md-button }
 
 </div>
