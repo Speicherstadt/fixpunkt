@@ -69,7 +69,7 @@ jobs:
     uses: firsttris/workflows/.github/workflows/docker-release.yml@v1
     with:
       image: tristanteu/fixpunkt
-      description: Georeferenzierte 3D-Baustellendokumentation und Massenermittlung aus Drohnenflügen
+      description: Selbst gehostete Massenermittlung für Baustellen: Aushub und Haufwerke aus Drohnenflügen
       version-file: Cargo.toml
     secrets: inherit
     permissions:
