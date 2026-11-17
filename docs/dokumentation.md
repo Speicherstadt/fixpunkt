@@ -1,7 +1,7 @@
 ---
 description: >-
   Baustelle dokumentieren in Fixpunkt: Zwangspunkte mit Sollhöhe gegen das aktuelle Gelände prüfen, Fotos mit
-  GPS-Position an ihrer Stelle zeigen, Notizen mit Koordinaten.
+  GPS-Position an ihrer Stelle zeigen, Notizen mit Koordinaten, alles als PDF-Bericht.
 ---
 
 # Dokumentation
@@ -36,3 +36,13 @@ Original.
 
 Notizen halten fest, was sonst im Bautagebuch verschwindet: Bodenproben, Abstimmungen, Fundstellen. Ost und Nord
 sind freiwillig; mit Lage stehen sie in der Ansicht.
+
+## Bericht (PDF)
+
+**Bericht (PDF)** oben im Abschnitt fasst die Dokumentation einer Baustelle zusammen: alle Zwangspunkte mit Lage,
+Sollhöhe, Gelände der letzten Aufnahme, Abweichung und Status (eingehalten bis ± 3 cm), die Notizen als Tabelle
+und jedes Foto mit Aufnahmezeit, Lage und Notiz. Lesern steht der Bericht genauso zur Verfügung.
+
+[![Seite 1 der Dokumentation als PDF: Zwangspunkt, Notiz und Foto](screenshot-pdf-dokumentation.png){ width="910" height="1263" loading="lazy" }](beispiel-dokumentation.pdf)
+
+[Beispiel herunterladen (PDF)](beispiel-dokumentation.pdf)

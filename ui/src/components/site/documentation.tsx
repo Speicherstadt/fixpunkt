@@ -3,7 +3,7 @@
  * Position aus GPS, Notizen. Fotos ohne GPS erscheinen in der Liste, aber nicht in der Ansicht.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, MapPin, StickyNote, Trash2, Upload } from "lucide-react";
+import { Camera, FileDown, MapPin, StickyNote, Trash2, Upload } from "lucide-react";
 import { type FormEvent, useId, useState } from "react";
 import { EmptyState, ErrorText, Section } from "@/components/page";
 import { cm } from "@/components/report/compare-report";
@@ -63,22 +63,31 @@ export function Documentation({ siteId, canEdit }: { siteId: number; canEdit: bo
       title={m.doc_title()}
       description={m.doc_text()}
       actions={
-        canEdit ? (
-          <>
-            <input
-              id={inputId}
-              type="file"
-              multiple
-              accept="image/jpeg,image/png"
-              className="sr-only"
-              onChange={(e) => upload(e.target.files)}
-            />
-            <label htmlFor={inputId} className={buttonVariants({ variant: "primary" })}>
-              <Upload size={16} aria-hidden="true" />
-              {m.doc_upload()}
-            </label>
-          </>
-        ) : null
+        <>
+          <a
+            href={`/api/sites/${siteId}/documentation/report`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <FileDown size={16} aria-hidden="true" />
+            {m.doc_report()}
+          </a>
+          {canEdit ? (
+            <>
+              <input
+                id={inputId}
+                type="file"
+                multiple
+                accept="image/jpeg,image/png"
+                className="sr-only"
+                onChange={(e) => upload(e.target.files)}
+              />
+              <label htmlFor={inputId} className={buttonVariants({ variant: "primary" })}>
+                <Upload size={16} aria-hidden="true" />
+                {m.doc_upload()}
+              </label>
+            </>
+          ) : null}
+        </>
       }
     >
       {uploading ? (

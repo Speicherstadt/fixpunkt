@@ -54,4 +54,5 @@ jobs:
             docs/screenshot-*.png
             docs/social-preview.png
             docs/beispiel-mengenbericht.pdf
+            docs/beispiel-dokumentation.pdf
           message: Screenshots erneuert

@@ -51,20 +51,20 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 - [x] Fortlaufende Aktualisierung über die Bauphase (Zeitreihe)
 
 ### Vergleichen
-- [ ] Plan/Ist-Vergleich mit hinterlegten DXF-Plänen
+- [x] Plan/Ist-Vergleich mit hinterlegten DXF-Plänen (Höhenpunkte und Koten, Plan als Hintergrund, Bericht als PDF)
 - [x] Zwei Zeitpunkte vergleichen (Abweichungs-Heatmap) – in der Ansicht und als GeoTIFF
 - [x] Soll-Höhe / Sollfläche gegen Scan
 
 ### Dokumentieren
-- [ ] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte, Leitungsverlauf
-- [ ] Fotos georeferenziert inkl. Blickrichtung, Notizen dazu
+- [x] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte mit Sollhöhe und Soll/Ist; Leitungsverlauf als Linie über einen DXF-Plan
+- [ ] Fotos georeferenziert inkl. Blickrichtung, Notizen dazu – Fotos mit GPS-Position und Notizen ✅, Dokumentation als PDF ✅, Blickrichtung offen
 - [x] Berichte (PDF) je Berechnung
 - [x] Dashboards pro Baustelle (Überblick oben auf der Baustellenseite)
-- [ ] Kartenansicht aller Baustellen/Scans
+- [x] Kartenansicht aller Baustellen/Scans
 
 ### Ansichten
-- [ ] 2D (Draufsicht, Orthofoto), 3D (Punktwolke, Mesh), Karte – Höhenbild ✅, Orthofoto ✅, 3D als Geländenetz ✅, Karte ✅, Punktwolke offen
-- [ ] Einfärbung nach RGB, Höhe, Intensität, Abweichung – Höhe und Abweichung ✅
+- [x] 2D (Draufsicht, Orthofoto), 3D (Punktwolke, Mesh), Karte
+- [ ] Einfärbung nach RGB, Höhe, Intensität, Abweichung – RGB, Höhe und Abweichung ✅, Intensität offen
 
 ### Export
 - [x] LAS/LAZ (Punktwolke), DXF (Linien/Punkte), LandXML (Flächen), CSV (Punkte), OBJ/PLY (Mesh), GeoTIFF (DGM) – Orthofoto offen
@@ -476,14 +476,14 @@ Wie in allen Projekten (`firsttris/workflows`):
 - [x] Release bereit: Docker-Image, statische musl-Programmdateien (mit mimalloc so schnell wie glibc), install.sh
 - [x] Upload großer Fotomengen fortsetzbar (tus) für die Drohnenbilder
 - [ ] Browser-Kacheln (3D Tiles/Potree) aus dem Rechenkern – E57 vom BLK2GO ✅, Punktwolke in 3D bis 1 Mio. Punkte ✅
-- [ ] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung
+- [x] Viewer mit Punkt-, Längen-, Flächen-, Höhenmessung (2D-Ansicht, Profil)
 - [ ] Mit öffentlichen OpenDroneMap-Datensätzen arbeiten, bis eigene Flüge da sind
 
 ### Phase 2 – Drohne + Aushubberechnung (2–3 Wochen)
 - [x] NodeODM anbinden (Fotos mit RTK-Position aus EXIF/XMP)
-- [ ] Orthofoto, DGM, Punktwolke im Viewer
-- [ ] **Aushub: Differenz zweier Flüge (Urgelände ↔ Baugrube)**, Ergebnis in m³ + Höhendifferenz-Karte
-- [ ] Volumen Haufwerk gegen Basisfläche
+- [x] Orthofoto, DGM, Punktwolke im Viewer
+- [x] **Aushub: Differenz zweier Flüge (Urgelände ↔ Baugrube)**, Ergebnis in m³ + Höhendifferenz-Karte
+- [x] Volumen Haufwerk gegen Basisfläche
 - [ ] Erster echter Flug: Baugrube vor und nach dem Aushub
 
 ### Phase 3 – Genauigkeit Drohne (laufend)
@@ -505,11 +505,11 @@ Wie in allen Projekten (`firsttris/workflows`):
 - [ ] TestFlight an den Kumpel
 
 ### Phase 5 – Ausbau
-- [ ] Zwangspunkte / Leitungsdokumentation
-- [ ] Plan/Ist-Vergleich mit DXF, Abweichungs-Heatmap
+- [x] Zwangspunkte / Leitungsdokumentation
+- [x] Plan/Ist-Vergleich mit DXF, Abweichungs-Heatmap
 - [x] Zeitreihen, PDF-Berichte
 - [x] Dashboards
-- [ ] Exporte DXF, LandXML, CSV, GeoTIFF
+- [x] Exporte DXF, LandXML, CSV, GeoTIFF
 - [x] Flugplanung in Fixpunkt (WPML) – DJI Cloud API offen
 - [ ] Android-PWA (Photogrammetrie + Web Bluetooth)
 - [ ] Optional: leichter Unicore-Empfänger im Sodex-Stil statt Reach RX2
@@ -533,7 +533,9 @@ Was im Vergleich zu SDX-Cloud/PocketScan noch fehlt, geordnet nach Nutzen für d
 7. [x] Passpunkte und Georeferenzierung in der UI (Vorschau mit Restklaffen, neue Aufnahme)
 8. [x] Dokumentieren: Zwangspunkte, Fotos mit Position, Notizen
 9. [x] DXF-Pläne als Hintergrund, Plan/Ist
-10. iOS-App mit RTK-Rover (Phase 4, braucht Mac und Xcode)
+10. [x] Orthofoto als Hintergrund, fortsetzbarer Upload (tus), farbige Punktwolke und E57, Überblick je Baustelle,
+    Flugplanung (KMZ für Pilot 2), API-Tokens und Passkeys, Dokumentation und Plan/Ist als PDF
+11. iOS-App mit RTK-Rover (Phase 4, braucht Mac und Xcode)
 
 ## 7. Machbarkeit
 

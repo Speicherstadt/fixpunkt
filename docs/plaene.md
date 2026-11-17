@@ -40,6 +40,10 @@ Gelände der neuesten Aufnahme an dieser Stelle und den Unterschied – dazu, wi
 mittlere und die größte Abweichung. Für eine ganze Fläche (Sohle, Planum) gibt es den
 [Soll/Ist-Vergleich](berechnungen.md#sollist) mit Sollhöhe, geneigter Ebene oder Soll-Geländemodell.
 
+Das Symbol neben einem Plan lädt Plan/Ist als **PDF** herunter: Kennzahlen (Punkte in ± 3 cm, mittlere und größte
+Abweichung), alle Höhenpunkte mit Layer, Lage, Soll, Ist und Ist − Soll sowie ein Hinweis auf Punkte außerhalb der
+Aufnahme.
+
 > [!TIP]
 > Auch die Höhenlinien aus dem [Export](berechnungen.md#export) als DXF lassen sich wieder als Plan einlesen –
 > etwa um den Stand einer früheren Befliegung über die aktuelle zu legen.

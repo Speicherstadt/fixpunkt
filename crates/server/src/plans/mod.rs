@@ -32,7 +32,7 @@ pub struct Plan {
     pub created_at: i64,
 }
 
-fn dir(app: &AppRef, id: i64) -> PathBuf {
+pub(crate) fn dir(app: &AppRef, id: i64) -> PathBuf {
     app.cfg.data_dir.join("plans").join(id.to_string())
 }
 

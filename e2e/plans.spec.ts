@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
@@ -24,6 +25,18 @@ test("Plan hochladen und Plan/Ist", async ({ page }) => {
   await expect(table.getByRole("row").nth(1)).toContainText("0,0 cm");
   await expect(table.getByRole("row").nth(2)).toContainText("298,25 m");
   await expect(table.getByRole("row").nth(2)).toContainText(/[-−]10,0 cm/);
+
+  // Plan/Ist als PDF
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    row.getByRole("link", { name: "Plan/Ist von „lageplan“ als PDF" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^Plan-Ist-.*\.pdf$/);
+  expect(
+    readFileSync(await download.path())
+      .subarray(0, 5)
+      .toString(),
+  ).toBe("%PDF-");
 
   // als Hintergrund
   const view = page.getByRole("region", { name: "Ansicht" });

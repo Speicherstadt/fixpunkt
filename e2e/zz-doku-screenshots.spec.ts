@@ -353,6 +353,27 @@ test("PDF-Bericht @screenshots", async () => {
   if (render.error) console.warn("pdftoppm fehlt, Vorschaubild nicht erneuert");
 });
 
+/** Dokumentation als PDF (Zwangspunkt, Notiz, Foto) wie der Mengenbericht: Beispiel und Vorschau von Seite 1 */
+test("PDF-Dokumentation @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const pdf = page.waitForEvent("download");
+  await page
+    .getByRole("region", { name: "Dokumentation" })
+    .getByRole("link", { name: "Bericht (PDF)" })
+    .click();
+  const file = `${DOCS}/beispiel-dokumentation.pdf`;
+  await (await pdf).saveAs(file);
+  const render = spawnSync("pdftoppm", [
+    "-png",
+    "-singlefile",
+    "-r",
+    "110",
+    file,
+    `${DOCS}/screenshot-pdf-dokumentation`,
+  ]);
+  if (render.error) console.warn("pdftoppm fehlt, Vorschaubild nicht erneuert");
+});
+
 test("Drohnenfotos @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const section = page.getByRole("region", { name: "Drohnenfotos auswerten" });

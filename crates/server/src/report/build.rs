@@ -84,7 +84,7 @@ struct Step {
     since_previous: Vol,
 }
 
-fn reference(epsg: i64) -> String {
+pub(crate) fn reference(epsg: i64) -> String {
     if epsg == 25832 {
         "ETRS89/UTM32 (EPSG:25832), DHHN2016".into()
     } else {

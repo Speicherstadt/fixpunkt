@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
@@ -28,6 +29,18 @@ test("Fotos und Zwangspunkte dokumentieren", async ({ page }) => {
   const point = doc.getByRole("listitem").filter({ hasText: "Kanalsohle Bestand" });
   await expect(point).toContainText("Soll 298,15 m");
   await expect(point).toContainText("Ist 298,20 m (5,0 cm)");
+
+  // Bericht als PDF mit dem Zwangspunkt
+  const [download] = await Promise.all([
+    page.waitForEvent("download"),
+    doc.getByRole("link", { name: "Bericht (PDF)" }).click(),
+  ]);
+  expect(download.suggestedFilename()).toMatch(/^Dokumentation-.*\.pdf$/);
+  expect(
+    readFileSync(await download.path())
+      .subarray(0, 5)
+      .toString(),
+  ).toBe("%PDF-");
 
   // löschen
   await photo.getByRole("button", { name: "foto-gps löschen" }).click();

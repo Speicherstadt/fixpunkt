@@ -1,7 +1,7 @@
 //! Bericht als PDF (A4 hoch): Helvetica aus den 14 Standardschriften, nichts eingebettet außer der Karte.
 //! Gestaltung wie die Web-UI: Zink-Grautöne, Orange für Abtrag, Blau für Auftrag.
 
-use super::doc::{Block, Doc, Kpi, Map, Table, Tone};
+use super::doc::{Block, Doc, Kpi, Map, Photo, Table, Tone};
 use super::text::{self, Weight};
 use flate2::{write::ZlibEncoder, Compression};
 use pdf_writer::{Content, Filter, Finish, Name, Pdf, Rect, Ref, Str, TextStr};
@@ -33,8 +33,13 @@ const FOOTER: &str =
 struct Image {
     cols: usize,
     rows: usize,
-    zlib: Vec<u8>,
+    /// RGB mit zlib gepackt, bei Fotos JPEG
+    data: Vec<u8>,
+    jpeg: bool,
 }
+
+/// Breite eines Fotos im Bericht; Text steht rechts daneben
+const PHOTO_W: f32 = 200.0;
 
 /// Seiten, Schreibposition (y von unten, wie im PDF) und Bilder
 struct Painter {
@@ -150,8 +155,13 @@ impl Painter {
         self.images.push(Image {
             cols,
             rows,
-            zlib: zlib(rgb),
+            data: zlib(rgb),
+            jpeg: false,
         });
+        self.place_image([x, y, w, h]);
+    }
+
+    fn place_image(&mut self, [x, y, w, h]: [f32; 4]) {
         let name = image_name(self.images.len() - 1);
         self.c()
             .save_state()
@@ -287,6 +297,36 @@ impl Painter {
         self.y -= 10.0;
     }
 
+    /// Foto links, Titel und Zeilen rechts daneben; zusammen auf einer Seite
+    fn photo(&mut self, ph: &Photo) {
+        let (w, h) = photo_size(ph);
+        let text_x = MARGIN + PHOTO_W + 14.0;
+        let lines: Vec<String> = ph
+            .lines
+            .iter()
+            .flat_map(|l| text::wrap(l, Weight::Regular, 9.0, PAGE_W - MARGIN - text_x))
+            .collect();
+        let text_h = 16.0 + 12.0 * lines.len() as f32;
+        self.ensure(h.max(text_h) + 12.0);
+        let top = self.y - 4.0;
+        self.images.push(Image {
+            cols: ph.cols,
+            rows: ph.rows,
+            data: ph.jpeg.clone(),
+            jpeg: true,
+        });
+        self.place_image([MARGIN, top - h, w, h]);
+        self.stroke_rect(MARGIN, top - h, w, h, BORDER, 0.5);
+        let mut y = top - 10.0;
+        self.text(text_x, y, &ph.title, Weight::Bold, 10.0, TEXT);
+        y -= 4.0;
+        for line in lines {
+            y -= 12.0;
+            self.text(text_x, y, &line, Weight::Regular, 9.0, MUTED);
+        }
+        self.y = (top - h).min(y) - 14.0;
+    }
+
     fn map(&mut self, m: &Map) {
         let room = self.y - BOTTOM - MAP_EXTRA - 4.0;
         let max_h = if room >= MAP_MIN_H.min(map_size(m, MAP_MAX_H).1) {
@@ -381,6 +421,12 @@ impl Painter {
     }
 }
 
+/// Größe eines Fotos: höchstens [`PHOTO_W`] breit und hoch
+fn photo_size(ph: &Photo) -> (f32, f32) {
+    let s = PHOTO_W / ph.cols.max(ph.rows).max(1) as f32;
+    (ph.cols as f32 * s, ph.rows as f32 * s)
+}
+
 /// Platz unter der Karte für Legende und eine Zeile Bildunterschrift
 const MAP_EXTRA: f32 = 56.0;
 
@@ -394,6 +440,7 @@ fn map_size(m: &Map, max_h: f32) -> (f32, f32) {
 fn lead(b: Option<&Block>) -> f32 {
     match b {
         Some(Block::Map(m)) => map_size(m, MAP_MIN_H).1 + MAP_EXTRA,
+        Some(Block::Photo(ph)) => photo_size(ph).1 + 16.0,
         Some(Block::Table(_)) => 3.0 * ROW_H,
         Some(Block::Note(_)) => 40.0,
         Some(Block::Text(_)) => 2.0 * 12.0,
@@ -425,6 +472,7 @@ pub fn render(doc: &Doc) -> Vec<u8> {
             Block::Note(s) => p.note(s),
             Block::Table(t) => p.table(t),
             Block::Map(m) => p.map(m),
+            Block::Photo(ph) => p.photo(ph),
         }
     }
     p.footers();
@@ -457,14 +505,18 @@ fn assemble(doc: &Doc, p: Painter) -> Vec<u8> {
             .encoding_predefined(Name(b"WinAnsiEncoding"));
     }
     for (img, r) in p.images.iter().zip(&images) {
-        let mut x = pdf.image_xobject(*r, &img.zlib);
-        x.filter(Filter::FlateDecode);
+        let mut x = pdf.image_xobject(*r, &img.data);
+        x.filter(if img.jpeg {
+            Filter::DctDecode
+        } else {
+            Filter::FlateDecode
+        });
         x.width(img.cols as i32);
         x.height(img.rows as i32);
         x.color_space().device_rgb();
         x.bits_per_component(8);
-        // Karte nicht weichzeichnen: jede Zelle bleibt als Fläche erkennbar
-        x.interpolate(false);
+        // Karte nicht weichzeichnen: jede Zelle bleibt als Fläche erkennbar; Fotos glätten
+        x.interpolate(img.jpeg);
     }
     let names: Vec<String> = (0..images.len()).map(image_name).collect();
     for ((page, content), body) in pages.iter().zip(p.pages) {

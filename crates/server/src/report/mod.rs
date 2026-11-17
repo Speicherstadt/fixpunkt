@@ -6,6 +6,8 @@ pub mod doc;
 pub mod map;
 mod metrics;
 pub mod pdf;
+pub mod site;
+pub mod site_routes;
 pub mod text;
 
 use crate::db::{self, status};

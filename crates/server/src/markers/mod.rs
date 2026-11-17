@@ -40,7 +40,7 @@ pub struct Marker {
     pub created_at: i64,
 }
 
-fn dir(app: &AppRef, id: i64) -> PathBuf {
+pub(crate) fn dir(app: &AppRef, id: i64) -> PathBuf {
     app.cfg.data_dir.join("markers").join(id.to_string())
 }
 

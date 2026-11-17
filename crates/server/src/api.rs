@@ -98,6 +98,11 @@ pub fn router(app: AppRef) -> Router {
         )
         .route("/plans/{id}", delete(plans::delete))
         .route("/plans/{id}/geometry", get(plans::geometry))
+        .route("/plans/{id}/report", get(report::site_routes::plan))
+        .route(
+            "/sites/{id}/documentation/report",
+            get(report::site_routes::documentation),
+        )
         .route("/sites/{id}/odm", post(odm::create))
         .route(
             "/jobs/{id}/images",

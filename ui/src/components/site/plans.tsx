@@ -3,7 +3,7 @@
  * Aufnahme. In der Ansicht lässt sich ein Plan über das Höhenbild legen.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, Trash2, Upload } from "lucide-react";
+import { FileDown, FileText, Trash2, Upload } from "lucide-react";
 import { useId, useState } from "react";
 import { EmptyState, ErrorText, Section } from "@/components/page";
 import { cm } from "@/components/report/compare-report";
@@ -123,6 +123,16 @@ function PlanRow({
           {p.info.zoneOffset ? ` · ${m.plans_zone({ zone: p.info.zoneOffset / 1e6 })}` : ""}
         </span>
       </div>
+      {p.info.spots ? (
+        <a
+          href={`/api/plans/${p.id}/report`}
+          className={buttonVariants({ variant: "ghost", size: "iconSm" })}
+          aria-label={m.plans_report({ name: p.name })}
+          title={m.plans_report({ name: p.name })}
+        >
+          <FileDown size={16} aria-hidden="true" />
+        </a>
+      ) : null}
       {canEdit ? (
         <Button
           size="iconSm"

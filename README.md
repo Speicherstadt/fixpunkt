@@ -61,7 +61,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Haufwerke gegen Basisfläche, Zeitreihe über die Bauphase
 - Soll/Ist gegen Sohlhöhe, geneigte Ebene oder Soll-DGM
 - Bodenfilter für Bagger, Container und Bewuchs
-- Bericht als PDF mit Karte, als CSV oder GeoTIFF
+- Bericht als PDF mit Karte, als CSV oder GeoTIFF; Dokumentation und Plan/Ist als PDF
 - Überblick je Baustelle: Aushub je Befliegung, Soll/Ist, Zwangspunkte
 
 </td>

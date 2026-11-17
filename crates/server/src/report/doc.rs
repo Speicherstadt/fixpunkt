@@ -66,6 +66,16 @@ pub struct Map {
     pub caption: String,
 }
 
+/// Foto als JPEG (RGB) mit Titel und Zeilen daneben
+#[derive(Debug, Clone, PartialEq)]
+pub struct Photo {
+    pub jpeg: Vec<u8>,
+    pub cols: usize,
+    pub rows: usize,
+    pub title: String,
+    pub lines: Vec<String>,
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Block {
     Heading(String),
@@ -74,6 +84,7 @@ pub enum Block {
     Note(String),
     Table(Table),
     Map(Map),
+    Photo(Photo),
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -107,6 +118,10 @@ impl Doc {
                 Block::Map(m) => {
                     out.push(m.caption.clone());
                     out.extend(m.legend_labels.iter().cloned());
+                }
+                Block::Photo(p) => {
+                    out.push(p.title.clone());
+                    out.extend(p.lines.iter().cloned());
                 }
             }
         }
