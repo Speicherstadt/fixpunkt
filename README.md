@@ -4,6 +4,8 @@
 
 <h1>Fixpunkt: Aushub und Haufwerke aus Drohnenflügen berechnen</h1>
 
+**Deutsch** · [English](README.en.md)
+
 **Selbst gehostete Massenermittlung für Baustellen: Punktwolke oder Höhenmodell hochladen, Abrechnungsgrenze setzen, Mengenbericht in m³.**<br>
 Vergleicht Urgelände und Aushub je Abrechnungsbereich, rechnet Bagger und Bewuchs heraus und gibt den Bericht als PDF, CSV oder GeoTIFF weiter.<br>
 Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf deinem Server.
@@ -27,8 +29,6 @@ docker run -d -p 8080:8080 -v fixpunkt:/data tristanteu/fixpunkt
 [FAQ](#-faq) •
 [Dokumentation](https://speicherstadt.github.io/fixpunkt/) •
 [Entwicklung](#️-entwicklung)
-
-<sub>English: self-hosted earthwork volume calculation from drone surveys – upload point clouds (LAS/LAZ) or elevation models (GeoTIFF, e.g. from OpenDroneMap), set billing boundaries, get cut and fill per area. One binary with web UI. The app is in German and English, the documentation in German.</sub>
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-bericht-dunkel.png">

@@ -26,7 +26,8 @@ ein Detail entscheidet.
 
 - Tests für das Geänderte (Unit-Tests im Modul, End-to-End in `crates/processing/tests/cli.rs`);
   Rechenergebnisse gegen unabhängig bekannte Werte prüfen (Formel, numerische Kontrolle).
-- die Doku in `docs/` und die README, wenn sich Funktionen, Architektur oder Stand ändern;
+- die Doku in `docs/` und beide READMEs (`README.md` deutsch, `README.en.md` englisch), wenn sich Funktionen,
+  Architektur oder Stand ändern;
 - die Screenshots nach einer Änderung am Aussehen: **Actions → Update screenshots → Run workflow**
   (lokal `bun run docs:screenshots`), dann die neuen Bilder ansehen.
 
