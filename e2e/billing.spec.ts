@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, type Page, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { boundaries, terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /**
  * Aufmaß im Browser: Grube 20 × 20 × 2 m = 800 m³ fest. Lehm mit 2 t/m³ und Auflockerung 1,25 → 1.600 t,
@@ -27,7 +28,7 @@ test("Aufmaß mit Preis, Kennwerten und Lieferscheinen", async ({ page }) => {
   await page.goto(`/sites/${site.id}`);
 
   // Preis am Bereich
-  const regions = page.getByRole("region", { name: "Bereiche" });
+  const regions = await section(page, "Bereiche");
   await regions.getByRole("button", { name: "Material und Massenziel für Grube" }).click();
   const form = regions.getByRole("form", { name: "Massenziel für Grube" });
   await form.getByLabel("Material").fill("Lehm");
@@ -40,7 +41,7 @@ test("Aufmaß mit Preis, Kennwerten und Lieferscheinen", async ({ page }) => {
   );
 
   // Zeitraum: vom Urgelände bis Januar; ohne Kennwerte nur m³
-  const billing = page.getByRole("region", { name: "Abrechnung" });
+  const billing = await section(page, "Abrechnung");
   await expect(billing.getByLabel("Von")).toHaveValue(String(before));
   await expect(billing.getByLabel("Bis")).toHaveValue(String(after));
   const positions = billing.getByRole("table", { name: "Positionen des Aufmaßes" });
@@ -133,7 +134,7 @@ test("Aufmaß nach Schichten", async ({ page }) => {
   const { site, volume } = await pitSite(page, "Schichten");
   await page.goto(`/sites/${site.id}`);
 
-  const billing = page.getByRole("region", { name: "Abrechnung" });
+  const billing = await section(page, "Abrechnung");
   await billing.getByRole("button", { name: "Schichten (0)" }).click();
   const form = billing.getByRole("form", { name: "Schichten (Homogenbereiche)" });
   await form.getByRole("button", { name: "Schicht hinzufügen" }).click();
@@ -167,7 +168,7 @@ test("Aufmaß zur Freigabe", async ({ page, browser }) => {
   const grube = regions.find((r) => r.name === "Grube")!;
   await api.call("PATCH", `/regions/${grube.id}`, { unitPrice: 10, priceUnit: "m3" });
   await page.goto(`/sites/${site.id}`);
-  const billing = page.getByRole("region", { name: "Abrechnung" });
+  const billing = await section(page, "Abrechnung");
   await billing.getByRole("button", { name: "Zur Freigabe senden" }).click();
   const dialog = page.getByRole("dialog", { name: "Zur Freigabe senden" });
   await dialog.getByLabel("Notiz für den Auftraggeber (optional)").fill("Abschlag Januar");

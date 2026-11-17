@@ -35,7 +35,7 @@ export function DronePhotos({ siteId }: { siteId: number }) {
   const status = useQuery({ queryKey: ["odm"], queryFn: api.odmStatus, staleTime: 60_000 });
   const s = status.data;
   return (
-    <Section title={m.odm_title()} description={m.odm_text()}>
+    <Section title={m.odm_title()} description={m.odm_text()} collapsible>
       {!s ? null : !s.configured ? (
         <p className="m-0 text-[13px] text-muted">
           {m.odm_off()}{" "}

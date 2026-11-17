@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /** DXF-Plan der Grube: hochladen, Plan/Ist gegen den Aushub, als Hintergrund in der Ansicht. */
 test("Plan hochladen und Plan/Ist", async ({ page }) => {
@@ -12,7 +13,7 @@ test("Plan hochladen und Plan/Ist", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const plans = page.getByRole("region", { name: "Pläne" });
+  const plans = await section(page, "Pläne");
   await plans.getByLabel("DXF hochladen").setInputFiles("e2e/data/lageplan.dxf");
   const row = plans.getByRole("listitem").filter({ hasText: "lageplan" });
   await expect(row).toContainText("5 Ebenen · 4 Linien · 2 Höhenpunkte");
@@ -39,9 +40,10 @@ test("Plan hochladen und Plan/Ist", async ({ page }) => {
   ).toBe("%PDF-");
 
   // als Hintergrund
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   await view.getByLabel("Plan darüber").selectOption({ label: "lageplan" });
   await expect(view.getByRole("application", { name: /Höhenbild/ })).toBeVisible();
+  await section(page, "Pläne");
   await row.getByRole("button", { name: "lageplan löschen" }).click();
   await expect(row).toHaveCount(0);
 });

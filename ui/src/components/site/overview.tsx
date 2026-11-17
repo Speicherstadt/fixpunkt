@@ -3,9 +3,10 @@
  * Aufmerksamkeit braucht. Welche Abschnitte in welcher Reihenfolge, stellt jeder Benutzer selbst ein (Anpassen).
  */
 import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import { FileText, SlidersHorizontal } from "lucide-react";
 import { useState } from "react";
-import { Section } from "@/components/page";
+import { EmptyState, Section } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { dashboardQuery, layoutQuery } from "@/lib/queries";
 import { m } from "@/paraglide/messages";
@@ -18,7 +19,22 @@ export function Overview({ siteId }: { siteId: number }) {
   const { data: layout } = useQuery(layoutQuery(siteId));
   const [editing, setEditing] = useState(false);
   const [report, setReport] = useState(false);
-  if (!d || d.captures.count === 0) return null;
+  if (!d) return null;
+  if (d.captures.count === 0)
+    return (
+      <Section title={m.overview_title()}>
+        <EmptyState>
+          {m.overview_empty()}{" "}
+          <Link
+            to="/sites/$siteId/aufnahmen"
+            params={{ siteId: String(siteId) }}
+            className="text-fg underline"
+          >
+            {m.overview_empty_link()}
+          </Link>
+        </EmptyState>
+      </Section>
+    );
   const sections = layout?.sections ?? [];
   return (
     <Section

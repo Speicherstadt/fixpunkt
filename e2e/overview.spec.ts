@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { PIT_M3, terrainXyz, X0, Y0 } from "./fixtures";
+import { section } from "./site";
 
 /**
  * Überblick einer Baustelle: Aushub gegen das Urgelände (Grube 800 m³ aus den Testdaten), Zwangspunkte gegen die
@@ -32,7 +33,7 @@ test("Überblick zeigt Aushub und verletzte Zwangspunkte", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const overview = page.getByRole("region", { name: "Überblick" });
+  const overview = await section(page, "Überblick");
   await expect(overview).toContainText("Aufnahmen2");
   await expect(overview.getByRole("link", { name: /Aushub/ })).toBeVisible();
   const m3 = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 }).format(PIT_M3);
@@ -55,7 +56,7 @@ test("Überblick anpassen", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const overview = page.getByRole("region", { name: "Überblick" });
+  const overview = await section(page, "Überblick");
   await expect(overview.getByText("Aufnahmen", { exact: true })).toBeVisible();
   await overview.getByRole("button", { name: "Anpassen" }).click();
   const list = overview.getByRole("list", { name: "Anpassen" });
@@ -94,10 +95,7 @@ test("Bericht zusammenstellen", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  await page
-    .getByRole("region", { name: "Überblick" })
-    .getByRole("button", { name: "Bericht" })
-    .click();
+  await (await section(page, "Überblick")).getByRole("button", { name: "Bericht" }).click();
   const dialog = page.getByRole("dialog", { name: "Bericht zusammenstellen" });
   await dialog.getByLabel("Titel").fill("Wochenbericht KW 47");
   await dialog.getByLabel("Erstellt von (Firma)").fill("Muster Tiefbau");
@@ -127,9 +125,6 @@ test("Bericht zusammenstellen", async ({ page }) => {
 
   // die Auswahl merkt sich dieser Browser
   await page.reload();
-  await page
-    .getByRole("region", { name: "Überblick" })
-    .getByRole("button", { name: "Bericht" })
-    .click();
+  await (await section(page, "Überblick")).getByRole("button", { name: "Bericht" }).click();
   await expect(page.getByRole("dialog").getByLabel("Titel")).toHaveValue("Wochenbericht KW 47");
 });

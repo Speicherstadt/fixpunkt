@@ -6,7 +6,7 @@ description: >-
 
 # Haufwerk, Soll/Ist, Zeitreihe, Export
 
-Neben dem [Aushub](aushub.md) rechnet Fixpunkt unter **Berechnungen** vier weitere Arten. Die Art wählt man oben
+Neben dem [Aushub](aushub.md) rechnet Fixpunkt im Reiter **Massen** unter **Berechnungen** vier weitere Arten. Die Art wählt man oben
 im Bereich; jede hat ihr eigenes Formular, das Ergebnis öffnet sich aus der Liste darunter.
 
 ## Haufwerk

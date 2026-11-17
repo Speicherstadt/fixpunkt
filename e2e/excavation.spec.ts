@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { PIT_M3, writeFixtures } from "./fixtures";
+import { section } from "./site";
 
 /** Der Kernablauf: Baustelle anlegen, zwei Aufnahmen und Grenzen hochladen, Aushub berechnen, Bericht lesen. */
 test("Aushub einer Baugrube berechnen", async ({ page }, info) => {
@@ -18,7 +19,8 @@ test("Aushub einer Baugrube berechnen", async ({ page }, info) => {
   await expect(table.getByRole("row", { name: /Nach Aushub/ }).getByText("Bereit")).toBeVisible();
   await expect(table.getByRole("row", { name: /Urgelaende/ })).toContainText("40.000");
 
-  // Grenzen
+  // Grenzen und Berechnung im Reiter „Massen“
+  await section(page, "Bereiche");
   await page.getByLabel("Grenze hochladen").setInputFiles(files.regions);
   await expect(page.getByText("900,0 m²")).toBeVisible();
   await expect(page.getByRole("checkbox", { name: "Bagger", exact: true })).toBeChecked();

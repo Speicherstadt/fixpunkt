@@ -17,6 +17,12 @@ import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as FreigabeTokenRouteImport } from './routes/freigabe.$token'
 import { Route as AppJobsJobIdRouteImport } from './routes/_app/jobs.$jobId'
 import { Route as AppSitesSiteIdRouteImport } from './routes/_app/sites.$siteId'
+import { Route as AppSitesSiteIdIndexRouteImport } from './routes/_app/sites.$siteId.index'
+import { Route as AppSitesSiteIdAbrechnungRouteImport } from './routes/_app/sites.$siteId.abrechnung'
+import { Route as AppSitesSiteIdAnsichtRouteImport } from './routes/_app/sites.$siteId.ansicht'
+import { Route as AppSitesSiteIdAufnahmenRouteImport } from './routes/_app/sites.$siteId.aufnahmen'
+import { Route as AppSitesSiteIdDokumentationRouteImport } from './routes/_app/sites.$siteId.dokumentation'
+import { Route as AppSitesSiteIdMassenRouteImport } from './routes/_app/sites.$siteId.massen'
 
 const AppRoute = AppRouteImport.update({
   id: '/_app',
@@ -57,6 +63,38 @@ const AppSitesSiteIdRoute = AppSitesSiteIdRouteImport.update({
   path: '/sites/$siteId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppSitesSiteIdIndexRoute = AppSitesSiteIdIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppSitesSiteIdRoute,
+} as any)
+const AppSitesSiteIdAbrechnungRoute =
+  AppSitesSiteIdAbrechnungRouteImport.update({
+    id: '/abrechnung',
+    path: '/abrechnung',
+    getParentRoute: () => AppSitesSiteIdRoute,
+  } as any)
+const AppSitesSiteIdAnsichtRoute = AppSitesSiteIdAnsichtRouteImport.update({
+  id: '/ansicht',
+  path: '/ansicht',
+  getParentRoute: () => AppSitesSiteIdRoute,
+} as any)
+const AppSitesSiteIdAufnahmenRoute = AppSitesSiteIdAufnahmenRouteImport.update({
+  id: '/aufnahmen',
+  path: '/aufnahmen',
+  getParentRoute: () => AppSitesSiteIdRoute,
+} as any)
+const AppSitesSiteIdDokumentationRoute =
+  AppSitesSiteIdDokumentationRouteImport.update({
+    id: '/dokumentation',
+    path: '/dokumentation',
+    getParentRoute: () => AppSitesSiteIdRoute,
+  } as any)
+const AppSitesSiteIdMassenRoute = AppSitesSiteIdMassenRouteImport.update({
+  id: '/massen',
+  path: '/massen',
+  getParentRoute: () => AppSitesSiteIdRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -65,7 +103,13 @@ export interface FileRoutesByFullPath {
   '/users': typeof AppUsersRoute
   '/freigabe/$token': typeof FreigabeTokenRoute
   '/jobs/$jobId': typeof AppJobsJobIdRoute
-  '/sites/$siteId': typeof AppSitesSiteIdRoute
+  '/sites/$siteId': typeof AppSitesSiteIdRouteWithChildren
+  '/sites/$siteId/abrechnung': typeof AppSitesSiteIdAbrechnungRoute
+  '/sites/$siteId/ansicht': typeof AppSitesSiteIdAnsichtRoute
+  '/sites/$siteId/aufnahmen': typeof AppSitesSiteIdAufnahmenRoute
+  '/sites/$siteId/dokumentation': typeof AppSitesSiteIdDokumentationRoute
+  '/sites/$siteId/massen': typeof AppSitesSiteIdMassenRoute
+  '/sites/$siteId/': typeof AppSitesSiteIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -74,7 +118,12 @@ export interface FileRoutesByTo {
   '/freigabe/$token': typeof FreigabeTokenRoute
   '/': typeof AppIndexRoute
   '/jobs/$jobId': typeof AppJobsJobIdRoute
-  '/sites/$siteId': typeof AppSitesSiteIdRoute
+  '/sites/$siteId/abrechnung': typeof AppSitesSiteIdAbrechnungRoute
+  '/sites/$siteId/ansicht': typeof AppSitesSiteIdAnsichtRoute
+  '/sites/$siteId/aufnahmen': typeof AppSitesSiteIdAufnahmenRoute
+  '/sites/$siteId/dokumentation': typeof AppSitesSiteIdDokumentationRoute
+  '/sites/$siteId/massen': typeof AppSitesSiteIdMassenRoute
+  '/sites/$siteId': typeof AppSitesSiteIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -85,7 +134,13 @@ export interface FileRoutesById {
   '/freigabe/$token': typeof FreigabeTokenRoute
   '/_app/': typeof AppIndexRoute
   '/_app/jobs/$jobId': typeof AppJobsJobIdRoute
-  '/_app/sites/$siteId': typeof AppSitesSiteIdRoute
+  '/_app/sites/$siteId': typeof AppSitesSiteIdRouteWithChildren
+  '/_app/sites/$siteId/abrechnung': typeof AppSitesSiteIdAbrechnungRoute
+  '/_app/sites/$siteId/ansicht': typeof AppSitesSiteIdAnsichtRoute
+  '/_app/sites/$siteId/aufnahmen': typeof AppSitesSiteIdAufnahmenRoute
+  '/_app/sites/$siteId/dokumentation': typeof AppSitesSiteIdDokumentationRoute
+  '/_app/sites/$siteId/massen': typeof AppSitesSiteIdMassenRoute
+  '/_app/sites/$siteId/': typeof AppSitesSiteIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -97,6 +152,12 @@ export interface FileRouteTypes {
     | '/freigabe/$token'
     | '/jobs/$jobId'
     | '/sites/$siteId'
+    | '/sites/$siteId/abrechnung'
+    | '/sites/$siteId/ansicht'
+    | '/sites/$siteId/aufnahmen'
+    | '/sites/$siteId/dokumentation'
+    | '/sites/$siteId/massen'
+    | '/sites/$siteId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -105,6 +166,11 @@ export interface FileRouteTypes {
     | '/freigabe/$token'
     | '/'
     | '/jobs/$jobId'
+    | '/sites/$siteId/abrechnung'
+    | '/sites/$siteId/ansicht'
+    | '/sites/$siteId/aufnahmen'
+    | '/sites/$siteId/dokumentation'
+    | '/sites/$siteId/massen'
     | '/sites/$siteId'
   id:
     | '__root__'
@@ -116,6 +182,12 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/jobs/$jobId'
     | '/_app/sites/$siteId'
+    | '/_app/sites/$siteId/abrechnung'
+    | '/_app/sites/$siteId/ansicht'
+    | '/_app/sites/$siteId/aufnahmen'
+    | '/_app/sites/$siteId/dokumentation'
+    | '/_app/sites/$siteId/massen'
+    | '/_app/sites/$siteId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -182,15 +254,79 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSitesSiteIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/sites/$siteId/': {
+      id: '/_app/sites/$siteId/'
+      path: '/'
+      fullPath: '/sites/$siteId/'
+      preLoaderRoute: typeof AppSitesSiteIdIndexRouteImport
+      parentRoute: typeof AppSitesSiteIdRoute
+    }
+    '/_app/sites/$siteId/abrechnung': {
+      id: '/_app/sites/$siteId/abrechnung'
+      path: '/abrechnung'
+      fullPath: '/sites/$siteId/abrechnung'
+      preLoaderRoute: typeof AppSitesSiteIdAbrechnungRouteImport
+      parentRoute: typeof AppSitesSiteIdRoute
+    }
+    '/_app/sites/$siteId/ansicht': {
+      id: '/_app/sites/$siteId/ansicht'
+      path: '/ansicht'
+      fullPath: '/sites/$siteId/ansicht'
+      preLoaderRoute: typeof AppSitesSiteIdAnsichtRouteImport
+      parentRoute: typeof AppSitesSiteIdRoute
+    }
+    '/_app/sites/$siteId/aufnahmen': {
+      id: '/_app/sites/$siteId/aufnahmen'
+      path: '/aufnahmen'
+      fullPath: '/sites/$siteId/aufnahmen'
+      preLoaderRoute: typeof AppSitesSiteIdAufnahmenRouteImport
+      parentRoute: typeof AppSitesSiteIdRoute
+    }
+    '/_app/sites/$siteId/dokumentation': {
+      id: '/_app/sites/$siteId/dokumentation'
+      path: '/dokumentation'
+      fullPath: '/sites/$siteId/dokumentation'
+      preLoaderRoute: typeof AppSitesSiteIdDokumentationRouteImport
+      parentRoute: typeof AppSitesSiteIdRoute
+    }
+    '/_app/sites/$siteId/massen': {
+      id: '/_app/sites/$siteId/massen'
+      path: '/massen'
+      fullPath: '/sites/$siteId/massen'
+      preLoaderRoute: typeof AppSitesSiteIdMassenRouteImport
+      parentRoute: typeof AppSitesSiteIdRoute
+    }
   }
 }
+
+interface AppSitesSiteIdRouteChildren {
+  AppSitesSiteIdAbrechnungRoute: typeof AppSitesSiteIdAbrechnungRoute
+  AppSitesSiteIdAnsichtRoute: typeof AppSitesSiteIdAnsichtRoute
+  AppSitesSiteIdAufnahmenRoute: typeof AppSitesSiteIdAufnahmenRoute
+  AppSitesSiteIdDokumentationRoute: typeof AppSitesSiteIdDokumentationRoute
+  AppSitesSiteIdMassenRoute: typeof AppSitesSiteIdMassenRoute
+  AppSitesSiteIdIndexRoute: typeof AppSitesSiteIdIndexRoute
+}
+
+const AppSitesSiteIdRouteChildren: AppSitesSiteIdRouteChildren = {
+  AppSitesSiteIdAbrechnungRoute: AppSitesSiteIdAbrechnungRoute,
+  AppSitesSiteIdAnsichtRoute: AppSitesSiteIdAnsichtRoute,
+  AppSitesSiteIdAufnahmenRoute: AppSitesSiteIdAufnahmenRoute,
+  AppSitesSiteIdDokumentationRoute: AppSitesSiteIdDokumentationRoute,
+  AppSitesSiteIdMassenRoute: AppSitesSiteIdMassenRoute,
+  AppSitesSiteIdIndexRoute: AppSitesSiteIdIndexRoute,
+}
+
+const AppSitesSiteIdRouteWithChildren = AppSitesSiteIdRoute._addFileChildren(
+  AppSitesSiteIdRouteChildren,
+)
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
   AppUsersRoute: typeof AppUsersRoute
   AppIndexRoute: typeof AppIndexRoute
   AppJobsJobIdRoute: typeof AppJobsJobIdRoute
-  AppSitesSiteIdRoute: typeof AppSitesSiteIdRoute
+  AppSitesSiteIdRoute: typeof AppSitesSiteIdRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -198,7 +334,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppUsersRoute: AppUsersRoute,
   AppIndexRoute: AppIndexRoute,
   AppJobsJobIdRoute: AppJobsJobIdRoute,
-  AppSitesSiteIdRoute: AppSitesSiteIdRoute,
+  AppSitesSiteIdRoute: AppSitesSiteIdRouteWithChildren,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { X0, Y0 } from "./fixtures";
+import { section } from "./site";
 
 /**
  * Flugplan über einem 40 × 40 m großen Bereich: M4E bei 2 cm → 75,0 m Höhe, Bahnabstand 31,68 m,
@@ -29,7 +30,7 @@ test("Flugplan als KMZ für DJI Pilot 2", async ({ page }) => {
   });
   await page.goto(`/sites/${site.id}`);
 
-  const flight = page.getByRole("region", { name: "Flugplanung" });
+  const flight = await section(page, "Flugplanung");
   await expect(flight).toContainText("Flughöhe über Start75,0 m");
   await expect(flight.getByRole("img", { name: /3 Bahnen über „Feld“/ })).toBeVisible();
 

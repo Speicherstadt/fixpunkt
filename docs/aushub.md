@@ -8,12 +8,12 @@ description: >-
 
 Der Ablauf für eine Baugrube: **Urgelände fliegen → Aushub fliegen → beide hochladen → Grenzen setzen → berechnen.**
 
-![Baustelle mit drei Aufnahmen, zwei Bereichen und einer fertigen Berechnung](screenshot-baustelle.png#only-light){ width="1440" height="959" }
-![Baustelle mit drei Aufnahmen, zwei Bereichen und einer fertigen Berechnung](screenshot-baustelle-dunkel.png#only-dark){ width="1440" height="959" }
+![Reiter „Massen“ einer Baustelle: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub](screenshot-baustelle.png#only-light){ width="1440" }
+![Reiter „Massen“ einer Baustelle: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub](screenshot-baustelle-dunkel.png#only-dark){ width="1440" }
 
 ## 1. Aufnahmen hochladen
 
-**Aufnahme hochladen** nimmt eine oder mehrere Dateien: Punktwolken (LAS, LAZ, E57, XYZ, CSV, TXT, PTS) oder
+Im Reiter **Aufnahmen** nimmt **Aufnahme hochladen** eine oder mehrere Dateien: Punktwolken (LAS, LAZ, E57, XYZ, CSV, TXT, PTS) oder
 Höhenmodelle (GeoTIFF, ASC). Der Name der Aufnahme kommt aus dem Dateinamen.
 
 Große Dateien laden in Stücken hoch. Reißt die Verbindung ab – Funkloch auf der Baustelle, WLAN gewechselt –,
@@ -31,8 +31,8 @@ aktualisiert sich von selbst, auch für Kolleginnen und Kollegen, die die Bauste
 
 ## 2. Abrechnungsgrenzen
 
-Bereiche lassen sich direkt in der [Ansicht](ansicht.md#bereiche-zeichnen) zeichnen oder als GeoJSON hochladen:
-**Grenze hochladen** nimmt eine GeoJSON-Datei. Jedes Polygon darin wird ein eigener Bereich, mit dem Namen aus
+Bereiche stehen im Reiter **Massen**. Sie lassen sich direkt in der [Ansicht](ansicht.md#bereiche-zeichnen)
+zeichnen oder als GeoJSON hochladen: **Grenze hochladen** nimmt eine GeoJSON-Datei. Jedes Polygon darin wird ein eigener Bereich, mit dem Namen aus
 der Eigenschaft `name` (oder `Bezeichnung`, `id`). So lässt sich eine Baugrube in Abschnitte teilen, die einzeln
 abgerechnet werden. Ohne Bereich rechnet Fixpunkt über die ganze Überlappung der beiden Aufnahmen.
 
@@ -55,7 +55,7 @@ Im selben Formular stehen **LV-Position, Einheitspreis und Preiseinheit** für d
 
 ## 3. Berechnen
 
-Unter **Berechnungen**:
+Im Reiter **Massen** unter **Berechnungen**:
 
 - **Urgelände (vorher)** und **Nach dem Aushub** wählen – vorausgewählt sind die älteste und die jüngste Aufnahme.
 - **Rasterweite:** 25 cm passt für Drohnenflüge; 10 cm für sehr dichte Wolken, 50 cm–1 m für schnelle Übersichten.

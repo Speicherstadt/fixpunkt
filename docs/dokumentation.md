@@ -6,7 +6,7 @@ description: >-
 
 # Dokumentation
 
-Unter **Dokumentation** auf der Seite einer Baustelle sammelt Fixpunkt, was neben den Massen festgehalten werden
+Im Reiter **Dokumentation** einer Baustelle sammelt Fixpunkt, was neben den Massen festgehalten werden
 muss: Zwangspunkte, Leitungen, Fotos und Notizen. Alles mit Lage erscheint auch in der [Ansicht](ansicht.md) –
 Zwangspunkte als Raute, Fotos und Notizen als Punkt, Leitungen als Linie.
 

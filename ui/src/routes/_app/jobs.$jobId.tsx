@@ -57,7 +57,7 @@ function resultView(job: Job): ReactNode {
           <Residuals report={r.data} />
           <div>
             <Link
-              to="/sites/$siteId"
+              to="/sites/$siteId/aufnahmen"
               params={{ siteId: String(job.siteId) }}
               className={buttonVariants({ variant: "primary" })}
             >
@@ -141,7 +141,8 @@ function JobPage() {
   const view = resultView(j);
   const back = (
     <Link
-      to="/sites/$siteId"
+      // Aufträge stehen unter „Massen“
+      to="/sites/$siteId/massen"
       params={{ siteId: String(j.siteId) }}
       className={buttonVariants({ variant: "ghost" })}
     >

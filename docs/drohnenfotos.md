@@ -50,7 +50,7 @@ lassen sich weiterhin als Aufnahme hochladen ([Daten vorbereiten](daten.md)).
 
 ## Ablauf
 
-1. Auf der Seite der Baustelle unter **Drohnenfotos auswerten** die Fotos des Flugs wählen (JPG, TIFF oder PNG,
+1. Im Reiter **Aufnahmen** der Baustelle **Drohnenfotos auswerten** aufklappen und die Fotos des Flugs wählen (JPG, TIFF oder PNG,
    mindestens 3).
 2. **Name** und **Flugdatum** der neuen Aufnahme, **Qualität** und **Höhenversatz** eintragen (siehe unten).
 3. **Hochladen und auswerten**: Fixpunkt lädt die Fotos nacheinander hoch und gibt sie an NodeODM. Unter

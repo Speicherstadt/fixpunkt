@@ -1,26 +1,18 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { ErrorText, PageHeader } from "@/components/page";
-import { Billing } from "@/components/site/billing";
-import { Calculations } from "@/components/site/calculations";
-import { Captures } from "@/components/site/captures";
-import { Documentation } from "@/components/site/documentation";
-import { DronePhotos } from "@/components/site/drone-photos";
-import { FlightPlanning } from "@/components/site/flight-plan";
-import { Overview } from "@/components/site/overview";
-import { Plans } from "@/components/site/plans";
-import { Regions } from "@/components/site/regions";
+import { SiteTabs } from "@/components/site/site-tabs";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { PlaceholderRows } from "@/components/ui/placeholder";
-import { SiteView } from "@/components/view/site-view";
 import { api } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { authQuery, siteQuery } from "@/lib/queries";
 import { m } from "@/paraglide/messages";
 
+/** Kopf und Reiter einer Baustelle; der Inhalt kommt aus den Unterseiten (sites.$siteId.*.tsx) */
 export const Route = createFileRoute("/_app/sites/$siteId")({ component: SitePage });
 
 function SitePage() {
@@ -50,19 +42,9 @@ function SitePage() {
           ) : null
         }
       />
+      <SiteTabs siteId={siteId} />
       <div className="flex flex-col gap-6">
-        <Overview siteId={siteId} />
-        <Captures siteId={siteId} canEdit={canEdit} />
-        {canEdit ? <DronePhotos siteId={siteId} /> : null}
-        <SiteView siteId={siteId} canEdit={canEdit} />
-        <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
-          <Regions siteId={siteId} canEdit={canEdit} />
-          <Calculations siteId={siteId} canEdit={canEdit} />
-        </div>
-        <Billing siteId={siteId} canEdit={canEdit} />
-        <FlightPlanning siteId={siteId} />
-        <Plans siteId={siteId} canEdit={canEdit} />
-        <Documentation siteId={siteId} canEdit={canEdit} />
+        <Outlet />
       </div>
       <Dialog
         open={confirm}

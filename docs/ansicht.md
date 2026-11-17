@@ -7,7 +7,7 @@ description: >-
 
 # Ansicht und Messen
 
-Unter **Ansicht** auf der Seite einer Baustelle zeigt Fixpunkt das Höhenbild einer Aufnahme: Farben von tief
+Im Reiter **Ansicht** einer Baustelle zeigt Fixpunkt das Höhenbild einer Aufnahme: Farben von tief
 (blau) nach hoch (braun, hell), mit Schummerung aus Nordwesten, damit Böschungen und Kanten plastisch wirken.
 
 ![Ansicht der Baugrube: Höhenbild, Soll/Ist-Abweichung der Sohle darübergelegt, Bereiche und ein Profil quer durch die Grube](screenshot-ansicht.png){ width="1024" height="1216" }

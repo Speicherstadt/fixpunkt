@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /**
  * Punktwolke mit Intensität (x y z i, ohne Farbe): in 3D zuerst grau nach Intensität, umschaltbar auf Höhe.
@@ -21,7 +22,7 @@ test("Punktwolke nach Intensität färben", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   await view.getByRole("group", { name: "Darstellung" }).getByText("3D", { exact: true }).click();
   await view.getByRole("group", { name: "Darstellung in 3D" }).getByText("Punktwolke").click();
   const terrain = view.getByRole("application", { name: /Gelände in 3D/ });

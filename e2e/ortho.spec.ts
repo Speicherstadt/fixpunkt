@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /** Orthofoto an einer Aufnahme: in der Ansicht als Hintergrund, umschaltbar auf das Höhenbild. */
 test("Orthofoto als Hintergrund", async ({ page }) => {
@@ -10,12 +11,13 @@ test("Orthofoto als Hintergrund", async ({ page }) => {
   await api.upload(site.id, "aushub.xyz", "Aushub", Date.now(), terrainXyz(true));
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
+  await section(page, "Aufnahmen");
 
   const row = page.getByRole("table").getByRole("row", { name: /Aushub/ });
   await row.getByLabel("Orthofoto zu Aushub hinzufügen").setInputFiles("e2e/data/ortho.tif");
   await expect(row).toContainText("Orthofoto 400 × 400 Pixel");
 
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   const canvas = view.getByRole("application", { name: /Höhenbild/ }).locator("canvas");
   /** Pixel im Gelb des Baggers auf dem Orthofoto (230, 180, 30) */
   const yellow = () =>
@@ -31,7 +33,7 @@ test("Orthofoto als Hintergrund", async ({ page }) => {
   await expect.poll(yellow).toBe(0);
 
   // als GeoTIFF exportieren: erst mit Orthofoto wählbar
-  const calc = page.getByRole("region", { name: "Berechnungen" });
+  const calc = await section(page, "Berechnungen");
   await calc
     .getByRole("group", { name: "Art der Berechnung" })
     .getByText("Export", { exact: true })
@@ -56,14 +58,17 @@ test("Orthofoto als Hintergrund", async ({ page }) => {
   expect([...(await res.body()).subarray(0, 4)]).toEqual([0x49, 0x49, 0x2a, 0]);
   await page.goBack();
 
+  await section(page, "Aufnahmen");
   await row.getByRole("button", { name: "Orthofoto von Aushub entfernen" }).click();
   await expect(row).not.toContainText("Orthofoto");
   // ohne Orthofoto nicht wählbar
+  await section(page, "Berechnungen");
   await calc
     .getByRole("group", { name: "Art der Berechnung" })
     .getByText("Export", { exact: true })
     .click();
   await expect(ortho).toBeDisabled();
-  await expect(row).not.toContainText("Orthofoto");
+  await section(page, "Ansicht");
+  await expect(view.getByRole("application", { name: /Höhenbild/ })).toBeVisible();
   await expect(view.getByRole("group", { name: "Hintergrund" })).toHaveCount(0);
 });

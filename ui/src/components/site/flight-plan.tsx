@@ -59,7 +59,7 @@ export function FlightPlanning({ siteId }: { siteId: number }) {
   });
 
   return (
-    <Section title={m.flight_title()} description={m.flight_description()}>
+    <Section title={m.flight_title()} description={m.flight_description()} collapsible>
       {region ? (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
           <form className="flex flex-col gap-4" onSubmit={(e) => e.preventDefault()}>

@@ -6,7 +6,7 @@ description: >-
 
 # Pläne
 
-Unter **Pläne** auf der Seite einer Baustelle lädt man Lage- oder Ausführungspläne als **DXF** hoch. Fixpunkt
+Im Reiter **Dokumentation** einer Baustelle, Abschnitt **Pläne**, lädt man Lage- oder Ausführungspläne als **DXF** hoch. Fixpunkt
 liest sie einmal ein und zeigt sie als Strichzeichnung über dem Höhenbild; Höhen aus dem Plan vergleicht es mit
 dem gemessenen Gelände.
 

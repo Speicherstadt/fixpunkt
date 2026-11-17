@@ -2,6 +2,7 @@ import { writeFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /** Upload reißt ab und setzt sich fort (tus): erster PATCH bricht ab, danach HEAD und Rest. */
 test("Upload setzt nach Abbruch fort", async ({ page }, info) => {
@@ -23,6 +24,7 @@ test("Upload setzt nach Abbruch fort", async ({ page }, info) => {
   });
 
   await page.goto(`/sites/${site.id}`);
+  await section(page, "Aufnahmen");
   await page.getByLabel("Aufnahme hochladen").setInputFiles(file);
   const row = page.getByRole("table").getByRole("row", { name: /gelaende/ });
   await expect(row.getByText("Bereit")).toBeVisible({ timeout: 30_000 });

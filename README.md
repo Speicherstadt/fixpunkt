@@ -128,7 +128,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 
 <p align="center">
   <img src="docs/screenshot-ansicht.png" alt="Ansicht einer Baugrube in Fixpunkt: Höhenbild, Soll/Ist-Abweichung der Sohle, Abrechnungsbereiche und ein Profil quer durch die Grube" width="49%">
-  <img src="docs/screenshot-baustelle.png" alt="Baustelle in Fixpunkt mit drei Aufnahmen vom Urgelände bis zum fertigen Aushub, zwei Abrechnungsbereichen und der Berechnung" width="49%">
+  <img src="docs/screenshot-baustelle.png" alt="Reiter Massen einer Baustelle in Fixpunkt: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub" width="49%">
 </p>
 
 ## 🚀 Installation

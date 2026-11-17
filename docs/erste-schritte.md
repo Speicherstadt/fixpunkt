@@ -27,9 +27,25 @@ Baustelle. Den Kartenhintergrund liefert OpenStreetMap, ein eigener Kachelserver
 ![Karte und Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen.png#only-light){ width="1440" height="900" }
 ![Karte und Liste der Baustellen mit Anzahl der Aufnahmen und Berechnungen](screenshot-baustellen-dunkel.png#only-dark){ width="1440" height="900" }
 
+## Reiter einer Baustelle
+
+Eine Baustelle ist in Reiter gegliedert, jeder mit eigener Adresse (Lesezeichen, Zurück-Taste und Links führen
+direkt dorthin):
+
+| Reiter | Was dort steht |
+|---|---|
+| **Überblick** | Kennzahlen, Fortschritt, Massenziele, Lagerbestand, was Aufmerksamkeit braucht |
+| **Aufnahmen** | Aufnahmen hochladen und prüfen; aufklappbar: [Drohnenfotos auswerten](drohnenfotos.md) und [Flugplanung](flugplanung.md) |
+| **Ansicht** | Höhenbild, Orthofoto, 3D, Messen, Bereiche zeichnen ([Ansicht](ansicht.md)) |
+| **Massen** | Abrechnungsbereiche und Berechnungen: Aushub, Haufwerk, Soll/Ist, Zeitreihe, Export, Passpunkte ([Aushub berechnen](aushub.md)) |
+| **Abrechnung** | Aufmaß je Zeitraum, Schichten, Kennwerte, Lieferscheine, Freigaben ([Abrechnung](abrechnung.md)) |
+| **Dokumentation** | Pläne (DXF), Zwangspunkte, Leitungen, Fotos, Notizen ([Dokumentation](dokumentation.md)) |
+
+Eine neue Baustelle öffnet im Reiter **Aufnahmen**: Den Anfang macht die Aufnahme des Urgeländes.
+
 ## Überblick einer Baustelle
 
-Oben auf der Seite einer Baustelle steht, sobald es eine Aufnahme gibt, der **Überblick**:
+Im ersten Reiter einer Baustelle steht, sobald es eine Aufnahme gibt, der **Überblick**:
 
 - **Aufnahmen** und wann zuletzt geflogen wurde, dazu Fotos, Notizen und Pläne;
 - **Aushub bisher**: der Abtrag der neuesten Aufnahme gegen das Urgelände (die älteste Aufnahme);

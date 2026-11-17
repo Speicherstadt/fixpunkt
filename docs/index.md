@@ -63,8 +63,8 @@ in Länge/Breite.
 [Daten vorbereiten](daten.md)
 </div>
 <div class="showcase-shot" markdown>
-![Baustelle mit drei Aufnahmen, zwei Abrechnungsbereichen und einer fertigen Berechnung](screenshot-baustelle.png#only-light){ width="1440" height="959" loading="lazy" }
-![Baustelle mit drei Aufnahmen, zwei Abrechnungsbereichen und einer fertigen Berechnung](screenshot-baustelle-dunkel.png#only-dark){ width="1440" height="959" loading="lazy" }
+![Reiter „Massen“ einer Baustelle: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub](screenshot-baustelle.png#only-light){ width="1440" loading="lazy" }
+![Reiter „Massen“ einer Baustelle: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub](screenshot-baustelle-dunkel.png#only-dark){ width="1440" loading="lazy" }
 </div>
 </div>
 

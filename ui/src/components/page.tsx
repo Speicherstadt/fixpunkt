@@ -1,4 +1,5 @@
-import { type ReactNode, useId } from "react";
+import { ChevronDown, ChevronRight } from "lucide-react";
+import { type ReactNode, useId, useState } from "react";
 import { cn } from "@/lib/cn";
 
 /** Seitentitel (genau ein h1 je Seite) mit Aktionen rechts */
@@ -20,21 +21,30 @@ export const PageHeader = ({
   </header>
 );
 
-/** Karte mit Überschrift */
+/**
+ * Karte mit Überschrift. `collapsible`: die Überschrift klappt den Inhalt auf und zu; zugeklappt bleibt er
+ * eingehängt (ein laufender Upload geht nicht verloren), nur unsichtbar.
+ */
 export const Section = ({
   title,
   description,
   actions,
   children,
   className,
+  collapsible = false,
+  defaultOpen = false,
 }: {
   title: string;
   description?: string;
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
+  collapsible?: boolean;
+  defaultOpen?: boolean;
 }) => {
   const id = useId();
+  const [open, setOpen] = useState(defaultOpen);
+  const shown = !collapsible || open;
   return (
     <section
       aria-labelledby={id}
@@ -43,15 +53,37 @@ export const Section = ({
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1">
           <h2 id={id} className="m-0 text-[16px] font-semibold">
-            {title}
+            {collapsible ? (
+              <button
+                type="button"
+                aria-expanded={open}
+                onClick={() => setOpen(!open)}
+                className="-mx-1 inline-flex items-center gap-1.5 rounded-md px-1 text-left hover:bg-hover"
+              >
+                {open ? (
+                  <ChevronDown size={16} aria-hidden="true" />
+                ) : (
+                  <ChevronRight size={16} aria-hidden="true" />
+                )}
+                {title}
+              </button>
+            ) : (
+              title
+            )}
           </h2>
           {description ? (
             <p className="m-0 max-w-prose text-[13px] text-muted">{description}</p>
           ) : null}
         </div>
-        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
+        {actions && shown ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
-      {children}
+      {collapsible ? (
+        <div hidden={!open} className="flex flex-col gap-4">
+          {children}
+        </div>
+      ) : (
+        children
+      )}
     </section>
   );
 };

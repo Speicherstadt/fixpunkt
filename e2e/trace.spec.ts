@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /** Leitung in der Ansicht nachzeichnen, in der Dokumentation wiederfinden, als DXF für CAD herunterladen */
 test("Leitung zeichnen und als DXF exportieren", async ({ page }) => {
@@ -11,7 +12,7 @@ test("Leitung zeichnen und als DXF exportieren", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   const canvas = view.getByRole("application", { name: /Höhenbild der Baustelle/ });
   await expect(canvas).toBeVisible();
   const box = (await canvas.boundingBox())!;
@@ -33,7 +34,7 @@ test("Leitung zeichnen und als DXF exportieren", async ({ page }) => {
   await view.getByLabel("Notiz (Material, DN …)").fill("Steinzeug DN 300");
   await view.getByRole("button", { name: "Leitung speichern" }).click();
 
-  const doc = page.getByRole("region", { name: "Dokumentation" });
+  const doc = await section(page, "Dokumentation");
   const item = doc.getByRole("listitem").filter({ hasText: "Kanal Bestand" });
   await expect(item).toContainText("Leitung");
   await expect(item).toContainText(`Länge ${measured} · 3 Punkte`);

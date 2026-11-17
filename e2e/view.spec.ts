@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { boundaries, terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /** 2D-Ansicht: messen mit Maus und Tastatur, Bereich zeichnen und speichern, Differenz darüberlegen */
 test("Ansicht: messen, zeichnen, überlagern", async ({ page }) => {
@@ -15,7 +16,7 @@ test("Ansicht: messen, zeichnen, überlagern", async ({ page }) => {
   await api.settled(site.id);
 
   await page.goto(`/sites/${site.id}`);
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   const canvas = view.getByRole("application", { name: /Höhenbild der Baustelle/ });
   await expect(canvas).toBeVisible();
   const box = (await canvas.boundingBox())!;
@@ -51,7 +52,10 @@ test("Ansicht: messen, zeichnen, überlagern", async ({ page }) => {
   await expect(view.getByRole("term").filter({ hasText: "Fläche (horizontal)" })).toBeVisible();
   await page.getByLabel("Name des Bereichs").fill("Gezeichnet");
   await page.getByRole("button", { name: "Bereich speichern" }).click();
-  await expect(page.getByRole("listitem").filter({ hasText: "Gezeichnet" })).toBeVisible();
+  // der neue Bereich steht im Reiter „Massen“
+  const regions = await section(page, "Bereiche");
+  await expect(regions.getByRole("listitem").filter({ hasText: "Gezeichnet" })).toBeVisible();
+  await section(page, "Ansicht");
 
   // Differenz darüberlegen
   await page.getByLabel("Darüber anzeigen").selectOption({ label: "Urgelände → Aushub" });

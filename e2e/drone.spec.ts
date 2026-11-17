@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
+import { section } from "./site";
 
 /**
  * Drohnenfotos über NodeODM (Nachbau in e2e/nodeodm-stub.ts): Fotos wählen, hochladen, auswerten; die
@@ -13,37 +14,39 @@ test("Drohnenfotos werden zur Aufnahme", async ({ page }) => {
   };
   await page.goto(`/sites/${site.id}`);
 
-  const section = page.getByRole("region", { name: "Drohnenfotos auswerten" });
-  await expect(section.getByText(/NodeODM 2\.5\.2/)).toBeVisible();
-  const submit = section.getByRole("button", { name: "Hochladen und auswerten" });
+  const sec = await section(page, "Drohnenfotos auswerten");
+  await expect(sec.getByText(/NodeODM 2\.5\.2/)).toBeVisible();
+  const submit = sec.getByRole("button", { name: "Hochladen und auswerten" });
   await expect(submit).toBeDisabled();
-  await expect(section.getByText("Mindestens 3 Fotos auswählen")).toBeVisible();
+  await expect(sec.getByText("Mindestens 3 Fotos auswählen")).toBeVisible();
 
   const photo = (i: number) => ({
     name: `DJI_${String(i).padStart(4, "0")}.JPG`,
     mimeType: "image/jpeg",
     buffer: Buffer.from([0xff, 0xd8, 0xff, 0xe0, i]),
   });
-  await section.getByLabel("Fotos", { exact: true }).setInputFiles([1, 2, 3, 4].map(photo));
-  await expect(section.getByText("4 Fotos, 20 B")).toBeVisible();
-  await section.getByLabel("Name der Aufnahme").fill("Flug 1");
-  await section.getByLabel("Qualität").selectOption({ label: "Schnell (Vorschau)" });
-  await section.getByLabel("Höhenversatz in m").fill("abc");
-  await expect(section.getByText("Höhenversatz als Zahl in m, z. B. 47,25")).toBeVisible();
-  await section.getByLabel("Höhenversatz in m").fill("0");
+  await sec.getByLabel("Fotos", { exact: true }).setInputFiles([1, 2, 3, 4].map(photo));
+  await expect(sec.getByText("4 Fotos, 20 B")).toBeVisible();
+  await sec.getByLabel("Name der Aufnahme").fill("Flug 1");
+  await sec.getByLabel("Qualität").selectOption({ label: "Schnell (Vorschau)" });
+  await sec.getByLabel("Höhenversatz in m").fill("abc");
+  await expect(sec.getByText("Höhenversatz als Zahl in m, z. B. 47,25")).toBeVisible();
+  await sec.getByLabel("Höhenversatz in m").fill("0");
   await submit.click();
-  await expect(section.getByRole("status")).toContainText("Läuft in NodeODM");
+  await expect(sec.getByRole("status")).toContainText("Läuft in NodeODM");
 
   // Auftrag in der Liste, danach die neue Aufnahme – fertig geprüft
-  const calc = page.getByRole("region", { name: "Berechnungen" });
+  const calc = await section(page, "Berechnungen");
   const job = calc.getByRole("link", { name: /Drohnenfotos „Flug 1“/ });
   await expect(job.getByText("Fertig")).toBeVisible({ timeout: 30_000 });
   await expect(job).toContainText("4 Fotos");
+  await section(page, "Aufnahmen");
   const row = page.getByRole("table").getByRole("row", { name: /Flug 1/ });
   await expect(row.getByText("Bereit")).toBeVisible({ timeout: 30_000 });
   await expect(row).toContainText("40.000");
 
   // Ergebnisseite
+  await section(page, "Berechnungen");
   await job.click();
   await expect(page.getByText("13 min")).toBeVisible();
   await expect(page.getByText("Unverändert übernommen.")).toBeVisible();

@@ -53,7 +53,7 @@ m³ lose bleibt dann ohne Betrag, und ein Hinweis nennt die betroffenen Bereiche
 
 ## 3. Aufmaß für einen Zeitraum
 
-Unter **Abrechnung** wählt man **Von** und **Bis**; vorgeschlagen ist der letzte Zeitraum, von der vorletzten bis
+Im Reiter **Abrechnung** wählt man **Von** und **Bis**; vorgeschlagen ist der letzte Zeitraum, von der vorletzten bis
 zur letzten Befliegung. Die Menge eines Zeitraums ist
 
 > Aushub gegen das Urgelände bis „Bis“ − Aushub gegen das Urgelände bis „Von“.

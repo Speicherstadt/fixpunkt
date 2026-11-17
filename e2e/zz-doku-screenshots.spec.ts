@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync } from "node:fs";
 import { expect, type Page, test } from "@playwright/test";
 import { type Api, apiFor } from "./api";
 import { boundaries, coloredTerrainXyz, terrainXyz, X0, Y0 } from "./fixtures";
+import { section } from "./site";
 
 /**
  * Die Bilder in README und Doku (docs/screenshot-*.png, hell und dunkel) und das Vorschaubild
@@ -242,7 +243,8 @@ test("Baustellen @screenshots", async () => {
 });
 
 test("Baustelle @screenshots", async () => {
-  await go(`/sites/${siteId}`);
+  // Reiter „Massen“: Bereiche und Berechnungen
+  await go(`/sites/${siteId}/massen`);
   await expect(
     page
       .getByRole("link", { name: /Urgelände → Aushub fertig/ })
@@ -253,7 +255,7 @@ test("Baustelle @screenshots", async () => {
 
 test("Flugplanung @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const flight = page.getByRole("region", { name: "Flugplanung" });
+  const flight = await section(page, "Flugplanung");
   await flight.getByLabel("Bereich").selectOption({ label: "Grube" });
   await expect(flight.getByRole("img", { name: /Bahnen über „Grube“/ })).toBeVisible();
   await flight.scrollIntoViewIfNeeded();
@@ -295,14 +297,14 @@ test("Passkeys und Tokens @screenshots", async () => {
 
 test("Überblick @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const overview = page.getByRole("region", { name: "Überblick" });
+  const overview = await section(page, "Überblick");
   await expect(overview.getByRole("list").first().getByRole("listitem")).toHaveCount(2);
   await overview.screenshot({ path: `${DOCS}/screenshot-ueberblick.png` });
 });
 
 test("Überblick anpassen @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const overview = page.getByRole("region", { name: "Überblick" });
+  const overview = await section(page, "Überblick");
   await overview.getByRole("button", { name: "Anpassen" }).click();
   await expect(overview.getByRole("list", { name: "Anpassen" })).toBeVisible();
   await overview.screenshot({ path: `${DOCS}/screenshot-ueberblick-anpassen.png` });
@@ -311,10 +313,7 @@ test("Überblick anpassen @screenshots", async () => {
 
 test("Bericht zusammenstellen @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  await page
-    .getByRole("region", { name: "Überblick" })
-    .getByRole("button", { name: "Bericht" })
-    .click();
+  await (await section(page, "Überblick")).getByRole("button", { name: "Bericht" }).click();
   const dialog = page.getByRole("dialog", { name: "Bericht zusammenstellen" });
   await dialog.getByLabel("Titel").fill("Wochenbericht KW 47");
   await dialog.getByLabel("Erstellt von (Firma)").fill("Muster Tiefbau GmbH");
@@ -369,7 +368,7 @@ test("Abrechnung @screenshots", async () => {
       reference,
     });
   await go(`/sites/${siteId}`);
-  const billing = page.getByRole("region", { name: "Abrechnung" });
+  const billing = await section(page, "Abrechnung");
   await expect(billing.getByRole("table", { name: "Abgleich mit Lieferscheinen" })).toBeVisible();
   await billing.screenshot({ path: `${DOCS}/screenshot-abrechnung.png` });
 });
@@ -400,7 +399,7 @@ test("Freigabe @screenshots", async ({ browser }) => {
 
 test("Orthofoto @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   await expect(view.getByRole("group", { name: "Hintergrund" })).toBeVisible();
   await page.waitForTimeout(400);
   await view.getByRole("application").scrollIntoViewIfNeeded();
@@ -409,7 +408,7 @@ test("Orthofoto @screenshots", async () => {
 
 test("Ansicht mit Differenz @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   await view.getByRole("group", { name: "Hintergrund" }).getByText("Höhenbild").click();
   await view.getByLabel("Darüber anzeigen").selectOption({ index: 1 });
   await view.getByRole("group", { name: "Werkzeug" }).getByText("Profil", { exact: true }).click();
@@ -424,7 +423,7 @@ test("Ansicht mit Differenz @screenshots", async () => {
 
 test("3D-Ansicht @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   await view.getByLabel("Darüber anzeigen").selectOption({ index: 1 });
   await view.getByRole("group", { name: "Darstellung" }).getByText("3D", { exact: true }).click();
   const terrain = view.getByRole("application", { name: /Gelände in 3D/ });
@@ -473,10 +472,7 @@ test("PDF-Bericht @screenshots", async () => {
 test("PDF-Dokumentation @screenshots", async () => {
   await go(`/sites/${siteId}`);
   const pdf = page.waitForEvent("download");
-  await page
-    .getByRole("region", { name: "Dokumentation" })
-    .getByRole("link", { name: "Bericht (PDF)" })
-    .click();
+  await (await section(page, "Dokumentation")).getByRole("link", { name: "Bericht (PDF)" }).click();
   const file = `${DOCS}/beispiel-dokumentation.pdf`;
   await (await pdf).saveAs(file);
   const render = spawnSync("pdftoppm", [
@@ -492,24 +488,24 @@ test("PDF-Dokumentation @screenshots", async () => {
 
 test("Drohnenfotos @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const section = page.getByRole("region", { name: "Drohnenfotos auswerten" });
-  await expect(section.getByText(/NodeODM 2\.5\.2/)).toBeVisible();
+  const sec = await section(page, "Drohnenfotos auswerten");
+  await expect(sec.getByText(/NodeODM 2\.5\.2/)).toBeVisible();
   // Platzhalter statt echter Fotos; nur Anzahl und Größe erscheinen im Bild
   const photos = Array.from({ length: 40 }, (_, i) => ({
     name: `DJI_${String(i + 1).padStart(4, "0")}.JPG`,
     mimeType: "image/jpeg",
     buffer: Buffer.alloc(250_000),
   }));
-  await section.getByLabel("Fotos", { exact: true }).setInputFiles(photos);
-  await section.getByLabel("Name der Aufnahme").fill("Befliegung 4");
-  await section.scrollIntoViewIfNeeded();
-  await section.screenshot({ path: `${DOCS}/screenshot-drohnenfotos.png` });
+  await sec.getByLabel("Fotos", { exact: true }).setInputFiles(photos);
+  await sec.getByLabel("Name der Aufnahme").fill("Befliegung 4");
+  await sec.scrollIntoViewIfNeeded();
+  await sec.screenshot({ path: `${DOCS}/screenshot-drohnenfotos.png` });
   await page.reload();
 });
 
 test("Passpunkte @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const calc = page.getByRole("region", { name: "Berechnungen" });
+  const calc = await section(page, "Berechnungen");
   await calc.getByText("Passpunkte", { exact: true }).click();
   // Scan-Koordinaten mit Messrauschen von wenigen Millimetern, P4 mit einem Fehler von 8 cm
   const noise = [
@@ -543,11 +539,11 @@ test("Passpunkte @screenshots", async () => {
 
 test("Pläne @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const plans = page.getByRole("region", { name: "Pläne" });
+  const plans = await section(page, "Pläne");
   await expect(plans.getByRole("table", { name: "Plan/Ist" })).toBeVisible();
   await plans.scrollIntoViewIfNeeded();
   await plans.screenshot({ path: `${DOCS}/screenshot-plaene.png` });
-  const view = page.getByRole("region", { name: "Ansicht" });
+  const view = await section(page, "Ansicht");
   await view.getByLabel("Plan darüber").selectOption({ label: "Lageplan" });
   await page.waitForTimeout(300);
   await view.getByRole("application").scrollIntoViewIfNeeded();
@@ -557,7 +553,7 @@ test("Pläne @screenshots", async () => {
 
 test("Dokumentation @screenshots", async () => {
   await go(`/sites/${siteId}`);
-  const doc = page.getByRole("region", { name: "Dokumentation" });
+  const doc = await section(page, "Dokumentation");
   await expect(doc.getByRole("img", { name: "Schacht" })).toBeVisible();
   await doc.scrollIntoViewIfNeeded();
   await doc.screenshot({ path: `${DOCS}/screenshot-dokumentation.png` });

@@ -62,7 +62,9 @@ export function Regions({ siteId, canEdit }: { siteId: number; canEdit: boolean 
                   ) : null}
                 </span>
                 <span className="flex items-center gap-2">
-                  <span className="tabular text-[13px] text-muted">{formatArea(r.areaM2)}</span>
+                  <span className="tabular text-[13px] whitespace-nowrap text-muted">
+                    {formatArea(r.areaM2)}
+                  </span>
                   {canEdit ? (
                     <Button
                       variant="ghost"

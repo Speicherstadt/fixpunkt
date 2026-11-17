@@ -27,7 +27,7 @@ export function OdmReport({ result, siteId }: { result: OdmResult; siteId: numbe
       </p>
       <div>
         <Link
-          to="/sites/$siteId"
+          to="/sites/$siteId/aufnahmen"
           params={{ siteId: String(siteId) }}
           className={buttonVariants({ variant: "primary" })}
         >

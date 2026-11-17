@@ -94,7 +94,8 @@ function NewSiteDialog({
       onOpenChange(false);
       setName("");
       setDescription("");
-      await navigate({ to: "/sites/$siteId", params: { siteId: String(site.id) } });
+      // eine neue Baustelle braucht zuerst Aufnahmen
+      await navigate({ to: "/sites/$siteId/aufnahmen", params: { siteId: String(site.id) } });
     },
   });
   const submit = (e: FormEvent) => {

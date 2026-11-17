@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz, X0, Y0 } from "./fixtures";
+import { section } from "./site";
 
 /** Scan im lokalen System: 100 m östlich, 50 m südlich, 2 m zu hoch */
 const SHIFT = [100, -50, 2] as const;
@@ -37,7 +38,7 @@ test("Passpunkte: Scan georeferenzieren", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const calc = page.getByRole("region", { name: "Berechnungen" });
+  const calc = await section(page, "Berechnungen");
   await calc.getByText("Passpunkte", { exact: true }).click();
   await calc.getByText("Liste einfügen").click();
   await calc.getByLabel(/Eine Zeile je Punkt/).fill(list);
@@ -58,6 +59,7 @@ test("Passpunkte: Scan georeferenzieren", async ({ page }) => {
   const job = calc.getByRole("link", { name: /Passpunkte · Scan lokal/ });
   await expect(job.getByText("Fertig")).toBeVisible({ timeout: 30_000 });
   await expect(job).toContainText("RMS 0,0 cm");
+  await section(page, "Aufnahmen");
   const row = page.getByRole("table").getByRole("row", { name: /Scan lokal \(georeferenziert\)/ });
   await expect(row.getByText("Bereit")).toBeVisible({ timeout: 30_000 });
 });

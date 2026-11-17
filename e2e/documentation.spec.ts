@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /** Dokumentation: Foto mit GPS landet an seiner Stelle, Zwangspunkt wird gegen das Gelände geprüft. */
 test("Fotos und Zwangspunkte dokumentieren", async ({ page }) => {
@@ -12,7 +13,7 @@ test("Fotos und Zwangspunkte dokumentieren", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const doc = page.getByRole("region", { name: "Dokumentation" });
+  const doc = await section(page, "Dokumentation");
   await expect(doc.getByText(/Noch nichts dokumentiert/)).toBeVisible();
   await doc.getByLabel("Fotos hochladen").setInputFiles("e2e/data/foto-gps.jpg");
   const photo = doc.getByRole("listitem").filter({ hasText: "foto-gps" });

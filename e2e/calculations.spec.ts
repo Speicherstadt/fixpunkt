@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { boundaries, terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /**
  * Die Berechnungsarten neben dem Aushub über die Oberfläche: Haufwerk, Soll/Ist, Zeitreihe, Export.
@@ -16,7 +17,7 @@ test("Haufwerk, Soll/Ist, Zeitreihe und Export", async ({ page }) => {
   await api.call("POST", `/sites/${site.id}/regions`, { geojson: boundaries() });
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
-  const calc = page.getByRole("region", { name: "Berechnungen" });
+  const calc = await section(page, "Berechnungen");
   const kinds = calc.getByRole("group", { name: "Art der Berechnung" });
   const jobs = page.getByRole("link", { name: /·|Zeitreihe/ });
   /** Art wählen wie ein Nutzer: auf die Beschriftung klicken */

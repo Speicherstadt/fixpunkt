@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test";
 import { apiFor } from "./api";
 import { boundaries, terrainXyz } from "./fixtures";
+import { section } from "./site";
 
 /**
  * Massenziel: im Bereich „Grube“ (30 × 30 m) liegt die Grube mit 20 × 20 × 2 m = 800 m³. Ziel 1.000 m³ Abtrag →
@@ -15,7 +16,7 @@ test("Massenziel je Bereich im Überblick", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const regions = page.getByRole("region", { name: "Bereiche" });
+  const regions = await section(page, "Bereiche");
   await regions.getByRole("button", { name: "Material und Massenziel für Grube" }).click();
   const form = regions.getByRole("form", { name: "Massenziel für Grube" });
   await form.getByLabel("Material").fill("Boden Klasse 4");
@@ -25,7 +26,7 @@ test("Massenziel je Bereich im Überblick", async ({ page }) => {
     "Boden Klasse 4 · Ziel 1.000 m³ Abtrag",
   );
 
-  const overview = page.getByRole("region", { name: "Überblick" });
+  const overview = await section(page, "Überblick");
   const targets = overview.getByRole("list", { name: "Massenziele" });
   await expect(targets).toContainText("noch nicht berechnet");
 
@@ -59,7 +60,7 @@ test("Bestand je Material im Überblick", async ({ page }) => {
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
 
-  const regions = page.getByRole("region", { name: "Bereiche" });
+  const regions = await section(page, "Bereiche");
   await regions.getByRole("button", { name: "Material und Massenziel für Grube" }).click();
   const form = regions.getByRole("form", { name: "Massenziel für Grube" });
   await form.getByLabel("Material").fill("Boden Klasse 4");
@@ -69,7 +70,7 @@ test("Bestand je Material im Überblick", async ({ page }) => {
   await expect(regions.getByRole("listitem").filter({ hasText: "Grube" })).toContainText(
     "Boden Klasse 4 · Lager",
   );
-  const overview = page.getByRole("region", { name: "Überblick" });
+  const overview = await section(page, "Überblick");
   await expect(overview).toContainText("Noch keine Haufwerk-Berechnung für die Lager.");
 
   const grube = (

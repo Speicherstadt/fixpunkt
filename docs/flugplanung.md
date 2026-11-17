@@ -6,7 +6,7 @@ description: >-
 
 # Flugplanung
 
-Im Abschnitt **Flugplanung** einer Baustelle entsteht aus einem Abrechnungsbereich eine Kartiermission für
+Im Reiter **Aufnahmen** einer Baustelle, Abschnitt **Flugplanung** (aufklappen), entsteht aus einem Abrechnungsbereich eine Kartiermission für
 DJI Pilot 2. Die Drohne fliegt parallele Bahnen (Rasenmäher-Muster) mit senkrecht nach unten gerichteter Kamera und
 löst auf jeder Bahn in festem Abstand aus. Die Fotos gehen danach wie gewohnt an
 [NodeODM](drohnenfotos.md).

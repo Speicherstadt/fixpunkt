@@ -135,7 +135,7 @@ processed by [OpenDroneMap](https://opendronemap.org/), directly from Fixpunkt v
 
 <p align="center">
   <img src="docs/screenshot-ansicht.png" alt="View of a construction pit in Fixpunkt: elevation image, plan vs. actual deviation of the pit floor, billing areas and a profile across the pit" width="49%">
-  <img src="docs/screenshot-baustelle.png" alt="Construction site in Fixpunkt with three captures from original terrain to finished excavation, two billing areas and the calculation" width="49%">
+  <img src="docs/screenshot-baustelle.png" alt="Volumes tab of a construction site in Fixpunkt: billing areas and calculations from original terrain to finished excavation" width="49%">
 </p>
 
 ## 🚀 Installation
