@@ -129,6 +129,17 @@ test.beforeAll(async ({ browser }) => {
     y: Y0 + 20,
     z: 300.3,
   });
+  // Leitung am Grubenrand entlang, Höhen vom Urgelände
+  await api("POST", `/sites/${siteId}/markers`, {
+    kind: "line",
+    title: "Kanal DN 300",
+    note: "Steinzeug, Bestand",
+    points: [
+      [X0 + 32, Y0 + 2, 300.0],
+      [X0 + 32, Y0 + 20, 300.0],
+      [X0 + 32, Y0 + 38, 300.0],
+    ],
+  });
   await api("POST", `/sites/${siteId}/markers`, {
     kind: "note",
     title: "Bodenprobe BP 2",

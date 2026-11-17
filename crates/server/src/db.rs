@@ -103,7 +103,7 @@ pub struct Job {
 }
 
 /// Gespeichertes JSON als Objekt ausgeben, nicht als String.
-fn raw_json<S: serde::Serializer>(v: &Option<String>, s: S) -> Result<S::Ok, S::Error> {
+pub fn raw_json<S: serde::Serializer>(v: &Option<String>, s: S) -> Result<S::Ok, S::Error> {
     match v.as_deref().map(serde_json::from_str::<serde_json::Value>) {
         Some(Ok(j)) => s.serialize_some(&j),
         _ => s.serialize_none(),

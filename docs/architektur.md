@@ -41,7 +41,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `odm/` | Drohnenfotos über NodeODM: REST-Client (`client.rs`, reqwest mit rustls/ring), Ablauf mit Fortschritt und Wiederaufnahme nach Neustart (`run.rs`), Umrechnung in die Zone der Baustelle und Höhenversatz (`cloud.rs`) |
 | `compute/` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, Zeitreihe (`volume.rs`), Soll/Ist (`compare.rs`), Exporte (`export.rs`), Passpunkte (`georef.rs`, Vorschau unter `/api/georef/fit`) |
 | `view.rs` | Höhenraster für die 2D-Ansicht als Float32 (`/api/captures/{id}/grid`, `/api/jobs/{id}/grid/{name}`), je Aufnahme zwischengespeichert |
-| `markers/` | Dokumentation: Zwangspunkte, Notizen, Fotos (Position und Zeit aus EXIF, Vorschaubild) unter `markers/<id>/` |
+| `markers/` | Dokumentation: Zwangspunkte, Leitungen (Stützpunkte als JSON), Notizen, Fotos (Position und Zeit aus EXIF, Vorschaubild) unter `markers/<id>/`; als DXF (`dxf.rs`) |
 | `plans/` | DXF-Pläne: einmal gelesen (`dxf.rs`: Linienzüge, Bögen, Texte, Höhenpunkte, Zonenkennung) und als JSON für die Ansicht abgelegt |
 | `ortho.rs` | Orthofoto je Aufnahme: GeoTIFF stückweise verkleinert (Rechenkern `ortho.rs`), als PNG mit Ecken in der Zone der Baustelle |
 | `uploads.rs` | Fortsetzbarer Upload nach tus 1.0 (Kern, creation, termination): Stücke nach `uploads/`, fertige Dateien an ihr Ziel (Aufnahme, Drohnenfoto, Orthofoto) |

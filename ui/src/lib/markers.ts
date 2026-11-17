@@ -25,10 +25,34 @@ export const checkConstraint = (
   return { actual, diff, ok: Math.abs(diff) <= CONSTRAINT_TOLERANCE };
 };
 
-/** Markierungen mit Lage als Punkte für die Karte der Ansicht */
+/** Markierungen mit Lage als Punkte für die Karte der Ansicht (Linien zeichnet `linesOf`) */
 export const pinsOf = (markers: Marker[]) =>
   markers.flatMap((m) =>
-    m.x !== null && m.y !== null
+    m.kind !== "line" && m.x !== null && m.y !== null
       ? [{ label: m.title, at: [m.x, m.y] as [number, number], diamond: m.kind === "constraint" }]
       : [],
   );
+
+/** Linien der Dokumentation für die Ansicht */
+export const linesOf = (markers: Marker[]) =>
+  markers.flatMap((m) =>
+    m.kind === "line" && m.points
+      ? [{ name: m.title, points: m.points.map((p) => [p[0]!, p[1]!] as [number, number]) }]
+      : [],
+  );
+
+/** Länge einer Linie in der Ebene, in m */
+export const lineLength = (points: number[][]) =>
+  points
+    .slice(1)
+    .reduce((sum, p, i) => sum + Math.hypot(p[0]! - points[i]![0]!, p[1]! - points[i]![1]!), 0);
+
+/**
+ * Stützpunkte einer neuen Linie mit Gelände darunter; ohne Höhe an der Stelle nur Ost und Nord.
+ * Höhen auf Millimeter gerundet.
+ */
+export const tracePoints = (pts: [number, number][], grid: HeightGrid | undefined): number[][] =>
+  pts.map(([x, y]) => {
+    const z = grid ? sampleAt(grid, x, y) : null;
+    return z === null || Number.isNaN(z) ? [x, y] : [x, y, Math.round(z * 1000) / 1000];
+  });

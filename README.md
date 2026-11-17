@@ -86,7 +86,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Messen: Punkt, Strecke, Gefälle, Fläche, Profil
 - Abrechnungsbereiche direkt im Browser zeichnen
 - Karte aller Baustellen
-- Zwangspunkte mit Soll/Ist, Fotos mit GPS-Position, Notizen
+- Zwangspunkte mit Soll/Ist, Leitungen nachzeichnen, Fotos mit GPS-Position, Notizen – als PDF und DXF
 - DXF-Pläne als Hintergrund, Höhen aus dem Plan gegen das Gelände
 - Bedienbar mit Maus und Tastatur
 

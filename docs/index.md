@@ -97,7 +97,7 @@ Flächen und Profile direkt im Bild messen, Abrechnungsbereiche einfach anklicke
 [Ansicht und Messen](ansicht.md)
 </div>
 <div class="showcase-shot" markdown>
-![Ansicht der Baugrube mit Soll/Ist-Abweichung, Bereichen und Profil](screenshot-ansicht.png){ width="1024" height="1134" loading="lazy" }
+![Ansicht der Baugrube mit Soll/Ist-Abweichung, Bereichen und Profil](screenshot-ansicht.png){ width="1024" height="1216" loading="lazy" }
 </div>
 </div>
 

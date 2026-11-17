@@ -83,7 +83,12 @@ pub async fn documentation(
                 .photo
                 .as_ref()
                 .and_then(|_| thumb(&markers::dir(&app, m.id).join("thumb.jpg")));
+            let line = (m.kind == "line").then(|| {
+                let pts = m.line();
+                (markers::line_length(&pts), pts.len())
+            });
             Entry {
+                line,
                 at: m.taken_at.unwrap_or(m.created_at),
                 kind: m.kind,
                 title: m.title,

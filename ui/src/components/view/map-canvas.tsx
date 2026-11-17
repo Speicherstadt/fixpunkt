@@ -30,6 +30,8 @@ type Props = {
   range: [number, number];
   overlay: { grid: HeightGrid; limit: number; removedIsNegative: boolean } | null;
   outlines: Outline[];
+  /** gezeichnete Linien der Dokumentation (Leitungsverlauf) */
+  lines: Outline[];
   pins: Pin[];
   /** DXF-Plan als Strichzeichnung über dem Höhenbild */
   plan: PlanGeometry | null;
@@ -86,6 +88,7 @@ export function MapCanvas({
   range,
   overlay,
   outlines,
+  lines,
   pins,
   plan,
   ortho,
@@ -207,6 +210,23 @@ export function MapCanvas({
       ctx.fillText(o.name, sx + 4, sy - 4);
     }
     const accent = cssVar("--accent") || "blue";
+    for (const l of lines) {
+      if (l.points.length < 2) continue;
+      path(l.points, false);
+      ctx.lineJoin = "round";
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = bg;
+      ctx.stroke();
+      ctx.lineWidth = 2.5;
+      ctx.strokeStyle = accent;
+      ctx.stroke();
+      const [sx, sy] = toScreen(view, l.points[0]![0], l.points[0]![1]);
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = bg;
+      ctx.strokeText(l.name, sx + 6, sy - 6);
+      ctx.fillStyle = fg;
+      ctx.fillText(l.name, sx + 6, sy - 6);
+    }
     for (const p of pins) {
       const [sx, sy] = toScreen(view, p.at[0], p.at[1]);
       ctx.beginPath();
@@ -257,7 +277,7 @@ export function MapCanvas({
       ctx.lineTo(cx, cy + 8);
       ctx.stroke();
     }
-  }, [view, base, over, grid, overlay, outlines, pins, plan, ortho, shape, picking]);
+  }, [view, base, over, grid, overlay, outlines, lines, pins, plan, ortho, shape, picking]);
 
   if (!view) return <div ref={wrap} className="h-72 w-full" />;
   const bar = scaleBar(view);

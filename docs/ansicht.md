@@ -10,7 +10,7 @@ description: >-
 Unter **Ansicht** auf der Seite einer Baustelle zeigt Fixpunkt das Höhenbild einer Aufnahme: Farben von tief
 (blau) nach hoch (braun, hell), mit Schummerung aus Nordwesten, damit Böschungen und Kanten plastisch wirken.
 
-![Ansicht der Baugrube: Höhenbild, Soll/Ist-Abweichung der Sohle darübergelegt, Bereiche und ein Profil quer durch die Grube](screenshot-ansicht.png){ width="1024" height="1134" }
+![Ansicht der Baugrube: Höhenbild, Soll/Ist-Abweichung der Sohle darübergelegt, Bereiche und ein Profil quer durch die Grube](screenshot-ansicht.png){ width="1024" height="1216" }
 
 ## Bedienen
 
@@ -64,6 +64,13 @@ Mit **Bereich zeichnen** die Ecken einer Abrechnungsgrenze nacheinander anklicke
 schließt sich selbst), einen Namen eingeben und **Bereich speichern**. Der Bereich steht danach unter **Bereiche**
 und in allen Berechnungen zur Auswahl – ganz ohne QGIS. Für genaue Grenzen aus Plänen bleibt der Import als
 [GeoJSON](daten.md#abrechnungsgrenzen-aus-qgis).
+
+## Leitungen zeichnen
+
+Mit **Leitung zeichnen** die Punkte entlang einer Leitung nacheinander anklicken (mindestens zwei). Länge und
+Gefälle erscheinen wie bei **Strecke**; mit Name und Notiz gespeichert, steht die Leitung in der
+[Dokumentation](dokumentation.md#leitungen) und als Linie in der Ansicht. Jeder Punkt bekommt die Höhe des
+Geländes der gezeigten Aufnahme.
 
 ## 3D
 

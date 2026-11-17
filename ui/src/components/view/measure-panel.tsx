@@ -4,7 +4,7 @@ import { type HeightGrid, sampleAt } from "@/lib/view/grid";
 import { m } from "@/paraglide/messages";
 import { ProfileChart } from "./profile-chart";
 
-export type Tool = "pan" | "point" | "line" | "area" | "profile" | "draw";
+export type Tool = "pan" | "point" | "line" | "area" | "profile" | "draw" | "trace";
 
 const metres = (v: number) => `${v.toFixed(2).replace(".", ",")} m`;
 const coord = (v: number) => v.toFixed(2).replace(".", ",");
@@ -54,7 +54,7 @@ export const results = (tool: Tool, grid: HeightGrid, points: Pt[]): [string, st
       [m.measure_height(), z === null ? "–" : formatHeight(z)],
     ];
   }
-  if ((tool === "line" || tool === "profile") && points.length > 1) {
+  if ((tool === "line" || tool === "profile" || tool === "trace") && points.length > 1) {
     const l = measureLine(grid, points);
     return [
       [m.measure_length2d(), metres(l.length2d)],

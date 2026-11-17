@@ -56,7 +56,7 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 - [x] Soll-Höhe / Sollfläche gegen Scan
 
 ### Dokumentieren
-- [x] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte mit Sollhöhe und Soll/Ist; Leitungsverlauf als Linie über einen DXF-Plan
+- [x] **Zwangspunkte** digitalisieren: Abzweige, Hausanschlüsse, Schächte mit Sollhöhe und Soll/Ist; Leitungsverlauf nachzeichnen; alles als PDF und DXF
 - [ ] Fotos georeferenziert inkl. Blickrichtung, Notizen dazu – Fotos mit GPS-Position und Notizen ✅, Dokumentation als PDF ✅, Blickrichtung offen
 - [x] Berichte (PDF) je Berechnung
 - [x] Dashboards pro Baustelle (Überblick oben auf der Baustellenseite)

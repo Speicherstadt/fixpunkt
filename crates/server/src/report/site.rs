@@ -66,6 +66,8 @@ pub struct Entry {
     pub ist: Option<f64>,
     /// Vorschaubild als JPEG (RGB) mit Größe
     pub photo: Option<(Vec<u8>, usize, usize)>,
+    /// Linie: Länge in der Ebene und Zahl der Stützpunkte
+    pub line: Option<(f64, usize)>,
 }
 
 fn status(e: &Entry) -> (&'static str, Option<f64>) {
@@ -88,6 +90,7 @@ fn status(e: &Entry) -> (&'static str, Option<f64>) {
 pub fn documentation_doc(ctx: &SiteContext, entries: &[Entry]) -> Doc {
     let of = |k: &str| -> Vec<&Entry> { entries.iter().filter(|e| e.kind == k).collect() };
     let (constraints, notes, photos) = (of("constraint"), of("note"), of("photo"));
+    let lines = of("line");
     let violated = constraints
         .iter()
         .filter(|e| status(e).0 == "verletzt")
@@ -95,7 +98,7 @@ pub fn documentation_doc(ctx: &SiteContext, entries: &[Entry]) -> Doc {
     let mut d = head(
         ctx,
         "Dokumentation",
-        "Zwangspunkte, Notizen und Fotos".into(),
+        "Zwangspunkte, Leitungen, Notizen und Fotos".into(),
     );
     let checked = constraints.iter().filter(|e| status(e).1.is_some()).count();
     d.kpis = vec![
@@ -148,6 +151,32 @@ pub fn documentation_doc(ctx: &SiteContext, entries: &[Entry]) -> Doc {
             "Ist: Gelände der letzten Aufnahme an der Stelle. Eingehalten bis ± {}.",
             cm(CONSTRAINT_TOLERANCE)
         )));
+    }
+    if !lines.is_empty() {
+        d.blocks.push(Block::Heading("Leitungen".into()));
+        d.blocks.push(Block::Table(Table {
+            columns: vec![
+                col("Leitung", false, 2.2),
+                col("Anfang", false, 2.6),
+                col("Länge", true, 1.2),
+                col("Punkte", true, 0.9),
+                col("Notiz", false, 2.6),
+            ],
+            rows: lines
+                .iter()
+                .map(|e| {
+                    let (len, n) = e.line.unwrap_or((0.0, 0));
+                    vec![
+                        e.title.clone(),
+                        position(e.x, e.y),
+                        format!("{} m", number(len, 2)),
+                        n.to_string(),
+                        e.note.clone(),
+                    ]
+                })
+                .collect(),
+            total: None,
+        }));
     }
     if !notes.is_empty() {
         d.blocks.push(Block::Heading("Notizen".into()));
@@ -303,6 +332,7 @@ mod tests {
             at: 1_795_000_000_000,
             ist,
             photo: None,
+            line: None,
         }
     }
 
@@ -322,12 +352,18 @@ mod tests {
             entry("constraint", "draußen", Some(300.0), None),
             entry("note", "Bodenprobe", None, None),
             entry("photo", "Böschung Nord", None, None),
+            Entry {
+                line: Some((11.0, 3)),
+                ..entry("line", "Kanal DN 300", None, None)
+            },
         ];
         let d = documentation_doc(&ctx(), &entries);
         assert_eq!(d.kpis[0].value, "1 / 3");
         assert_eq!(d.kpis[0].tone, Tone::Removed);
         let t = d.texts();
         for s in [
+            "Kanal DN 300",
+            "11,00 m",
             "+5,0 cm",
             "+1,0 cm",
             "verletzt",

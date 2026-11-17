@@ -2,19 +2,19 @@
  * 2D-Ansicht einer Baustelle: Höhenbild einer Aufnahme, wahlweise mit Differenz/Abweichung darüber, die Bereiche,
  * und Werkzeuge zum Messen und Zeichnen. Gerechnet wird im Browser (src/lib/view/*), gespeichert nur ein neuer Bereich.
  */
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Eraser, Undo2 } from "lucide-react";
 import { lazy, Suspense, useMemo, useState } from "react";
 import { ErrorText, Section } from "@/components/page";
 import { Button } from "@/components/ui/button";
-import { Input, Label, Select } from "@/components/ui/input";
+import { Label, Select } from "@/components/ui/input";
 import { PlaceholderRows } from "@/components/ui/placeholder";
 import { Segmented } from "@/components/ui/segmented";
-import { api, FilesResult, type Job } from "@/lib/api";
+import { FilesResult, type Job } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { formatHeight } from "@/lib/format";
 import { chronological, jobTitle } from "@/lib/jobs";
-import { pinsOf } from "@/lib/markers";
+import { linesOf, pinsOf } from "@/lib/markers";
 import {
   capturesQuery,
   jobsQuery,
@@ -25,13 +25,14 @@ import {
   siteQuery,
 } from "@/lib/queries";
 import { deviationColor, deviationLimit, heightColor, terrainColor } from "@/lib/view/colors";
-import { type Pt, polygonGeojson, ringOf } from "@/lib/view/geometry";
+import { type Pt, ringOf } from "@/lib/view/geometry";
 import { fetchGrid, robustRange, sampleAt } from "@/lib/view/grid";
 import { buildMesh } from "@/lib/view/mesh";
 import { fetchPoints, pointScene } from "@/lib/view/points";
 import { m } from "@/paraglide/messages";
 import { MapCanvas } from "./map-canvas";
 import { MeasurePanel, type Tool } from "./measure-panel";
+import { SaveShape } from "./save-shape";
 import type { Content } from "./terrain-3d";
 
 /** three.js nur laden, wenn jemand auf 3D schaltet */
@@ -44,6 +45,7 @@ const TOOLS: { id: Tool; text: () => string }[] = [
   { id: "area", text: m.tool_area },
   { id: "profile", text: m.tool_profile },
   { id: "draw", text: m.tool_draw },
+  { id: "trace", text: m.tool_trace },
 ];
 
 /** Ergebnis-Raster eines Auftrags, das sich überlagern lässt */
@@ -73,8 +75,6 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
   const [exaggeration, setExaggeration] = useState(2);
   const [points, setPoints] = useState<Pt[]>([]);
   const [hover, setHover] = useState<Pt | null>(null);
-  const [name, setName] = useState("");
-  const queryClient = useQueryClient();
 
   const grid = useQuery({
     queryKey: ["grid", "capture", captureId],
@@ -146,26 +146,16 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
   const [planId, setPlanId] = useState<number | null>(null);
   const planGeometry = useQuery({ ...planGeometryQuery(planId ?? 0), enabled: planId !== null });
   const pins = useMemo(() => pinsOf(markers.data ?? []), [markers.data]);
+  const lines = useMemo(() => linesOf(markers.data ?? []), [markers.data]);
   const outlines = useMemo(
     () => (regions.data ?? []).map((r) => ({ name: r.name, points: ringOf(r.geojson) })),
     [regions.data],
   );
 
-  const save = useMutation({
-    mutationFn: () =>
-      api.addRegions(siteId, polygonGeojson(points, site.data?.epsg ?? 25832), name.trim()),
-    onSuccess: async () => {
-      setPoints([]);
-      setName("");
-      await queryClient.invalidateQueries({ queryKey: ["regions", siteId] });
-    },
-  });
-
   if (!ready.length) return null;
   const chooseTool = (t: Tool) => {
     setTool(t);
     setPoints([]);
-    save.reset();
   };
   const names = (id: unknown) => captures.data?.find((c) => c.id === id)?.name ?? "–";
   const hoverZ = hover && grid.data ? sampleAt(grid.data, hover[0], hover[1]) : null;
@@ -241,10 +231,12 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
           <Segmented
             name="tool"
             legend={m.view_tools()}
-            options={TOOLS.filter((t) => canEdit || t.id !== "draw").map((t) => ({
-              id: t.id,
-              text: t.text(),
-            }))}
+            options={TOOLS.filter((t) => canEdit || (t.id !== "draw" && t.id !== "trace")).map(
+              (t) => ({
+                id: t.id,
+                text: t.text(),
+              }),
+            )}
             value={tool}
             onChange={chooseTool}
           />
@@ -292,6 +284,7 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
             range={range}
             overlay={overlayProp}
             outlines={outlines}
+            lines={lines}
             pins={pins}
             plan={planId !== null ? (planGeometry.data ?? null) : null}
             ortho={orthoProp}
@@ -352,32 +345,18 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
                   <Eraser size={14} aria-hidden="true" />
                   {m.view_clear()}
                 </Button>
-                {tool === "draw" ? (
-                  <form
-                    className="ml-auto flex flex-wrap items-end gap-2"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      save.mutate();
-                    }}
-                  >
-                    <Label className="w-56">
-                      {m.view_region_name()}
-                      <Input value={name} onChange={(e) => setName(e.target.value)} required />
-                    </Label>
-                    <Button
-                      type="submit"
-                      variant="primary"
-                      disabled={points.length < 3 || save.isPending}
-                    >
-                      {m.view_region_save()}
-                    </Button>
-                  </form>
+                {tool === "draw" || tool === "trace" ? (
+                  <SaveShape
+                    key={tool}
+                    kind={tool === "draw" ? "region" : "line"}
+                    siteId={siteId}
+                    epsg={site.data?.epsg ?? 25832}
+                    grid={grid.data}
+                    points={points}
+                    onSaved={() => setPoints([])}
+                  />
                 ) : null}
               </div>
-              {tool === "draw" && points.length < 3 ? (
-                <p className="m-0 text-[13px] text-muted">{m.view_draw_hint()}</p>
-              ) : null}
-              <ErrorText>{save.error ? errorText(save.error) : null}</ErrorText>
             </div>
           ) : null}
         </>

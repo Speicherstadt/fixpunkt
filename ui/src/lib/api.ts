@@ -108,7 +108,7 @@ export const SiteItem = Site.extend({
   center: z.tuple([z.number(), z.number()]).nullable().optional(),
 });
 
-export const MarkerKind = z.enum(["constraint", "photo", "note"]);
+export const MarkerKind = z.enum(["constraint", "photo", "note", "line"]);
 export type MarkerKind = z.infer<typeof MarkerKind>;
 
 /** Markierung der Dokumentation (Zwangspunkt, Foto, Notiz) */
@@ -124,6 +124,8 @@ export const Marker = z.object({
   photo: z.string().nullable(),
   takenAt: z.number().nullable(),
   createdAt: z.number(),
+  /** Linie: Stützpunkte [x, y] oder [x, y, z] */
+  points: z.array(z.array(z.number())).nullable().optional(),
 });
 export type Marker = z.infer<typeof Marker>;
 
@@ -134,6 +136,7 @@ export type NewMarker = {
   x?: number;
   y?: number;
   z?: number;
+  points?: number[][];
 };
 
 export const Plan = z.object({

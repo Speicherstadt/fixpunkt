@@ -1,6 +1,8 @@
-//! Dokumentation einer Baustelle: Zwangspunkte (mit Sollhöhe), Fotos (Position aus EXIF), Notizen. Eine
-//! Markierung hat höchstens ein Foto; Datei und Vorschaubild liegen unter `markers/<id>/`.
+//! Dokumentation einer Baustelle: Zwangspunkte (mit Sollhöhe), Fotos (Position aus EXIF), Notizen und Linien
+//! (Leitungsverlauf). Eine Markierung hat höchstens ein Foto; Datei und Vorschaubild liegen unter `markers/<id>/`.
+//! Als DXF für CAD: `dxf.rs`.
 
+pub mod dxf;
 pub mod photo;
 
 use crate::auth::CurrentUser;
@@ -19,7 +21,9 @@ use serde::{Deserialize, Serialize};
 use sqlx::FromRow;
 use std::path::PathBuf;
 
-pub const KINDS: &[&str] = &["constraint", "photo", "note"];
+pub const KINDS: &[&str] = &["constraint", "photo", "note", "line"];
+/// Höchstens so viele Stützpunkte je Linie
+pub const MAX_LINE_POINTS: usize = 10_000;
 /// Größtes Foto in Bytes
 pub const MAX_PHOTO: usize = 50_000_000;
 
@@ -38,6 +42,31 @@ pub struct Marker {
     pub taken_at: Option<i64>,
     pub created_by: Option<i64>,
     pub created_at: i64,
+    /// Linie: Stützpunkte `[[x, y, z?], …]` als JSON
+    #[serde(serialize_with = "db::raw_json")]
+    pub points: Option<String>,
+}
+
+impl Marker {
+    /// Stützpunkte einer Linie; Höhe `None`, wo das Gelände keine hatte
+    pub fn line(&self) -> Vec<([f64; 2], Option<f64>)> {
+        let pts: Vec<Vec<f64>> = self
+            .points
+            .as_deref()
+            .and_then(|p| serde_json::from_str(p).ok())
+            .unwrap_or_default();
+        pts.iter()
+            .filter(|p| p.len() >= 2)
+            .map(|p| ([p[0], p[1]], p.get(2).copied()))
+            .collect()
+    }
+}
+
+/// Länge einer Linie in der Ebene, in m
+pub fn line_length(pts: &[([f64; 2], Option<f64>)]) -> f64 {
+    pts.windows(2)
+        .map(|w| (w[1].0[0] - w[0].0[0]).hypot(w[1].0[1] - w[0].0[1]))
+        .sum()
 }
 
 pub(crate) fn dir(app: &AppRef, id: i64) -> PathBuf {
@@ -75,6 +104,26 @@ pub struct NewMarker {
     x: Option<f64>,
     y: Option<f64>,
     z: Option<f64>,
+    /// nur für Linien
+    points: Option<Vec<Vec<f64>>>,
+}
+
+/// Stützpunkte: nur Linien haben welche, mindestens zwei mit Ost, Nord und optional Höhe
+pub fn validate_points(kind: &str, points: Option<&[Vec<f64>]>) -> ApiResult<()> {
+    let bad = |d: &str| Err(ApiError::bad_request(code::INVALID_INPUT).with_detail(d.to_string()));
+    match (kind, points) {
+        ("line", Some(p)) if (2..=MAX_LINE_POINTS).contains(&p.len()) => {
+            if p.iter()
+                .any(|q| !(2..=3).contains(&q.len()) || q.iter().any(|v| !v.is_finite()))
+            {
+                return bad("Stützpunkte");
+            }
+            Ok(())
+        }
+        ("line", _) => bad("Linie braucht mindestens zwei Punkte"),
+        (_, Some(_)) => bad("nur Linien haben Stützpunkte"),
+        _ => Ok(()),
+    }
 }
 
 /// Prüft Art, Titel und Koordinaten; ein Zwangspunkt braucht Lage und Sollhöhe
@@ -109,17 +158,25 @@ pub async fn create(
     db::get_site(&app.db, site)
         .await?
         .ok_or_else(ApiError::not_found)?;
-    validate(&m.kind, &m.title, m.x, m.y, m.z)?;
+    validate_points(&m.kind, m.points.as_deref())?;
+    // eine Linie liegt für Liste und Karte an ihrem Anfang
+    let (x, y, z) = match &m.points {
+        Some(p) => (p.first().map(|q| q[0]), p.first().map(|q| q[1]), None),
+        None => (m.x, m.y, m.z),
+    };
+    validate(&m.kind, &m.title, x, y, z)?;
+    let points = m.points.as_ref().map(serde_json::to_string).transpose()?;
     let id = sqlx::query(
-        "INSERT INTO markers(site_id, kind, title, note, x, y, z, created_by, created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "INSERT INTO markers(site_id, kind, title, note, x, y, z, points, created_by, created_at) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
     )
     .bind(site)
     .bind(&m.kind)
     .bind(m.title.trim())
     .bind(m.note.trim())
-    .bind(m.x)
-    .bind(m.y)
-    .bind(m.z)
+    .bind(x)
+    .bind(y)
+    .bind(z)
+    .bind(points)
     .bind(me.id)
     .bind(now_ms())
     .execute(&app.db)
@@ -155,6 +212,10 @@ pub async fn update(
         ..m
     };
     validate(&next.kind, &next.title, next.x, next.y, next.z)?;
+    // eine Linie bleibt eine Linie (ihre Stützpunkte gehen nicht verloren), ein Punkt wird keine
+    if (next.kind == "line") != next.points.is_some() {
+        return Err(ApiError::bad_request(code::INVALID_INPUT).with_detail("Art einer Linie"));
+    }
     sqlx::query(
         "UPDATE markers SET kind = ?, title = ?, note = ?, x = ?, y = ?, z = ? WHERE id = ?",
     )
@@ -303,6 +364,36 @@ mod tests {
         assert!(validate("foo", "x", None, None, None).is_err());
         assert!(validate("note", "x", Some(1.0), None, None).is_err());
         assert!(validate("note", "x", Some(f64::NAN), Some(1.0), None).is_err());
+        let two = vec![vec![0.0, 0.0], vec![3.0, 4.0, 298.0]];
+        assert!(validate_points("line", Some(&two)).is_ok());
+        assert!(validate_points("line", Some(&two[..1])).is_err());
+        assert!(validate_points("line", None).is_err());
+        assert!(validate_points("note", Some(&two)).is_err());
+        assert!(validate_points("line", Some(&[vec![0.0], vec![1.0, 1.0]])).is_err());
+        assert!(validate_points("note", None).is_ok());
+    }
+
+    #[test]
+    fn line_points_and_length() {
+        let m = Marker {
+            id: 1,
+            site_id: 1,
+            kind: "line".into(),
+            title: "Kanal".into(),
+            note: String::new(),
+            x: None,
+            y: None,
+            z: None,
+            photo: None,
+            taken_at: None,
+            created_by: None,
+            created_at: 0,
+            points: Some("[[0,0],[3,4,298.5],[3,10]]".into()),
+        };
+        let l = m.line();
+        assert_eq!(l[1], ([3.0, 4.0], Some(298.5)));
+        // 5 m (3-4-5-Dreieck) + 6 m
+        assert_eq!(line_length(&l), 11.0);
     }
 
     #[test]

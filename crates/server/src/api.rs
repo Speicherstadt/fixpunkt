@@ -89,6 +89,10 @@ pub fn router(app: AppRef) -> Router {
             put(markers::upload_photo).layer(DefaultBodyLimit::max(markers::MAX_PHOTO)),
         )
         .route("/markers/{id}/photo", get(markers::photo))
+        .route(
+            "/sites/{id}/documentation.dxf",
+            get(markers::dxf::documentation),
+        )
         .route("/markers/{id}/thumb", get(markers::thumb))
         .route(
             "/sites/{id}/plans",

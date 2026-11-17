@@ -3,7 +3,7 @@
  * Position aus GPS, Notizen. Fotos ohne GPS erscheinen in der Liste, aber nicht in der Ansicht.
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Camera, FileDown, MapPin, StickyNote, Trash2, Upload } from "lucide-react";
+import { Camera, FileDown, MapPin, Route, StickyNote, Trash2, Upload } from "lucide-react";
 import { type FormEvent, useId, useState } from "react";
 import { EmptyState, ErrorText, Section } from "@/components/page";
 import { cm } from "@/components/report/compare-report";
@@ -11,18 +11,19 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input, Label, Select, Textarea } from "@/components/ui/input";
 import { api, type Marker, type MarkerKind, uploadPhoto } from "@/lib/api";
 import { errorText } from "@/lib/errors";
-import { formatDateTime, formatHeight } from "@/lib/format";
+import { formatDateTime, formatHeight, formatNumber } from "@/lib/format";
 import { chronological } from "@/lib/jobs";
-import { checkConstraint } from "@/lib/markers";
+import { checkConstraint, lineLength } from "@/lib/markers";
 import { capturesQuery, markersQuery } from "@/lib/queries";
 import { fetchGrid, type HeightGrid } from "@/lib/view/grid";
 import { m } from "@/paraglide/messages";
 
-const ICON = { constraint: MapPin, photo: Camera, note: StickyNote } as const;
+const ICON = { constraint: MapPin, photo: Camera, note: StickyNote, line: Route } as const;
 const KIND_TEXT: Record<MarkerKind, () => string> = {
   constraint: m.doc_kind_constraint,
   photo: m.doc_kind_photo,
   note: m.doc_kind_note,
+  line: m.doc_kind_line,
 };
 
 const parse = (s: string) => (s.trim() ? Number(s.replace(",", ".")) : undefined);
@@ -70,6 +71,13 @@ export function Documentation({ siteId, canEdit }: { siteId: number; canEdit: bo
           >
             <FileDown size={16} aria-hidden="true" />
             {m.doc_report()}
+          </a>
+          <a
+            href={`/api/sites/${siteId}/documentation.dxf`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            <FileDown size={16} aria-hidden="true" />
+            {m.doc_dxf()}
           </a>
           {canEdit ? (
             <>
@@ -157,6 +165,14 @@ function MarkerRow({
             : ` · ${m.doc_no_position()}`}
         </span>
         {mk.note ? <span className="text-[13px]">{mk.note}</span> : null}
+        {mk.kind === "line" && mk.points ? (
+          <span className="tabular text-[13px]">
+            {m.doc_line({
+              length: formatNumber(lineLength(mk.points), 2),
+              points: mk.points.length,
+            })}
+          </span>
+        ) : null}
         {mk.kind === "constraint" && mk.z !== null ? (
           <span className="tabular text-[13px]">
             {m.doc_target({ h: formatHeight(mk.z) })}
