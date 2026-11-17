@@ -277,6 +277,8 @@
   "overview_stock_change": "since before",
   "overview_stock_count": "{measured} of {count} stockpiles calculated",
   "overview_stock_current": "Stock",
+  "overview_stock_history": "History by material",
+  "overview_stock_history_of": "History {material}",
   "overview_stock_material": "Material",
   "overview_stock_none": "No stockpile calculation for the stockpiles yet.",
   "overview_target_none": "not calculated yet",

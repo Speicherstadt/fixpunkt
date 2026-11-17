@@ -277,6 +277,8 @@
   "overview_stock_change": "seit vorher",
   "overview_stock_count": "{measured} von {count} Lagern berechnet",
   "overview_stock_current": "Bestand",
+  "overview_stock_history": "Verlauf je Material",
+  "overview_stock_history_of": "Verlauf {material}",
   "overview_stock_material": "Material",
   "overview_stock_none": "Noch keine Haufwerk-Berechnung für die Lager.",
   "overview_target_none": "noch nicht berechnet",

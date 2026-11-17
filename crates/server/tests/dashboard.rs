@@ -244,7 +244,20 @@ async fn stock_per_material() {
         .await;
     }
     jobs::run_pending(&c.app).await.unwrap();
-    let s = &c.get(&format!("/api/sites/{sid}/dashboard")).await.json()["stock"][0];
+    let d = c.get(&format!("/api/sites/{sid}/dashboard")).await.json();
+    // Verlauf: Woche 1 → Woche 2
+    let h: Vec<f64> = d["stockHistory"][0]["points"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|p| p["value"].as_f64().unwrap())
+        .collect();
+    assert_eq!(h.len(), 2);
+    assert!(
+        (h[0] - 1080.0).abs() < 10.0 && (h[1] - 600.0).abs() < 10.0,
+        "{h:?}"
+    );
+    let s = &d["stock"][0];
     assert_eq!(s["material"], "Boden Klasse 4");
     let (now, before) = (
         s["current"].as_f64().unwrap(),

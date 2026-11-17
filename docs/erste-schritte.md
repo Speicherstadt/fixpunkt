@@ -44,7 +44,7 @@ unter „Braucht Aufmerksamkeit“. Der Überblick aktualisiert sich von selbst,
 Haben Bereiche ein [Massenziel](aushub.md#material-und-massenziel), stehen sie unter **Massenziele**: erledigt
 von Soll in m³, Prozent und offen, dazu die Summe je Material. Gezählt wird die neueste Aushub-Berechnung gegen
 das Urgelände, die den Bereich enthält. Lager (Haufwerk-Bereiche) stehen unter **Bestand je Material**: Menge
-der neuesten Haufwerk-Berechnung, Änderung zur Befliegung davor und Stand.
+der neuesten Haufwerk-Berechnung, Änderung zur Befliegung davor und Stand, darunter der Verlauf je Material.
 
 ![Überblick mit Kennzahlen, Aushub je Befliegung und dem Massenziel der Grube](screenshot-ueberblick.png)
 

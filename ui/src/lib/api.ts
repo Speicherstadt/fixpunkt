@@ -258,6 +258,15 @@ export const Dashboard = z.object({
   materials: z
     .array(z.object({ material: z.string(), target: z.number(), done: z.number() }))
     .default([]),
+  /** Verlauf je Material: Summe der Lager je Befliegung */
+  stockHistory: z
+    .array(
+      z.object({
+        material: z.string(),
+        points: z.array(z.object({ at: z.number(), value: z.number() })),
+      }),
+    )
+    .default([]),
   /** Bestand je Material in den Lagern (Haufwerk-Bereichen) */
   stock: z
     .array(

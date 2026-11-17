@@ -87,4 +87,11 @@ test("Bestand je Material im Überblick", async ({ page }) => {
   await expect(row).toContainText(/(59\d|60\d) m³/);
   await expect(row).toContainText(/−(47\d|48\d) m³/);
   await expect(row).toContainText("09.01.1970");
+  // Verlauf: Woche 1 und Woche 2
+  const history = overview
+    .getByRole("region", { name: "Verlauf Boden Klasse 4" })
+    .getByRole("listitem");
+  await expect(history).toHaveCount(2);
+  await expect(history.nth(0)).toContainText(/02\.01\.1970.*1\.0(7\d|8\d) m³/);
+  await expect(history.nth(1)).toContainText(/09\.01\.1970.*(59\d|60\d) m³/);
 });
