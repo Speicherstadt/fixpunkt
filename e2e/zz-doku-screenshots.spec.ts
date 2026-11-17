@@ -190,6 +190,18 @@ test("Ansicht mit Differenz @screenshots", async () => {
   await view.screenshot({ path: `${DOCS}/screenshot-ansicht.png` });
 });
 
+test("3D-Ansicht @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const view = page.getByRole("region", { name: "Ansicht" });
+  await view.getByLabel("Darüber anzeigen").selectOption({ index: 1 });
+  await view.getByRole("group", { name: "Darstellung" }).getByText("3D", { exact: true }).click();
+  const terrain = view.getByRole("application", { name: /Gelände in 3D/ });
+  await expect(terrain).toHaveAttribute("data-triangles", /\d+/);
+  await page.waitForTimeout(500);
+  await view.scrollIntoViewIfNeeded();
+  await view.screenshot({ path: `${DOCS}/screenshot-3d.png` });
+});
+
 test("Mengenbericht und Vorschaubild @screenshots", async () => {
   await go(`/jobs/${reportJob}`);
   await expect(page.getByRole("table", { name: "Massen je Bereich" })).toBeVisible();

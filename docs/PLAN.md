@@ -529,7 +529,7 @@ Was im Vergleich zu SDX-Cloud/PocketScan noch fehlt, geordnet nach Nutzen für d
 3. [x] PDF-Bericht (Aushub, Haufwerk, Soll/Ist, Zeitreihe; mit Karte)
 4. [x] NodeODM-Anbindung: Drohnenfotos → Punktwolke in Fixpunkt (Zone und Höhenversatz, eigene Warteschlange)
 5. [x] Karte aller Baustellen (Leaflet, Lage aus den Aufnahmen)
-6. [ ] 3D-Ansicht
+6. [x] 3D-Ansicht (Geländenetz mit Höhen- oder Abweichungsfarben, Überhöhung)
 7. [ ] Passpunkte und Georeferenzierung in der UI
 8. [ ] Dokumentieren: Zwangspunkte, Fotos mit Position, Notizen
 9. [ ] DXF-Pläne als Hintergrund, Plan/Ist

@@ -4,9 +4,9 @@ import { Calculator, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { ErrorText, Section } from "@/components/page";
 import { Button } from "@/components/ui/button";
+import { Segmented } from "@/components/ui/segmented";
 import { StatusBadge } from "@/components/ui/status";
 import { api, type Capture } from "@/lib/api";
-import { cn } from "@/lib/cn";
 import { errorText } from "@/lib/errors";
 import { formatDateTime } from "@/lib/format";
 import { JOB_KINDS, type JobKind, jobSummary, jobTitle, KIND_TEXT } from "@/lib/jobs";
@@ -69,31 +69,16 @@ export function Calculations({ siteId, canEdit }: { siteId: number; canEdit: boo
     <Section title={m.calc_title()} description={HINTS[kind]()}>
       {canEdit ? (
         <>
-          <fieldset className="m-0 flex flex-wrap gap-1 rounded-lg bg-subtle p-1 border-0">
-            <legend className="sr-only">{m.calc_kind()}</legend>
-            {JOB_KINDS.map((k) => (
-              <label
-                key={k}
-                className={cn(
-                  "flex h-8 cursor-pointer items-center rounded-md px-3 text-[13px] text-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-fg",
-                  k === kind && "bg-bg font-medium text-fg shadow-sm",
-                )}
-              >
-                <input
-                  type="radio"
-                  name="kind"
-                  value={k}
-                  checked={k === kind}
-                  onChange={() => {
-                    setKind(k);
-                    start.reset();
-                  }}
-                  className="sr-only"
-                />
-                {KIND_TEXT[k]()}
-              </label>
-            ))}
-          </fieldset>
+          <Segmented
+            name="kind"
+            legend={m.calc_kind()}
+            options={JOB_KINDS.map((k) => ({ id: k, text: KIND_TEXT[k]() }))}
+            value={kind}
+            onChange={(k) => {
+              setKind(k);
+              start.reset();
+            }}
+          />
           <Form
             key={kind}
             ready={ready}

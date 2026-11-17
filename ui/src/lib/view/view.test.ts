@@ -6,6 +6,7 @@ import {
   hillshade,
   renderDeviation,
   renderHeights,
+  terrainColor,
 } from "./colors";
 import {
   length2d,
@@ -217,5 +218,23 @@ describe("ringOf", async () => {
     expect(ringOf({ type: "Polygon", coordinates: [ring.slice(0, 3)] })).toHaveLength(3);
     expect(ringOf(null)).toEqual([]);
     expect(ringOf({ coordinates: "kaputt" })).toEqual([]);
+  });
+
+  it("3D-Farben: Abweichung, wo das Overlay Daten hat, sonst Höhe", () => {
+    const base: HeightGrid = {
+      minX: 0,
+      maxY: 10,
+      cell: 1,
+      cols: 10,
+      rows: 10,
+      data: new Float32Array(100).fill(5),
+    };
+    const over: HeightGrid = { ...base, cols: 5, data: new Float32Array(50).fill(-1) };
+    const color = terrainColor([0, 10], { grid: over, limit: 1, removedIsNegative: true });
+    // Differenz −1 m = abgetragen → Orange wie in 2D und im PDF
+    expect(color(2, 5, 5)).toEqual(deviationColor(1, 1));
+    // außerhalb des Overlays: Höhenfarbe in der Mitte der Skala
+    expect(color(8, 5, 5)).toEqual(heightColor(0.5));
+    expect(terrainColor([0, 10], null)(2, 5, 0)).toEqual(heightColor(0));
   });
 });

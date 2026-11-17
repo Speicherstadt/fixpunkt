@@ -4,22 +4,27 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Eraser, Undo2 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { lazy, Suspense, useMemo, useState } from "react";
 import { ErrorText, Section } from "@/components/page";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
+import { PlaceholderRows } from "@/components/ui/placeholder";
+import { Segmented } from "@/components/ui/segmented";
 import { api, FilesResult, type Job } from "@/lib/api";
-import { cn } from "@/lib/cn";
 import { errorText } from "@/lib/errors";
 import { formatHeight } from "@/lib/format";
 import { chronological, jobTitle } from "@/lib/jobs";
 import { capturesQuery, jobsQuery, regionsQuery, siteQuery } from "@/lib/queries";
-import { deviationColor, deviationLimit, heightColor } from "@/lib/view/colors";
+import { deviationColor, deviationLimit, heightColor, terrainColor } from "@/lib/view/colors";
 import { type Pt, polygonGeojson, ringOf } from "@/lib/view/geometry";
 import { fetchGrid, robustRange, sampleAt } from "@/lib/view/grid";
+import { buildMesh } from "@/lib/view/mesh";
 import { m } from "@/paraglide/messages";
 import { MapCanvas } from "./map-canvas";
 import { MeasurePanel, type Tool } from "./measure-panel";
+
+/** three.js nur laden, wenn jemand auf 3D schaltet */
+const Terrain3D = lazy(() => import("./terrain-3d"));
 
 const TOOLS: { id: Tool; text: () => string }[] = [
   { id: "pan", text: m.tool_pan },
@@ -52,6 +57,8 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
   const [overlayId, setOverlay] = useState<number | null>(null);
   const overlayJob = overlays.find((j) => j.id === overlayId);
   const [tool, setTool] = useState<Tool>("pan");
+  const [mode, setMode] = useState<"2d" | "3d">("2d");
+  const [exaggeration, setExaggeration] = useState(2);
   const [points, setPoints] = useState<Pt[]>([]);
   const [hover, setHover] = useState<Pt | null>(null);
   const [name, setName] = useState("");
@@ -81,6 +88,13 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
           }
         : null,
     [overlay.data, overlayJob, limit],
+  );
+  const mesh = useMemo(
+    () =>
+      mode === "3d" && grid.data && range
+        ? buildMesh(grid.data, terrainColor(range, overlayProp), exaggeration)
+        : null,
+    [mode, grid.data, range, overlayProp, exaggeration],
   );
   const outlines = useMemo(
     () => (regions.data ?? []).map((r) => ({ name: r.name, points: ringOf(r.geojson) })),
@@ -134,30 +148,52 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
           </Select>
         </Label>
       </div>
-      <fieldset className="m-0 flex flex-wrap gap-1 rounded-lg border-0 bg-subtle p-1">
-        <legend className="sr-only">{m.view_tools()}</legend>
-        {TOOLS.filter((t) => canEdit || t.id !== "draw").map((t) => (
-          <label
-            key={t.id}
-            className={cn(
-              "flex h-8 cursor-pointer items-center rounded-md px-3 text-[13px] text-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-fg",
-              t.id === tool && "bg-bg font-medium text-fg shadow-sm",
-            )}
-          >
-            <input
-              type="radio"
-              name="tool"
-              value={t.id}
-              checked={t.id === tool}
-              onChange={() => chooseTool(t.id)}
-              className="sr-only"
-            />
-            {t.text()}
-          </label>
-        ))}
-      </fieldset>
+      <div className="flex flex-wrap items-center gap-3">
+        <Segmented
+          name="mode"
+          legend={m.view3d_mode()}
+          options={[
+            { id: "2d", text: m.view3d_2d() },
+            { id: "3d", text: m.view3d_3d() },
+          ]}
+          value={mode}
+          onChange={setMode}
+        />
+        {mode === "2d" ? (
+          <Segmented
+            name="tool"
+            legend={m.view_tools()}
+            options={TOOLS.filter((t) => canEdit || t.id !== "draw").map((t) => ({
+              id: t.id,
+              text: t.text(),
+            }))}
+            value={tool}
+            onChange={chooseTool}
+          />
+        ) : (
+          <Label className="flex-row items-center gap-2">
+            {m.view3d_exaggeration()}
+            <Select
+              className="h-8 w-24"
+              value={String(exaggeration)}
+              onChange={(e) => setExaggeration(Number(e.target.value))}
+            >
+              {[1, 2, 5].map((x) => (
+                <option key={x} value={x}>
+                  {x} ×
+                </option>
+              ))}
+            </Select>
+          </Label>
+        )}
+      </div>
       {grid.error ? <ErrorText>{errorText(grid.error)}</ErrorText> : null}
-      {grid.data && range ? (
+      {grid.data && range && mode === "3d" ? (
+        <Suspense fallback={<PlaceholderRows count={2} />}>
+          {mesh ? <Terrain3D mesh={mesh} label={m.view3d_label()} /> : null}
+        </Suspense>
+      ) : null}
+      {grid.data && range && mode === "2d" ? (
         <>
           <MapCanvas
             grid={grid.data}
@@ -250,7 +286,8 @@ export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean
             </div>
           ) : null}
         </>
-      ) : grid.isPending ? (
+      ) : null}
+      {grid.isPending ? (
         <p role="status" className="m-0 text-[13px] text-muted">
           {m.view_loading()}
         </p>

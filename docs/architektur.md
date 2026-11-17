@@ -25,7 +25,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 |---|---|---|
 | Rechenkern | `crates/processing` | Rust: LAS/LAZ, GeoTIFF, Raster, Bodenfilter, Volumen, Helmert, UTM/Geoid, Exporte |
 | Server | `crates/server` | tokio, axum, sqlx (SQLite), Server-Sent Events, argon2id |
-| Web-UI | `ui` | Bun, Vite, React, TanStack Router + Query, Komponenten im shadcn/ui-Stil auf Radix, Tailwind 4, Paraglide (de/en) |
+| Web-UI | `ui` | Bun, Vite, React, TanStack Router + Query, Komponenten im shadcn/ui-Stil auf Radix, Tailwind 4, Paraglide (de/en); Karte mit Leaflet, 3D mit three.js (nachgeladen) |
 | E2E | `e2e` | Playwright gegen die echte Programmdatei |
 | Auslieferung | `docker`, `scripts/install.sh` | Image in drei Stufen, statische musl-Programmdateien |
 

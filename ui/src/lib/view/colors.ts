@@ -1,5 +1,5 @@
 /** Farben der 2D-Ansicht: Höhen mit Schummerung, Abweichungen blau – weiß – rot. */
-import type { HeightGrid } from "./grid";
+import { type HeightGrid, sampleAt } from "./grid";
 
 type Rgb = [number, number, number];
 
@@ -103,3 +103,21 @@ export const deviationLimit = (g: HeightGrid): number => {
     .sort((a, b) => a - b);
   return Math.max(0.05, v[Math.floor(0.98 * (v.length - 1))] ?? 0.05);
 };
+
+/**
+ * Farbe eines Geländepunkts in 3D: Abweichung/Differenz, wo das überlagerte Raster Daten hat (Orange = Material
+ * weg wie in 2D), sonst die Höhenfarbe
+ */
+export const terrainColor =
+  (
+    range: [number, number],
+    overlay: { grid: HeightGrid; limit: number; removedIsNegative: boolean } | null,
+  ) =>
+  (x: number, y: number, z: number): Rgb => {
+    if (overlay) {
+      const v = sampleAt(overlay.grid, x, y);
+      if (v !== null && !Number.isNaN(v))
+        return deviationColor((overlay.removedIsNegative ? -1 : 1) * v, overlay.limit);
+    }
+    return heightColor((z - range[0]) / (range[1] - range[0]));
+  };

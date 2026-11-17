@@ -1,7 +1,8 @@
 ---
 description: >-
-  2D-Ansicht in Fixpunkt: Höhenbild jeder Aufnahme mit Schummerung, Differenz oder Soll/Ist-Abweichung
-  darübergelegt, messen (Punkt, Strecke, Fläche, Profil) und Abrechnungsbereiche direkt im Browser zeichnen.
+  2D- und 3D-Ansicht in Fixpunkt: Höhenbild jeder Aufnahme mit Schummerung, Differenz oder Soll/Ist-Abweichung
+  darübergelegt, Gelände in 3D mit Überhöhung, messen (Punkt, Strecke, Fläche, Profil) und Abrechnungsbereiche
+  direkt im Browser zeichnen.
 ---
 
 # Ansicht und Messen
@@ -50,3 +51,21 @@ Mit **Bereich zeichnen** die Ecken einer Abrechnungsgrenze nacheinander anklicke
 schließt sich selbst), einen Namen eingeben und **Bereich speichern**. Der Bereich steht danach unter **Bereiche**
 und in allen Berechnungen zur Auswahl – ganz ohne QGIS. Für genaue Grenzen aus Plänen bleibt der Import als
 [GeoJSON](daten.md#abrechnungsgrenzen-aus-qgis).
+
+## 3D
+
+**Darstellung → 3D** zeigt dasselbe Höhenraster als Gelände, mit denselben Farben: Höhenstufen oder – mit
+**Darüber anzeigen** – die Differenz bzw. Soll/Ist-Abweichung (orange: Material weg, blau: dazu). So sieht man auf
+einen Blick, wo an der Sohle noch zu viel steht oder ob Böschungen sauber laufen. **Überhöhung** streckt die Höhen
+(1×, 2×, 5×), damit flache Mulden und Zentimeter-Abweichungen sichtbar werden.
+
+![3D-Ansicht der Baugrube: Gelände zweifach überhöht, Soll/Ist-Abweichung der Sohle farbig, der Bagger als Block](screenshot-3d.png){ width="1024" height="832" loading="lazy" }
+
+| Bedienung | Maus | Tastatur |
+|---|---|---|
+| Drehen | ziehen | – |
+| Verschieben | rechte Maustaste ziehen | Pfeiltasten (Ansicht vorher anklicken oder mit Tab wählen) |
+| Zoomen | Rad | – |
+
+Messen und Zeichnen bleiben in 2D, wo Strecken und Flächen sich genau setzen lassen. Große Raster werden für 3D
+ausgedünnt (höchstens 400 Stützpunkte je Seite); die 3D-Bibliothek (three.js) lädt erst beim Umschalten.
