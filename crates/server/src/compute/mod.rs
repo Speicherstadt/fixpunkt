@@ -7,7 +7,7 @@ pub mod export;
 pub mod volume;
 
 #[cfg(test)]
-pub(crate) mod testdata;
+pub mod testdata;
 
 use anyhow::{bail, Context, Result};
 use fixpunkt::geom::{BBox, Polygon, Region};

@@ -175,6 +175,20 @@ test("Baustelle @screenshots", async () => {
   await shot("baustelle", true);
 });
 
+test("Ansicht mit Differenz @screenshots", async () => {
+  await go(`/sites/${siteId}`);
+  const view = page.getByRole("region", { name: "Ansicht" });
+  await view.getByLabel("Darüber anzeigen").selectOption({ index: 1 });
+  await view.getByRole("group", { name: "Werkzeug" }).getByText("Profil", { exact: true }).click();
+  const canvas = view.getByRole("application");
+  const box = (await canvas.boundingBox())!;
+  await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.55 } });
+  await canvas.click({ position: { x: box.width * 0.7, y: box.height * 0.55 } });
+  await expect(view.getByRole("img", { name: /Profil über/ })).toBeVisible();
+  await view.scrollIntoViewIfNeeded();
+  await view.screenshot({ path: `${DOCS}/screenshot-ansicht.png` });
+});
+
 test("Mengenbericht und Vorschaubild @screenshots", async () => {
   await go(`/jobs/${reportJob}`);
   await expect(page.getByRole("table", { name: "Massen je Bereich" })).toBeVisible();

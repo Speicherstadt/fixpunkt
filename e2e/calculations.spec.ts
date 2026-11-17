@@ -16,7 +16,8 @@ test("Haufwerk, Soll/Ist, Zeitreihe und Export", async ({ page }) => {
   await api.call("POST", `/sites/${site.id}/regions`, { geojson: boundaries() });
   await api.settled(site.id);
   await page.goto(`/sites/${site.id}`);
-  const kinds = page.getByRole("group", { name: "Art der Berechnung" });
+  const calc = page.getByRole("region", { name: "Berechnungen" });
+  const kinds = calc.getByRole("group", { name: "Art der Berechnung" });
   const jobs = page.getByRole("link", { name: /·|Zeitreihe/ });
   /** Art wählen wie ein Nutzer: auf die Beschriftung klicken */
   const choose = async (kind: string) => {
@@ -39,7 +40,7 @@ test("Haufwerk, Soll/Ist, Zeitreihe und Export", async ({ page }) => {
 
   // Haufwerk: Urgelände gegen feste Höhe 299 m im Bereich „Grube“ (30 × 30 m, 1,0–1,35 m darüber)
   await choose("Haufwerk");
-  await page
+  await calc
     .getByRole("combobox", { name: "Aufnahme", exact: true })
     .selectOption({ label: "Urgelände" });
   await page.getByLabel("Basisfläche").selectOption("height");

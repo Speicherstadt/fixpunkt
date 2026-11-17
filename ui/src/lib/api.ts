@@ -122,6 +122,8 @@ export const Region = z.object({
   id: z.number(),
   siteId: z.number(),
   name: z.string(),
+  /** GeoJSON-Feature im metrischen System der Baustelle (crates/server/src/compute/mod.rs) */
+  geojson: z.unknown(),
   areaM2: z.number(),
   createdAt: z.number(),
 });

@@ -77,6 +77,15 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus.
 <tr>
 <td width="50%" valign="top">
 
+### 🗺️ Ansicht und Messen
+- Höhenbild jeder Aufnahme, Differenz oder Abweichung darübergelegt
+- Messen: Punkt, Strecke, Gefälle, Fläche, Profil
+- Abrechnungsbereiche direkt im Browser zeichnen
+- Bedienbar mit Maus und Tastatur
+
+</td>
+<td width="50%" valign="top">
+
 ### 👷 Im Team
 - Benutzer mit Rollen: Admin, Bearbeiten, Nur lesen
 - Live-Status: Prüfung und Berechnung aktualisieren sich von selbst
@@ -84,6 +93,8 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus.
 - Oberfläche auf Deutsch und Englisch
 
 </td>
+</tr>
+<tr>
 <td width="50%" valign="top">
 
 ### 🧮 Exporte und Kommandozeile
@@ -93,12 +104,21 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus.
 - [Alle Befehle](https://firsttris.github.io/fixpunkt/kommandozeile.html)
 
 </td>
+<td width="50%" valign="top">
+
+### 🔒 Selbst gehostet
+- Eine Programmdatei mit SQLite, kein Cloud-Abo
+- Docker-Image für amd64 und arm64, oder systemd ohne Container
+- Login mit argon2id, Schutz gegen CSRF
+- [Installation](https://firsttris.github.io/fixpunkt/installation.html)
+
+</td>
 </tr>
 </table>
 
 <p align="center">
+  <img src="docs/screenshot-ansicht.png" alt="Ansicht einer Baugrube in Fixpunkt: Höhenbild, Soll/Ist-Abweichung der Sohle, Abrechnungsbereiche und ein Profil quer durch die Grube" width="49%">
   <img src="docs/screenshot-baustelle.png" alt="Baustelle in Fixpunkt mit drei Aufnahmen vom Urgelände bis zum fertigen Aushub, zwei Abrechnungsbereichen und der Berechnung" width="49%">
-  <img src="docs/screenshot-baustellen.png" alt="Liste der Baustellen mit Aufnahmen, Berechnungen und Datum der letzten Befliegung" width="49%">
 </p>
 
 ## 🚀 Installation

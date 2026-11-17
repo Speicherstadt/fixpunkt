@@ -13,6 +13,7 @@ pub mod jobs;
 pub mod sites;
 pub mod state;
 pub mod ui;
+pub mod view;
 
 use anyhow::{Context, Result};
 use axum::Router;
@@ -61,6 +62,7 @@ pub fn router(app: AppRef) -> Router {
                     .and(NotForContentType::const_new("font/"))
                     .and(NotForContentType::const_new("image/tiff"))
                     .and(NotForContentType::const_new("application/octet-stream")),
+                // Raster der Ansicht (application/x-fixpunkt-grid) werden komprimiert: viele leere Zellen
             ),
         )
 }

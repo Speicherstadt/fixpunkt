@@ -38,21 +38,21 @@ Abgeleitet aus dem, was SDX-Cloud/PocketScan anbieten:
 Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reihenfolge-nach-nutzen).
 
 ### Messen
-- [ ] Einzelpunkt mit Koordinate (Rechts-/Hochwert, Höhe)
-- [ ] **Längen** / Strecken (3D und horizontal), Polylinien
-- [ ] Höhenunterschiede, Gefälle (z. B. Leitungsgefälle in %)
-- [ ] **Flächen** (horizontal und Oberfläche)
-- [ ] Querprofile / Längsschnitte durch einen Graben
+- [x] Einzelpunkt mit Koordinate (Rechts-/Hochwert, Höhe)
+- [x] **Längen** / Strecken (3D und horizontal), Polylinien
+- [x] Höhenunterschiede, Gefälle (z. B. Leitungsgefälle in %)
+- [x] **Flächen** (horizontal und Oberfläche)
+- [x] Querprofile / Längsschnitte durch einen Graben
 
 ### Massenermittlung
 - [x] **Volumen von Haufwerken** (gegen interpolierte Basisfläche)
 - [x] **Aushub-/Auftragsmassen** (Differenz zweier Aufnahmen: Urgelände ↔ Aushub)
-- [ ] Volumen innerhalb frei gezeichneter Bereiche (Geofences) – Bereiche als GeoJSON ✅, Zeichnen im Browser offen
+- [x] Volumen innerhalb frei gezeichneter Bereiche (Geofences) – im Browser gezeichnet oder als GeoJSON
 - [x] Fortlaufende Aktualisierung über die Bauphase (Zeitreihe)
 
 ### Vergleichen
 - [ ] Plan/Ist-Vergleich mit hinterlegten DXF-Plänen
-- [ ] Zwei Zeitpunkte vergleichen (Abweichungs-Heatmap) – Raster als GeoTIFF ✅, Anzeige im Browser offen
+- [x] Zwei Zeitpunkte vergleichen (Abweichungs-Heatmap) – in der Ansicht und als GeoTIFF
 - [x] Soll-Höhe / Sollfläche gegen Scan
 
 ### Dokumentieren
@@ -62,8 +62,8 @@ Stand und Reihenfolge der offenen Punkte: [6a. Reihenfolge nach Nutzen](#6a-reih
 - [ ] Kartenansicht aller Baustellen/Scans
 
 ### Ansichten
-- [ ] 2D (Draufsicht, Orthofoto), 3D (Punktwolke, Mesh), Karte
-- [ ] Einfärbung nach RGB, Höhe, Intensität, Abweichung
+- [ ] 2D (Draufsicht, Orthofoto), 3D (Punktwolke, Mesh), Karte – Draufsicht als Höhenbild ✅, Orthofoto, 3D und Karte offen
+- [ ] Einfärbung nach RGB, Höhe, Intensität, Abweichung – Höhe und Abweichung ✅
 
 ### Export
 - [x] LAS/LAZ (Punktwolke), DXF (Linien/Punkte), LandXML (Flächen), CSV (Punkte), OBJ/PLY (Mesh), GeoTIFF (DGM) – Orthofoto offen
@@ -523,7 +523,7 @@ Was im Vergleich zu SDX-Cloud/PocketScan noch fehlt, geordnet nach Nutzen für d
 (Baugrube per Drohne):
 
 1. [x] Haufwerk, Soll/Ist, Zeitreihe und Exporte in der Web-UI
-2. [ ] 2D-Ansicht der Baustelle: Höhenbild, Abweichungs-Heatmap, Bereiche zeichnen, messen (Punkt, Strecke, Fläche, Profil)
+2. [x] 2D-Ansicht der Baustelle: Höhenbild, Abweichungs-Heatmap, Bereiche zeichnen, messen (Punkt, Strecke, Fläche, Profil)
 3. [ ] PDF-Bericht
 4. [ ] NodeODM-Anbindung: Drohnenfotos → Punktwolke in Fixpunkt
 5. [ ] Karte aller Baustellen

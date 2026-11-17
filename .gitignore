@@ -18,6 +18,6 @@ e2e/.auth/
 ui/project.inlang/cache/
 
 # Doku
-site/
+/site/
 scripts/doku-*/__pycache__/
 .cache/

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useId } from "react";
 import { cn } from "@/lib/cn";
 
 /** Seitentitel (genau ein h1 je Seite) mit Aktionen rechts */
@@ -33,20 +33,28 @@ export const Section = ({
   actions?: ReactNode;
   children: ReactNode;
   className?: string;
-}) => (
-  <section className={cn("flex flex-col gap-4 rounded-xl border border-border p-5", className)}>
-    <div className="flex flex-wrap items-start justify-between gap-3">
-      <div className="flex flex-col gap-1">
-        <h2 className="m-0 text-[16px] font-semibold">{title}</h2>
-        {description ? (
-          <p className="m-0 max-w-prose text-[13px] text-muted">{description}</p>
-        ) : null}
+}) => {
+  const id = useId();
+  return (
+    <section
+      aria-labelledby={id}
+      className={cn("flex flex-col gap-4 rounded-xl border border-border p-5", className)}
+    >
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h2 id={id} className="m-0 text-[16px] font-semibold">
+            {title}
+          </h2>
+          {description ? (
+            <p className="m-0 max-w-prose text-[13px] text-muted">{description}</p>
+          ) : null}
+        </div>
+        {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
       </div>
-      {actions ? <div className="flex flex-wrap gap-2">{actions}</div> : null}
-    </div>
-    {children}
-  </section>
-);
+      {children}
+    </section>
+  );
+};
 
 export const EmptyState = ({ children }: { children: ReactNode }) => (
   <p className="m-0 rounded-lg bg-subtle px-4 py-6 text-center text-[13px] text-muted">

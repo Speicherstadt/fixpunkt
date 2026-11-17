@@ -1,0 +1,260 @@
+/**
+ * 2D-Ansicht einer Baustelle: Höhenbild einer Aufnahme, wahlweise mit Differenz/Abweichung darüber, die Bereiche,
+ * und Werkzeuge zum Messen und Zeichnen. Gerechnet wird im Browser (src/lib/view/*), gespeichert nur ein neuer Bereich.
+ */
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Eraser, Undo2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ErrorText, Section } from "@/components/page";
+import { Button } from "@/components/ui/button";
+import { Input, Label, Select } from "@/components/ui/input";
+import { api, FilesResult, type Job } from "@/lib/api";
+import { cn } from "@/lib/cn";
+import { errorText } from "@/lib/errors";
+import { formatHeight } from "@/lib/format";
+import { chronological, jobTitle } from "@/lib/jobs";
+import { capturesQuery, jobsQuery, regionsQuery, siteQuery } from "@/lib/queries";
+import { deviationColor, deviationLimit, heightColor } from "@/lib/view/colors";
+import { type Pt, polygonGeojson, ringOf } from "@/lib/view/geometry";
+import { fetchGrid, robustRange, sampleAt } from "@/lib/view/grid";
+import { m } from "@/paraglide/messages";
+import { MapCanvas } from "./map-canvas";
+import { MeasurePanel, type Tool } from "./measure-panel";
+
+const TOOLS: { id: Tool; text: () => string }[] = [
+  { id: "pan", text: m.tool_pan },
+  { id: "point", text: m.tool_point },
+  { id: "line", text: m.tool_line },
+  { id: "area", text: m.tool_area },
+  { id: "profile", text: m.tool_profile },
+  { id: "draw", text: m.tool_draw },
+];
+
+/** Ergebnis-Raster eines Auftrags, das sich überlagern lässt */
+const overlayFile = (j: Job) => {
+  const r = FilesResult.safeParse(j.result);
+  return r.success
+    ? r.data.files.find((f) => f === "diff.tif" || f === "abweichung.tif")
+    : undefined;
+};
+
+const rgb = (c: [number, number, number]) => `rgb(${c.map(Math.round).join(" ")})`;
+
+export function SiteView({ siteId, canEdit }: { siteId: number; canEdit: boolean }) {
+  const captures = useQuery(capturesQuery(siteId));
+  const regions = useQuery(regionsQuery(siteId));
+  const jobs = useQuery(jobsQuery(siteId));
+  const site = useQuery(siteQuery(siteId));
+  const ready = chronological((captures.data ?? []).filter((c) => c.status === "ready"));
+  const [picked, setCapture] = useState<number | undefined>();
+  const captureId = picked ?? ready.at(-1)?.id;
+  const overlays = (jobs.data ?? []).filter((j) => j.status === "done" && overlayFile(j));
+  const [overlayId, setOverlay] = useState<number | null>(null);
+  const overlayJob = overlays.find((j) => j.id === overlayId);
+  const [tool, setTool] = useState<Tool>("pan");
+  const [points, setPoints] = useState<Pt[]>([]);
+  const [hover, setHover] = useState<Pt | null>(null);
+  const [name, setName] = useState("");
+  const queryClient = useQueryClient();
+
+  const grid = useQuery({
+    queryKey: ["grid", "capture", captureId],
+    queryFn: () => fetchGrid(`/api/captures/${captureId}/grid`),
+    enabled: captureId !== undefined,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  const overlay = useQuery({
+    queryKey: ["grid", "job", overlayJob?.id],
+    queryFn: () => fetchGrid(`/api/jobs/${overlayJob!.id}/grid/${overlayFile(overlayJob!)}`),
+    enabled: overlayJob !== undefined,
+    staleTime: Number.POSITIVE_INFINITY,
+  });
+  const range = useMemo(() => (grid.data ? robustRange(grid.data) : null), [grid.data]);
+  const limit = useMemo(() => (overlay.data ? deviationLimit(overlay.data) : 1), [overlay.data]);
+  const overlayProp = useMemo(
+    () =>
+      overlay.data && overlayJob
+        ? {
+            grid: overlay.data,
+            limit,
+            removedIsNegative: overlayFile(overlayJob) === "diff.tif",
+          }
+        : null,
+    [overlay.data, overlayJob, limit],
+  );
+  const outlines = useMemo(
+    () => (regions.data ?? []).map((r) => ({ name: r.name, points: ringOf(r.geojson) })),
+    [regions.data],
+  );
+
+  const save = useMutation({
+    mutationFn: () =>
+      api.addRegions(siteId, polygonGeojson(points, site.data?.epsg ?? 25832), name.trim()),
+    onSuccess: async () => {
+      setPoints([]);
+      setName("");
+      await queryClient.invalidateQueries({ queryKey: ["regions", siteId] });
+    },
+  });
+
+  if (!ready.length) return null;
+  const chooseTool = (t: Tool) => {
+    setTool(t);
+    setPoints([]);
+    save.reset();
+  };
+  const names = (id: unknown) => captures.data?.find((c) => c.id === id)?.name ?? "–";
+  const hoverZ = hover && grid.data ? sampleAt(grid.data, hover[0], hover[1]) : null;
+
+  return (
+    <Section title={m.view_title()} description={m.view_text()}>
+      <div className="grid gap-4 md:grid-cols-2">
+        <Label>
+          {m.calc_capture()}
+          <Select value={captureId ?? ""} onChange={(e) => setCapture(Number(e.target.value))}>
+            {ready.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        </Label>
+        <Label>
+          {m.view_overlay()}
+          <Select
+            value={overlayId ?? ""}
+            onChange={(e) => setOverlay(e.target.value ? Number(e.target.value) : null)}
+          >
+            <option value="">{m.view_overlay_none()}</option>
+            {overlays.map((j) => (
+              <option key={j.id} value={j.id}>
+                {jobTitle(j, names)}
+              </option>
+            ))}
+          </Select>
+        </Label>
+      </div>
+      <fieldset className="m-0 flex flex-wrap gap-1 rounded-lg border-0 bg-subtle p-1">
+        <legend className="sr-only">{m.view_tools()}</legend>
+        {TOOLS.filter((t) => canEdit || t.id !== "draw").map((t) => (
+          <label
+            key={t.id}
+            className={cn(
+              "flex h-8 cursor-pointer items-center rounded-md px-3 text-[13px] text-muted has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-fg",
+              t.id === tool && "bg-bg font-medium text-fg shadow-sm",
+            )}
+          >
+            <input
+              type="radio"
+              name="tool"
+              value={t.id}
+              checked={t.id === tool}
+              onChange={() => chooseTool(t.id)}
+              className="sr-only"
+            />
+            {t.text()}
+          </label>
+        ))}
+      </fieldset>
+      {grid.error ? <ErrorText>{errorText(grid.error)}</ErrorText> : null}
+      {grid.data && range ? (
+        <>
+          <MapCanvas
+            grid={grid.data}
+            range={range}
+            overlay={overlayProp}
+            outlines={outlines}
+            shape={{ points, closed: tool === "area" || tool === "draw" }}
+            picking={tool !== "pan"}
+            onPick={(p) => setPoints((ps) => (tool === "point" ? [p] : [...ps, p]))}
+            onHover={setHover}
+            label={m.view_canvas_label()}
+          />
+          <div className="flex flex-wrap items-center justify-between gap-3 text-[12px] text-muted">
+            <span className="tabular" aria-live="off">
+              {hover
+                ? m.view_cursor({
+                    e: hover[0].toFixed(2).replace(".", ","),
+                    n: hover[1].toFixed(2).replace(".", ","),
+                    h: hoverZ === null ? "–" : formatHeight(hoverZ),
+                  })
+                : m.view_keys()}
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="tabular">{formatHeight(range[0])}</span>
+              <span
+                aria-hidden="true"
+                className="block h-2 w-24 rounded-sm"
+                style={{
+                  background: `linear-gradient(to right, ${[0, 0.25, 0.5, 0.75, 1].map((t) => rgb(heightColor(t))).join(", ")})`,
+                }}
+              />
+              <span className="tabular">{formatHeight(range[1])}</span>
+            </span>
+            {overlay.data ? (
+              <span className="flex items-center gap-2">
+                <span>{m.view_legend_fill()}</span>
+                <span
+                  aria-hidden="true"
+                  className="block h-2 w-24 rounded-sm"
+                  style={{
+                    background: `linear-gradient(to right, ${[-1, -0.5, 0, 0.5, 1].map((t) => rgb(deviationColor(t, 1))).join(", ")})`,
+                  }}
+                />
+                <span>{m.view_legend_cut({ cm: (limit * 100).toFixed(0) })}</span>
+              </span>
+            ) : null}
+          </div>
+          {tool !== "pan" ? (
+            <div className="flex flex-col gap-3">
+              <MeasurePanel tool={tool} grid={grid.data} points={points} />
+              <div className="flex flex-wrap items-end gap-2">
+                <Button
+                  size="sm"
+                  onClick={() => setPoints((ps) => ps.slice(0, -1))}
+                  disabled={!points.length}
+                >
+                  <Undo2 size={14} aria-hidden="true" />
+                  {m.view_undo()}
+                </Button>
+                <Button size="sm" onClick={() => setPoints([])} disabled={!points.length}>
+                  <Eraser size={14} aria-hidden="true" />
+                  {m.view_clear()}
+                </Button>
+                {tool === "draw" ? (
+                  <form
+                    className="ml-auto flex flex-wrap items-end gap-2"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      save.mutate();
+                    }}
+                  >
+                    <Label className="w-56">
+                      {m.view_region_name()}
+                      <Input value={name} onChange={(e) => setName(e.target.value)} required />
+                    </Label>
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      disabled={points.length < 3 || save.isPending}
+                    >
+                      {m.view_region_save()}
+                    </Button>
+                  </form>
+                ) : null}
+              </div>
+              {tool === "draw" && points.length < 3 ? (
+                <p className="m-0 text-[13px] text-muted">{m.view_draw_hint()}</p>
+              ) : null}
+              <ErrorText>{save.error ? errorText(save.error) : null}</ErrorText>
+            </div>
+          ) : null}
+        </>
+      ) : grid.isPending ? (
+        <p role="status" className="m-0 text-[13px] text-muted">
+          {m.view_loading()}
+        </p>
+      ) : null}
+    </Section>
+  );
+}

@@ -9,6 +9,7 @@ import { Regions } from "@/components/site/regions";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { PlaceholderRows } from "@/components/ui/placeholder";
+import { SiteView } from "@/components/view/site-view";
 import { api } from "@/lib/api";
 import { errorText } from "@/lib/errors";
 import { authQuery, siteQuery } from "@/lib/queries";
@@ -45,6 +46,7 @@ function SitePage() {
       />
       <div className="flex flex-col gap-6">
         <Captures siteId={siteId} canEdit={canEdit} />
+        <SiteView siteId={siteId} canEdit={canEdit} />
         <div className="grid gap-6 lg:grid-cols-[1fr_2fr]">
           <Regions siteId={siteId} canEdit={canEdit} />
           <Calculations siteId={siteId} canEdit={canEdit} />

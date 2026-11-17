@@ -26,6 +26,7 @@ aktualisiert sich von selbst, auch für Kolleginnen und Kollegen, die die Bauste
 
 ## 2. Abrechnungsgrenzen
 
+Bereiche lassen sich direkt in der [Ansicht](ansicht.md#bereiche-zeichnen) zeichnen oder als GeoJSON hochladen:
 **Grenze hochladen** nimmt eine GeoJSON-Datei. Jedes Polygon darin wird ein eigener Bereich, mit dem Namen aus
 der Eigenschaft `name` (oder `Bezeichnung`, `id`). So lässt sich eine Baugrube in Abschnitte teilen, die einzeln
 abgerechnet werden. Ohne Bereich rechnet Fixpunkt über die ganze Überlappung der beiden Aufnahmen.

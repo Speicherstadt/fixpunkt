@@ -846,3 +846,79 @@ async fn compare_series_and_export() {
         .await;
     assert_eq!(bad.json()["error"], "api.invalidInput");
 }
+
+#[tokio::test]
+async fn grids_for_the_2d_view() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": "Ansicht"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let a = c
+        .upload(
+            &format!("/api/sites/{sid}/captures?file=a.xyz"),
+            terrain_xyz(false),
+        )
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let b = c
+        .upload(
+            &format!("/api/sites/{sid}/captures?file=b.xyz"),
+            terrain_xyz(true),
+        )
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    jobs::run_pending(&c.app).await.unwrap();
+
+    let g = c.get(&format!("/api/captures/{a}/grid")).await;
+    assert_eq!(g.status, StatusCode::OK);
+    assert_eq!(
+        g.headers[header::CONTENT_TYPE],
+        "application/x-fixpunkt-grid"
+    );
+    let num = |k: &str| g.headers[k].to_str().unwrap().parse::<f64>().unwrap();
+    let (cols, rows) = (num("x-grid-cols") as usize, num("x-grid-rows") as usize);
+    assert_eq!((cols, rows, num("x-grid-cell")), (160, 160, 0.25));
+    assert_eq!(g.body.len(), cols * rows * 4);
+    assert_eq!(num("x-grid-min-x"), X0);
+    // Mitte: 300 + 0,01 · 20 = 300,2
+    let i = (rows / 2 * cols + cols / 2) * 4;
+    let z = f32::from_le_bytes(g.body[i..i + 4].try_into().unwrap());
+    assert!((z - 300.2).abs() < 0.01, "{z}");
+    assert!(
+        c.app.cfg.capture_dir(a).join("ansicht.f32").exists(),
+        "zwischengespeichert"
+    );
+
+    let job = c
+        .json(
+            Method::POST,
+            &format!("/api/sites/{sid}/jobs"),
+            json!({"kind": "volume", "params": {"before": a, "after": b}}),
+        )
+        .await;
+    let jid = job.json()["id"].as_i64().unwrap();
+    jobs::run_pending(&c.app).await.unwrap();
+    let d = c.get(&format!("/api/jobs/{jid}/grid/diff.tif")).await;
+    assert_eq!(d.status, StatusCode::OK);
+    let i = (rows / 2 * cols + cols / 2) * 4;
+    let dz = f32::from_le_bytes(d.body[i..i + 4].try_into().unwrap());
+    assert!((dz + 2.0).abs() < 0.01, "Grube 2 m tief: {dz}");
+    assert_eq!(
+        c.get(&format!("/api/jobs/{jid}/grid/..%2Ffixpunkt.db"))
+            .await
+            .status,
+        StatusCode::NOT_FOUND
+    );
+    assert_eq!(
+        c.get("/api/captures/999/grid").await.status,
+        StatusCode::NOT_FOUND
+    );
+}

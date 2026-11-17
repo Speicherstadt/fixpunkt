@@ -87,6 +87,22 @@ warnt bei Lücken in den Daten und geht als CSV, Differenzraster (GeoTIFF) oder 
 
 <div class="showcase-feature showcase-feature--flip" markdown>
 <div markdown>
+<span class="showcase-kicker">Ansicht und Messen</span>
+
+## Messen und zeichnen, ohne QGIS
+
+Das Höhenbild jeder Aufnahme mit der Differenz oder der Soll/Ist-Abweichung darüber. Strecken, Gefälle,
+Flächen und Profile direkt im Bild messen, Abrechnungsbereiche einfach anklicken – mit Maus oder Tastatur.
+
+[Ansicht und Messen](ansicht.md)
+</div>
+<div class="showcase-shot" markdown>
+![Ansicht der Baugrube mit Soll/Ist-Abweichung, Bereichen und Profil](screenshot-ansicht.png){ width="1024" height="1134" loading="lazy" }
+</div>
+</div>
+
+<div class="showcase-feature" markdown>
+<div markdown>
 <span class="showcase-kicker">Auf der Baustelle</span>
 
 ## Am Handy wie am Schreibtisch
