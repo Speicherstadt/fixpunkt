@@ -27,9 +27,6 @@ export const parseOffset = (text: string): number | null => {
   return Number.isFinite(v) && Math.abs(v) <= 200 ? v : null;
 };
 
-/** Datum aus `<input type="date">` als Mittag Ortszeit (kein Tageswechsel durch Zeitzonen) */
-export const dateInputToMs = (value: string): number => new Date(`${value}T12:00:00`).getTime();
-
 /** Ablauf; gibt den gestarteten Auftrag. Bricht ein Upload ab, bleibt der Entwurf zum Löschen stehen. */
 export const uploadFlight = async (
   deps: OdmDeps,

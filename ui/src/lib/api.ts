@@ -659,6 +659,8 @@ export const api = {
     request("POST", "/sites", Site, { name, description }),
   deleteSite: (id: number) => request("DELETE", `/sites/${id}`, Empty),
   captures: (siteId: number) => request("GET", `/sites/${siteId}/captures`, z.array(Capture)),
+  updateCapture: (id: number, patch: { name?: string; capturedAt?: number }) =>
+    request("PATCH", `/captures/${id}`, Capture, patch),
   deleteCapture: (id: number) => request("DELETE", `/captures/${id}`, Empty),
   deleteOrtho: (captureId: number) => request("DELETE", `/captures/${captureId}/ortho`, Empty),
   regions: (siteId: number) => request("GET", `/sites/${siteId}/regions`, z.array(Region)),

@@ -19,6 +19,13 @@ test("Aushub einer Baugrube berechnen", async ({ page }, info) => {
   await expect(table.getByRole("row", { name: /Nach Aushub/ }).getByText("Bereit")).toBeVisible();
   await expect(table.getByRole("row", { name: /Urgelaende/ })).toContainText("40.000");
 
+  // Flugdatum nachtragen: Liste, Vorauswahl und Zeitreihe ordnen danach
+  await table.getByLabel("Datum von Nach Aushub").fill("2026-11-17");
+  await table.getByLabel("Datum von Urgelaende").fill("2026-11-03");
+  await expect(table.getByLabel("Datum von Urgelaende")).toHaveValue("2026-11-03");
+  await expect(table.getByLabel("Datum von Nach Aushub")).toHaveValue("2026-11-17");
+  await expect(table.getByRole("row").nth(1)).toContainText("Urgelaende");
+
   // Grenzen und Berechnung im Reiter „Massen“
   await section(page, "Bereiche");
   await page.getByLabel("Grenze hochladen").setInputFiles(files.regions);

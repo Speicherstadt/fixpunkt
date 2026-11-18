@@ -73,3 +73,13 @@ export const parseDecimal = (s: string): number | undefined => {
   const v = Number(normalized);
   return Number.isFinite(v) ? v : undefined;
 };
+
+/** Datum aus `<input type="date">` als Mittag Ortszeit (kein Tageswechsel durch Zeitzonen) */
+export const dateInputToMs = (value: string): number => new Date(`${value}T12:00:00`).getTime();
+
+/** Zeitpunkt als Wert für `<input type="date">` (JJJJ-MM-TT, Ortszeit) */
+export const msToDateInput = (ms: number): string => {
+  const d = new Date(ms);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};

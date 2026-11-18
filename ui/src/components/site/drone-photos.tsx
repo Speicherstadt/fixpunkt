@@ -9,9 +9,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input, Label, Select } from "@/components/ui/input";
 import { api, type OdmQuality, uploadImage } from "@/lib/api";
 import { errorText } from "@/lib/errors";
-import { formatBytes, formatDate } from "@/lib/format";
+import { dateInputToMs, formatBytes, formatDate } from "@/lib/format";
 import {
-  dateInputToMs,
   IMAGE_ACCEPT,
   MIN_IMAGES,
   parseOffset,

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Job } from "@/lib/api";
-import { dateInputToMs, parseOffset, photosOnly, uploadFlight } from "@/lib/odm";
+import { parseOffset, photosOnly, uploadFlight } from "@/lib/odm";
 
 const job = (status: string): Job => ({
   id: 7,
@@ -74,6 +74,5 @@ describe("odm", () => {
     expect(parseOffset("-1.5")).toBe(-1.5);
     expect(parseOffset("abc")).toBeNull();
     expect(parseOffset("500")).toBeNull();
-    expect(new Date(dateInputToMs("2026-11-17")).getDate()).toBe(17);
   });
 });

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  dateInputToMs,
   formatArea,
   formatBytes,
   formatCount,
@@ -8,6 +9,7 @@ import {
   formatEuro,
   formatHeight,
   formatVolume,
+  msToDateInput,
   parseDecimal,
 } from "@/lib/format";
 
@@ -48,5 +50,13 @@ describe("Abrechnung: Euro, Tag, Eingaben", () => {
     expect(parseDecimal(" 15 ")).toBe(15);
     expect(parseDecimal("")).toBeUndefined();
     expect(parseDecimal("viel")).toBeUndefined();
+  });
+});
+
+describe("Datumsfelder", () => {
+  it("Hin und zurück ohne Tageswechsel", () => {
+    expect(new Date(dateInputToMs("2026-11-17")).getDate()).toBe(17);
+    expect(msToDateInput(dateInputToMs("2026-11-03"))).toBe("2026-11-03");
+    expect(msToDateInput(new Date(2026, 0, 5, 23, 59).getTime())).toBe("2026-01-05");
   });
 });

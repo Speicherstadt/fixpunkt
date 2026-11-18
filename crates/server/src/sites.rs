@@ -241,7 +241,7 @@ pub fn validate_target(p: &RegionPatch) -> ApiResult<()> {
         return bad("Soll-Menge");
     }
     if p.unit_price
-        .is_some_and(|t| !t.is_finite() || t < 0.0 || t > 1e6)
+        .is_some_and(|t| !t.is_finite() || !(0.0..=1e6).contains(&t))
     {
         return bad("Einheitspreis");
     }

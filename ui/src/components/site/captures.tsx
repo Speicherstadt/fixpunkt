@@ -3,11 +3,12 @@ import { Download, ImageIcon, ImageOff, ImagePlus, Trash2, Upload } from "lucide
 import { useId, useRef, useState } from "react";
 import { EmptyState, ErrorText, Section } from "@/components/page";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { PlaceholderRows } from "@/components/ui/placeholder";
 import { StatusBadge } from "@/components/ui/status";
 import { api, type Capture, uploadCapture, uploadOrtho } from "@/lib/api";
 import { errorText } from "@/lib/errors";
-import { formatBytes, formatCount, formatDate } from "@/lib/format";
+import { dateInputToMs, formatBytes, formatCount, formatDate, msToDateInput } from "@/lib/format";
 import { capturesQuery } from "@/lib/queries";
 import { m } from "@/paraglide/messages";
 
@@ -170,7 +171,13 @@ function CaptureRow({
         ) : null}
         {orthoError ? <div className="text-[12px] text-danger">{orthoError}</div> : null}
       </td>
-      <td className="py-2.5 pr-3 whitespace-nowrap">{formatDate(c.capturedAt)}</td>
+      <td className="py-1.5 pr-3 whitespace-nowrap">
+        {canEdit ? (
+          <CaptureDate c={c} onChanged={onChanged} />
+        ) : (
+          <span className="inline-block py-1">{formatDate(c.capturedAt)}</span>
+        )}
+      </td>
       <td className="tabular py-2.5 pr-3 text-right">{points}</td>
       <td className="tabular py-2.5 pr-3 text-right whitespace-nowrap">
         {formatBytes(c.fileSize)}
@@ -230,5 +237,31 @@ function CaptureRow({
         </div>
       </td>
     </tr>
+  );
+}
+
+/** Flugdatum ändern: Zeitreihe, Überblick und Abrechnung ordnen nach diesem Datum */
+function CaptureDate({ c, onChanged }: { c: Capture; onChanged: () => void }) {
+  const save = useMutation({
+    mutationFn: (value: string) => api.updateCapture(c.id, { capturedAt: dateInputToMs(value) }),
+    onSuccess: onChanged,
+  });
+  return (
+    <>
+      <Input
+        type="date"
+        required
+        className="h-8 w-[10.5rem] px-2 text-[13px]"
+        aria-label={m.captures_date_of({ name: c.name })}
+        defaultValue={msToDateInput(c.capturedAt)}
+        key={c.capturedAt}
+        disabled={save.isPending}
+        onChange={(e) => {
+          if (e.target.value && e.target.value !== msToDateInput(c.capturedAt))
+            save.mutate(e.target.value);
+        }}
+      />
+      {save.error ? <div className="text-[12px] text-danger">{errorText(save.error)}</div> : null}
+    </>
   );
 }

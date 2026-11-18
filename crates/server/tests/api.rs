@@ -993,3 +993,49 @@ async fn sites_have_a_location_for_the_map() {
         json!({"mapTiles": null})
     );
 }
+
+/// Nachträglich hochgeladene Flüge: das Datum lässt sich ändern, die Liste ordnet danach
+#[tokio::test]
+async fn capture_date_can_be_changed() {
+    let mut c = Client::new().await;
+    c.setup_admin().await;
+    let sid = c
+        .json(Method::POST, "/api/sites", json!({"name": "Grube"}))
+        .await
+        .json()["id"]
+        .as_i64()
+        .unwrap();
+    let mut ids = Vec::new();
+    for (name, at) in [("erster", 1_000), ("zweiter", 2_000)] {
+        let r = c
+            .upload(
+                &format!("/api/sites/{sid}/captures?file={name}.xyz&capturedAt={at}"),
+                terrain_xyz(false),
+            )
+            .await;
+        ids.push(r.json()["id"].as_i64().unwrap());
+    }
+    let r = c
+        .json(
+            Method::PATCH,
+            &format!("/api/captures/{}", ids[0]),
+            json!({"capturedAt": 3_000}),
+        )
+        .await;
+    assert_eq!(r.status, StatusCode::OK);
+    assert_eq!(
+        (r.json()["capturedAt"].as_i64(), r.json()["name"].as_str()),
+        // Name bleibt, nur das Datum ändert sich
+        (Some(3_000), Some("erster.xyz"))
+    );
+    let order: Vec<i64> = c
+        .get(&format!("/api/sites/{sid}/captures"))
+        .await
+        .json()
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|x| x["id"].as_i64().unwrap())
+        .collect();
+    assert_eq!(order, vec![ids[1], ids[0]]);
+}
