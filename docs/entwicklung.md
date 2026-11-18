@@ -28,6 +28,11 @@ bun run e2e
 zensical build --strict   # wenn docs/ oder mkdocs.yml geändert
 ```
 
+`bun run lint` führt nach Biome auch [`checks`](https://github.com/firsttris/workflows#checks) aus (Einstellungen in
+`checks.json`): Dateien über 400 Zeilen, Seiten, die `e2e/accessibility.spec.ts` nicht öffnet, und die Texte der
+Oberfläche (beide Sprachen vollständig, alle genutzt, keiner im Code). Was es schon vorher gab, steht in `.checks/`;
+im Pull Request nennt `checks pr` neue oder gewachsene lange Funktionen.
+
 Der GAEB-Export wird gegen das offizielle Schema geprüft, sobald `GAEB_X31_XSD` darauf zeigt (braucht `xmllint`;
 die CI lädt das Schema von gaeb.de, lokal wird die Prüfung sonst übersprungen):
 
@@ -41,7 +46,7 @@ GAEB_X31_XSD=/pfad/GAEB_DA_XML_31_3.3_2023-01.xsd cargo test -p fixpunkt-server 
 |---|---|---|
 | Rechenkern | `crates/processing` | Unit-Tests je Modul gegen bekannte Werte; `tests/cli.rs` ruft jeden Befehl an einer synthetischen Baustelle auf |
 | Server | `crates/server` | Unit-Tests je Modul; `tests/api.rs` mit echtem Router, SQLite und Rechenkern |
-| UI | `ui/src/**/*.test.ts(x)` | Vitest und Testing Library; Texte in beiden Sprachen vollständig, Gestaltungsregeln |
+| UI | `ui/src/**/*.test.ts(x)` | Vitest und Testing Library; Server-Fehlertexte übersetzt, Gestaltungsregeln |
 | E2E | `e2e/` | Playwright gegen die Programmdatei: kompletter Aushub mit Prüfung der m³, Rollen, axe (WCAG 2.2 AA) hell und dunkel, Tastatur, Handy |
 | Docker | CI | Image bauen, als Nicht-root starten, Health, UI, erster Admin |
 

@@ -54,11 +54,17 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # für `checks pr`: Basis und Kopf des Pull Requests
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version-file: package.json
       - run: bun install --frozen-lockfile
       - run: bun run lint
+      # Hinweise zum Pull Request (lange Funktionen, gewachsene große Dateien, Code ohne Doku, Fix
+      # ohne Test); sie halten nichts auf
+      - if: github.event_name == 'pull_request'
+        run: bun checks pr
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build

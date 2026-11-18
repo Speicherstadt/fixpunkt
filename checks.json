@@ -1,0 +1,14 @@
+{
+  "fileSize": {
+    "include": ["ui/src/**/*.{ts,tsx}", "crates/*/src/**/*.rs"]
+  },
+  "pages": {
+    "routeTree": "ui/src/routeTree.gen.ts",
+    "specs": ["e2e/accessibility.spec.ts"]
+  },
+  "i18n": {
+    "project": "ui/project.inlang",
+    "include": ["ui/src/**/*.{ts,tsx}"],
+    "dynamicPrefixes": ["server_"]
+  }
+}
