@@ -10,5 +10,11 @@
     "project": "ui/project.inlang",
     "include": ["ui/src/**/*.{ts,tsx}"],
     "dynamicPrefixes": ["server_"]
+  },
+  "cycles": {
+    "modules": ["ui/src/components/*", "ui/src/*"],
+    "aliases": {
+      "@/": "ui/src/"
+    }
   }
 }
