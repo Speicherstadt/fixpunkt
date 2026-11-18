@@ -1,0 +1,18 @@
+# Files with more than 400 lines from before the check (checks file-size, firsttris/workflows).
+# They may grow; split them in a pull request of their own. `checks file-size --clean` removes the
+# ones that are gone or small again.
+crates/processing/src/cli.rs
+crates/processing/src/colored.rs
+crates/processing/src/crs.rs
+crates/processing/src/export.rs
+crates/processing/src/filter.rs
+crates/processing/src/geom.rs
+crates/processing/src/grid.rs
+crates/processing/src/volume.rs
+crates/server/src/auth/mod.rs
+crates/server/src/jobs/spec.rs
+crates/server/src/markers/mod.rs
+crates/server/src/report/build.rs
+crates/server/src/report/pdf.rs
+crates/server/src/uploads.rs
+ui/src/lib/api.ts

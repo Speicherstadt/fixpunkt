@@ -20,9 +20,21 @@
     "rules": {
       "preset": "recommended",
       "style": { "noNonNullAssertion": "off" },
-      "a11y": { "noAutofocus": "off" }
+      "a11y": { "noAutofocus": "off" },
+      "complexity": {
+        "noExcessiveLinesPerFunction": {
+          "level": "info",
+          "options": { "maxLines": 80, "skipBlankLines": true }
+        }
+      }
     }
   },
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "e2e/**"],
+      "linter": { "rules": { "complexity": { "noExcessiveLinesPerFunction": "off" } } }
+    }
+  ],
   "javascript": { "formatter": { "quoteStyle": "double", "semicolons": "always" } },
   "css": { "parser": { "tailwindDirectives": true } }
 }

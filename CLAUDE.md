@@ -73,8 +73,9 @@ Sache: ab ~400 Zeilen teilen, Funktionen ab ~80 Zeilen.
 - **Rechenkern** (`crates/processing`): Unit-Tests je Modul gegen bekannte Werte, `tests/cli.rs` End-to-End.
 - **Server** (`crates/server`): Unit-Tests je Modul, `tests/api.rs` mit echtem Router, SQLite und Rechenkern;
   Aufträge deterministisch mit `jobs::run_pending`.
-- **UI** (`ui/src/**/*.test.ts(x)`): Vitest + Testing Library; Texte (de/en vollständig, alle genutzt, alle
-  Server-Fehler übersetzt) und Gestaltungsregeln (`design-rules.test.ts`, wie Kontext).
+- **UI** (`ui/src/**/*.test.ts(x)`): Vitest + Testing Library; alle Server-Fehler übersetzt und Gestaltungsregeln
+  (`design-rules.test.ts`, wie Kontext). Texte (de/en vollständig, alle genutzt, keiner im Code), Dateigröße und
+  Seiten im axe-Test prüft `checks` in `bun run lint` (`checks.json`, firsttris/workflows).
 - **E2E** (`e2e/`): Playwright gegen `target/debug/fixpunkt` mit eingebetteter UI, frisches Datenverzeichnis;
   axe hell/dunkel, Tastatur, Handy. Elemente nach Rolle und Name suchen.
 - **Docker** (CI): Image bauen, als Nicht-root starten, Health, UI und erster Admin.

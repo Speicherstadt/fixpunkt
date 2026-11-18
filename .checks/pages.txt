@@ -1,0 +1,11 @@
+# Pages a spec file does not open, one per line: <spec> <page> <reason> (checks pages,
+# firsttris/workflows). The reason "open" marks a gap from before the check; open the page in the
+# spec and delete the line. A new page goes into the spec, not here.
+e2e/accessibility.spec.ts /freigabe/$token open
+e2e/accessibility.spec.ts /jobs/$jobId open
+e2e/accessibility.spec.ts /sites/$siteId open
+e2e/accessibility.spec.ts /sites/$siteId/abrechnung open
+e2e/accessibility.spec.ts /sites/$siteId/ansicht open
+e2e/accessibility.spec.ts /sites/$siteId/aufnahmen open
+e2e/accessibility.spec.ts /sites/$siteId/dokumentation open
+e2e/accessibility.spec.ts /sites/$siteId/massen open
