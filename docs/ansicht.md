@@ -30,7 +30,7 @@ Hat die Aufnahme ein **Orthofoto** – das entzerrte Luftbild aus derselben Befl
 Hintergrund; unter **Hintergrund** lässt sich auf das Höhenbild umschalten. Differenz, Bereiche, Pläne und
 Markierungen liegen darüber wie gewohnt.
 
-![Ansicht mit Orthofoto: Baugrube, Bagger und Fahrspuren, darüber Bereiche und Markierungen](screenshot-orthofoto.pngNone){ width="982" height="563" loading="lazy" }
+![Ansicht mit Orthofoto: Baugrube, Bagger und Fahrspuren, darüber Bereiche und Markierungen](screenshot-orthofoto.png){ width="982" height="563" loading="lazy" }
 
 Aus [Drohnenfotos](drohnenfotos.md) übernimmt Fixpunkt das Orthofoto von NodeODM selbst. Sonst im Reiter
 **Aufnahmen** in der Liste über das Bildsymbol ein GeoTIFF anhängen (RGB oder RGBA, z. B. `odm_orthophoto.tif` aus WebODM). Fixpunkt
@@ -80,7 +80,7 @@ Geländes der gezeigten Aufnahme.
 einen Blick, wo an der Sohle noch zu viel steht oder ob Böschungen sauber laufen. **Überhöhung** streckt die Höhen
 (1×, 2×, 5×), damit flache Mulden und Zentimeter-Abweichungen sichtbar werden.
 
-![3D-Ansicht der Baugrube: Gelände zweifach überhöht, Soll/Ist-Abweichung der Sohle farbig, der Bagger als Block](screenshot-3d.pngNone){ width="1024" height="913" loading="lazy" }
+![3D-Ansicht der Baugrube: Gelände zweifach überhöht, Soll/Ist-Abweichung der Sohle farbig, der Bagger als Block](screenshot-3d.png){ width="1024" height="913" loading="lazy" }
 
 | Bedienung | Maus | Tastatur |
 |---|---|---|
@@ -97,7 +97,7 @@ Farbe, Intensität (grau, die hellsten und dunkelsten 2 % abgeschnitten) und Hö
 zeigt die Intensität Markierungen, Kanten und Material oft besser als die Höhe. So sieht man, was der Bodenfilter herausrechnet: Bagger, Container, Bewuchs stehen als Punkte
 über dem Gelände. Große Wolken zeigt die Ansicht gleichmäßig ausgedünnt mit höchstens einer Million Punkten.
 
-![Punktwolke der Baugrube in Farbe: Schotter, dunklere Grubensohle, der Bagger gelb über dem Gelände](screenshot-punktwolke.pngNone){ width="982" height="591" loading="lazy" }
+![Punktwolke der Baugrube in Farbe: Schotter, dunklere Grubensohle, der Bagger gelb über dem Gelände](screenshot-punktwolke.png){ width="982" height="591" loading="lazy" }
 
 Messen und Zeichnen bleiben in 2D, wo Strecken und Flächen sich genau setzen lassen. Große Raster werden für 3D
 ausgedünnt (höchstens 400 Stützpunkte je Seite); die 3D-Bibliothek (three.js) lädt erst beim Umschalten.

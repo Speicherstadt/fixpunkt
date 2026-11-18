@@ -148,7 +148,7 @@ lesbar – auch draußen, hell oder dunkel.
 [Benutzer und Rollen](benutzer.md)
 </div>
 <div class="showcase-phone" markdown>
-![Mengenbericht am Handy mit Kennzahlen und einer Karte je Bereich](screenshot-handy.pngNone){ width="780" height="1688" loading="lazy" }
+![Mengenbericht am Handy mit Kennzahlen und einer Karte je Bereich](screenshot-handy.png){ width="780" height="1688" loading="lazy" }
 </div>
 </div>
 

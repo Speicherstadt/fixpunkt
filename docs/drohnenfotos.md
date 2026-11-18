@@ -14,7 +14,7 @@ ausgewertet, holt Fixpunkt die Punktwolke ab, bringt sie in das Bezugssystem der
 Den Flug selbst plant Fixpunkt auf Wunsch mit: [Flugplanung](flugplanung.md) erzeugt aus einem Bereich eine
 Mission für DJI Pilot 2.
 
-![Abschnitt „Drohnenfotos auswerten“: 40 Fotos ausgewählt, Name, Flugdatum, Qualität und Höhenversatz](screenshot-drohnenfotos.pngNone){ width="1024" height="454" }
+![Abschnitt „Drohnenfotos auswerten“: 40 Fotos ausgewählt, Name, Flugdatum, Qualität und Höhenversatz](screenshot-drohnenfotos.png){ width="1024" height="454" }
 
 ## NodeODM einrichten
 

@@ -10,7 +10,7 @@ Im Reiter **Dokumentation** einer Baustelle stehen die [Pläne](plaene.md) und d
 festgehalten werden muss: Zwangspunkte, Leitungen, Fotos und Notizen. Alles mit Lage erscheint auch in der [Ansicht](ansicht.md) –
 Zwangspunkte als Raute, Fotos und Notizen als Punkt, Leitungen als Linie.
 
-![Dokumentation einer Baugrube: Notiz zur Bodenprobe, Zwangspunkt am Kanal mit Soll- und Isthöhe, Foto mit GPS-Position](screenshot-dokumentation.pngNone){ width="1024" height="529" loading="lazy" }
+![Dokumentation einer Baugrube: Notiz zur Bodenprobe, Zwangspunkt am Kanal mit Soll- und Isthöhe, Foto mit GPS-Position](screenshot-dokumentation.png){ width="1024" height="529" loading="lazy" }
 
 ## Zwangspunkte
 
@@ -55,7 +55,7 @@ sind freiwillig; mit Lage stehen sie in der Ansicht.
 Sollhöhe, Gelände der letzten Aufnahme, Abweichung und Status (eingehalten bis ± 3 cm), die Notizen als Tabelle
 und jedes Foto mit Aufnahmezeit, Lage und Notiz. Lesern steht der Bericht genauso zur Verfügung.
 
-[![Seite 1 der Dokumentation als PDF: Zwangspunkt, Notiz und Foto](screenshot-pdf-dokumentation.pngNone){ width="910" height="1287" loading="lazy" }](beispiel-dokumentation.pdf)
+[![Seite 1 der Dokumentation als PDF: Zwangspunkt, Notiz und Foto](screenshot-pdf-dokumentation.png){ width="910" height="1287" loading="lazy" }](beispiel-dokumentation.pdf)
 
 [Beispiel herunterladen (PDF)](beispiel-dokumentation.pdf)
 

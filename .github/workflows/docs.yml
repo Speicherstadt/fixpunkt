@@ -65,11 +65,13 @@ jobs:
       - run: test -z "$(grep -L '^description:' docs/*.md)"
       - run: test -z "$(grep -L 'property="og:image"' site/*.html)"
       - run: grep -q 'application/ld+json' site/index.html
-      # Alle Bilder, auf die die Seiten verweisen, sind da
+      # Alle Bilder, auf die die gebauten Seiten verweisen, sind da (geprüft am HTML, nicht am Markdown:
+      # ein Rest hinter dem Dateinamen wie „bild.pngNone“ fiel im Markdown nicht auf)
       - run: |
           missing=0
-          for img in $(grep -ohE '\(screenshot-[a-z-]+\.png' docs/*.md | tr -d '(' | sort -u); do
-            test -f "docs/$img" || { echo "::error::docs/$img fehlt"; missing=1; }
+          for src in $(grep -ohE '<img [^>]*src="[^"]+"' site/*.html | grep -oE 'src="[^"]+"' | cut -d'"' -f2 | sort -u); do
+            case "$src" in http*|data:*|/*) continue ;; esac
+            test -f "site/${src%%#*}" || { echo "::error::Bild fehlt: $src"; missing=1; }
           done
           exit $missing
       - uses: actions/upload-pages-artifact@v5

@@ -10,7 +10,7 @@ Im Reiter **Dokumentation** einer Baustelle, Abschnitt **Pläne**, lädt man Lag
 liest sie einmal ein und zeigt sie als Strichzeichnung über dem Höhenbild; Höhen aus dem Plan vergleicht es mit
 dem gemessenen Gelände.
 
-![Pläne: Lageplan mit 5 Ebenen, Plan/Ist mit zwei Höhenpunkten, Abweichung 0,0 und −10,0 cm](screenshot-plaene.pngNone){ width="1024" height="442" loading="lazy" }
+![Pläne: Lageplan mit 5 Ebenen, Plan/Ist mit zwei Höhenpunkten, Abweichung 0,0 und −10,0 cm](screenshot-plaene.png){ width="1024" height="442" loading="lazy" }
 
 ## Was gelesen wird
 
@@ -31,7 +31,7 @@ Baukoordinaten passen nicht; sie lassen sich im CAD vorher transformieren.
 In der [Ansicht](ansicht.md) unter **Plan darüber** einen Plan wählen: Er liegt als Strichzeichnung über dem
 Höhenbild und der Differenz, zusammen mit Bereichen und Markierungen.
 
-![Ansicht mit Lageplan darüber: Baufeld, Baugrube, Kanal mit Schacht, Beschriftung](screenshot-ansicht-plan.pngNone){ width="982" height="563" loading="lazy" }
+![Ansicht mit Lageplan darüber: Baufeld, Baugrube, Kanal mit Schacht, Beschriftung](screenshot-ansicht-plan.png){ width="982" height="563" loading="lazy" }
 
 ## Plan/Ist
 

@@ -98,7 +98,7 @@ Bezugssystem und Rasterweite, die Kennzahlen, die Tabelle je Bereich mit dem Ant
 Aufnahmen Daten haben, und eine Karte der Höhenänderung mit den Abrechnungsbereichen, Farbskala und
 Maßstabsleiste. Fehlen Daten, steht die Warnung auch im PDF.
 
-[![Seite 1 eines PDF-Berichts: Kennzahlen, Massen je Bereich und Karte der Höhenänderung mit den Bereichen Grube und Bagger](screenshot-pdf.pngNone){ width="910" height="1287" loading="lazy" }](beispiel-mengenbericht.pdf)
+[![Seite 1 eines PDF-Berichts: Kennzahlen, Massen je Bereich und Karte der Höhenänderung mit den Bereichen Grube und Bagger](screenshot-pdf.png){ width="910" height="1287" loading="lazy" }](beispiel-mengenbericht.pdf)
 
 [Beispiel herunterladen (PDF)](beispiel-mengenbericht.pdf). Haufwerk, Soll/Ist und Zeitreihe haben denselben
 Knopf; der Soll/Ist-Bericht zeigt zusätzlich Kennwerte, Restmassen, die Verteilung und eine Karte der

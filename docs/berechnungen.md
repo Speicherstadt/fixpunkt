@@ -76,7 +76,7 @@ Liegt eine Punktwolke nicht im Bezugssystem der Baustelle – ein Scan im lokale
 bringen identische Punkte sie dorthin: Punkte, die in der Aufnahme zu sehen sind und deren Sollkoordinaten
 bekannt sind (Passpunktplatten, Kanaldeckel, Bolzen, vom Vermesser eingemessen).
 
-![Passpunkte: vier Punkte mit Koordinaten in der Aufnahme und Soll, Vorschau mit RMS Lage 2,8 cm, Restklaffen je Punkt](screenshot-passpunkte.pngNone){ width="978" height="1288" loading="lazy" }
+![Passpunkte: vier Punkte mit Koordinaten in der Aufnahme und Soll, Vorschau mit RMS Lage 2,8 cm, Restklaffen je Punkt](screenshot-passpunkte.png){ width="978" height="1288" loading="lazy" }
 
 1. Im Reiter **Massen** unter **Berechnungen → Passpunkte** die Aufnahme wählen.
 2. Je Punkt die Koordinate in der Aufnahme (in der [Ansicht](ansicht.md) mit **Punkt** messen) und die

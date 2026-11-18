@@ -11,7 +11,7 @@ description: >-
 Beim allerersten Aufruf legt man den Admin-Zugang an. Danach meldet sich jeder mit Name und Passwort an; die
 Sitzung hält 30 Tage.
 
-![Anmeldung bei Fixpunkt mit Name und Passwort](screenshot-anmeldung.pngNone){ width="1024" height="700" }
+![Anmeldung bei Fixpunkt mit Name und Passwort](screenshot-anmeldung.png){ width="1024" height="700" }
 
 ## Baustelle anlegen
 
@@ -83,7 +83,7 @@ Herunterladen; die Auswahl merkt sich der Browser für das nächste Mal.
 
 ![Bericht zusammenstellen: Titel, Firma, Bausteine mit Häkchen und Pfeilen](screenshot-bericht-zusammenstellen.png)
 
-[![Seite 1 eines eigenen Berichts: Kennzahlen, Aushub je Befliegung, Massenziele, Soll/Ist, Zwangspunkte, Notizen](screenshot-pdf-baustellenbericht.pngNone){ width="910" height="1287" loading="lazy" }](beispiel-baustellenbericht.pdf)
+[![Seite 1 eines eigenen Berichts: Kennzahlen, Aushub je Befliegung, Massenziele, Soll/Ist, Zwangspunkte, Notizen](screenshot-pdf-baustellenbericht.png){ width="910" height="1287" loading="lazy" }](beispiel-baustellenbericht.pdf)
 
 [Beispiel herunterladen (PDF)](beispiel-baustellenbericht.pdf)
 
