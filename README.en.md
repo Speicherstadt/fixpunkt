@@ -2,12 +2,13 @@
 
 <img src="docs/assets/icon.svg" alt="Fixpunkt logo" width="72">
 
-<h1>Fixpunkt: earthwork volumes from drone surveys</h1>
+<h1>Fixpunkt: drone-based earthwork surveys, billing and site records</h1>
 
 [Deutsch](README.md) · **English**
 
-**Self-hosted volume calculation for construction sites: upload a point cloud or elevation model, draw a billing boundary, get a quantity report in m³.**<br>
-Compares original terrain and excavation per billing area, filters out excavators and vegetation, and hands over the report as PDF, CSV or GeoTIFF.<br>
+**Self-hosted for earthworks and civil engineering: from drone flight to billable quantity.**<br>
+Volumes per billing area with excavators and vegetation filtered out, plan vs. actual of the formation, progress across all flights.<br>
+Measurement statements with prices, delivery tickets, GAEB X31 and client approval; photos, constraint points, utility lines and DXF plans in the right place.<br>
 One binary with a web UI, ETRS89/UTM32 and DHHN2016 – no cloud subscription, on your own server.
 
 [![CI](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml/badge.svg)](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml)
@@ -48,7 +49,12 @@ missing is the step from point cloud to a billable quantity.
 - **Quantities on the day of the flight:** upload a capture, compare two states, cut and fill per billing area.
 - **The excavator doesn't count:** a ground filter removes machines, containers and vegetation and fills in the
   terrain below.
-- **Your data stays with you:** one binary with SQLite, no cloud subscription, no third-party service.
+- **Bill what was measured:** statement per period with item number and unit price, checked against delivery
+  tickets, as PDF or GAEB X31 – the client approves it via a link.
+- **Documented where it happened:** photos, constraint points, utility lines and notes sit at their place in the
+  terrain, as a PDF for the file.
+- **Your data stays with you:** one binary with SQLite, no cloud subscription; only the background map comes from
+  OpenStreetMap and can be turned off.
 - **Official coordinates:** ETRS89/UTM32 (EPSG:25832), heights in DHHN2016 via the GCG2016 quasigeoid.
 
 Runs on any Linux server, NAS or mini PC – with Docker, Podman or as a systemd service. The drone photos are
@@ -65,14 +71,24 @@ processed by [OpenDroneMap](https://opendronemap.org/), directly from Fixpunkt v
 - Stockpiles against a base surface, time series across the project
 - Plan vs. actual against a formation level, an inclined plane or a design surface
 - Ground filter for excavators, containers and vegetation
-- Report as PDF with map, as CSV or GeoTIFF; documentation, plan vs. actual and a custom site report as PDF
-- Billing: statement per period with item number and unit price, in bank and loose m³, tonnes and truck loads,
-  split by soil layers; delivery tickets imported as CSV and checked against the measurement; GAEB X31; client approval
-  via link
+- Quantity report as PDF with map, as CSV or GeoTIFF
 - Site overview, arranged by each user: excavation per flight, quantity targets, stock and history per material,
-  plan vs. actual, constraint points
+  plan vs. actual, constraint points – also as a custom site report (PDF)
 
 </td>
+<td width="50%" valign="top">
+
+### 💶 Billing
+- Statement per period with bill-of-quantities item and unit price
+- In bank and loose m³, tonnes and truck loads, split by soil layers
+- Delivery tickets entered by hand or as CSV, checked against the statement
+- Statement as PDF and GAEB DA XML X31 for billing software
+- Client approval via link, without an account
+- [Billing](https://speicherstadt.github.io/fixpunkt/abrechnung.html) · [Billing and law](https://speicherstadt.github.io/fixpunkt/recht.html) (German)
+
+</td>
+</tr>
+<tr>
 <td width="50%" valign="top">
 
 ### 🛰️ Data
@@ -82,10 +98,9 @@ processed by [OpenDroneMap](https://opendronemap.org/), directly from Fixpunkt v
 - Process drone photos directly via NodeODM
 - Billing boundaries as GeoJSON from QGIS, several areas per file
 - Boundaries in latitude/longitude are converted to UTM32
+- Flight date per capture, also for flights uploaded later
 
 </td>
-</tr>
-<tr>
 <td width="50%" valign="top">
 
 ### 🗺️ View and measure
@@ -94,10 +109,19 @@ processed by [OpenDroneMap](https://opendronemap.org/), directly from Fixpunkt v
 - Measure: point, distance, slope, area, profile
 - Draw billing areas directly in the browser
 - Map of all sites
-- Constraint points with plan vs. actual, traced utility lines, photos with GPS position and viewing direction,
-  notes – as PDF and DXF
-- DXF plans as background, heights from the plan against the terrain
 - Works with mouse and keyboard
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 📷 Site records
+- Photos with GPS position and viewing direction at their place in the terrain
+- Constraint points with design and actual height, notes
+- Trace utility lines, with heights from the capture
+- DXF plans as background, heights from the plan against the terrain (plan vs. actual)
+- As PDF for the file and as DXF for CAD
 
 </td>
 <td width="50%" valign="top">
@@ -134,8 +158,14 @@ processed by [OpenDroneMap](https://opendronemap.org/), directly from Fixpunkt v
 </table>
 
 <p align="center">
-  <img src="docs/screenshot-ansicht.png" alt="View of a construction pit in Fixpunkt: elevation image, plan vs. actual deviation of the pit floor, billing areas and a profile across the pit" width="49%">
-  <img src="docs/screenshot-baustelle.png" alt="Volumes tab of a construction site in Fixpunkt: billing areas and calculations from original terrain to finished excavation" width="49%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-ansicht-dunkel.png">
+    <img src="docs/screenshot-ansicht.png" alt="View tab of a construction site in Fixpunkt: elevation image, plan vs. actual deviation of the pit floor, billing areas and a profile across the pit" width="49%">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-baustelle-dunkel.png">
+    <img src="docs/screenshot-baustelle.png" alt="Volumes tab of a construction site in Fixpunkt: billing areas and calculations from original terrain to finished excavation" width="49%">
+  </picture>
 </p>
 
 ## 🚀 Installation

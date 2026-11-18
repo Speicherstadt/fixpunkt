@@ -16,6 +16,11 @@ Der Ablauf für eine Baugrube: **Urgelände fliegen → Aushub fliegen → beide
 Im Reiter **Aufnahmen** nimmt **Aufnahme hochladen** eine oder mehrere Dateien: Punktwolken (LAS, LAZ, E57, XYZ, CSV, TXT, PTS) oder
 Höhenmodelle (GeoTIFF, ASC). Der Name der Aufnahme kommt aus dem Dateinamen.
 
+Als Datum gilt zunächst der Zeitpunkt des Hochladens. Zeitreihe, Überblick, Vorauswahl der Berechnung und die
+Zeiträume der Abrechnung ordnen nach diesem Datum – bei Flügen, die erst später hochgeladen werden, in der
+Spalte **Aufnahme vom** das **Flugdatum** eintragen. Bei [Drohnenfotos](drohnenfotos.md) trägt man es schon
+vor dem Auswerten ein.
+
 Große Dateien laden in Stücken hoch. Reißt die Verbindung ab – Funkloch auf der Baustelle, WLAN gewechselt –,
 macht Fixpunkt von selbst weiter, wo es aufgehört hat. Wird die Seite zwischendurch geschlossen, dieselbe Datei
 einfach noch einmal wählen: der Upload setzt fort, statt von vorn zu beginnen. Unfertige Uploads verwirft der
@@ -93,14 +98,14 @@ Bezugssystem und Rasterweite, die Kennzahlen, die Tabelle je Bereich mit dem Ant
 Aufnahmen Daten haben, und eine Karte der Höhenänderung mit den Abrechnungsbereichen, Farbskala und
 Maßstabsleiste. Fehlen Daten, steht die Warnung auch im PDF.
 
-[![Seite 1 eines PDF-Berichts: Kennzahlen, Massen je Bereich und Karte der Höhenänderung mit den Bereichen Grube und Bagger](screenshot-pdf.png){ width="910" height="1263" loading="lazy" }](beispiel-mengenbericht.pdf)
+[![Seite 1 eines PDF-Berichts: Kennzahlen, Massen je Bereich und Karte der Höhenänderung mit den Bereichen Grube und Bagger](screenshot-pdf.pngNone){ width="910" height="1287" loading="lazy" }](beispiel-mengenbericht.pdf)
 
 [Beispiel herunterladen (PDF)](beispiel-mengenbericht.pdf). Haufwerk, Soll/Ist und Zeitreihe haben denselben
 Knopf; der Soll/Ist-Bericht zeigt zusätzlich Kennwerte, Restmassen, die Verteilung und eine Karte der
 Abweichung. Der PDF-Bericht ist vorerst nur auf Deutsch.
 
-Haufwerke, Soll/Ist-Vergleiche, Zeitreihen und Exporte stehen unter
-[Haufwerk, Soll/Ist, Zeitreihe, Export](berechnungen.md).
+Haufwerke, Soll/Ist-Vergleiche, Zeitreihen, Exporte und Passpunkte stehen unter
+[Haufwerk, Soll/Ist, Zeitreihe, Export, Passpunkte](berechnungen.md).
 
 > [!WARNING]
 > Für die Abrechnung den Bericht mit Lieferscheinen, LKW-Ladungen oder einem Aufmaß plausibilisieren, bis die

@@ -9,7 +9,7 @@ description: >-
 | Rolle | darf |
 |---|---|
 | **Admin** | alles, dazu Benutzer anlegen und löschen |
-| **Bearbeiten** | Baustellen, Aufnahmen, Bereiche und Berechnungen anlegen, ändern, löschen |
+| **Bearbeiten** | Baustellen, Aufnahmen, Bereiche, Berechnungen, Abrechnung, Pläne und Dokumentation anlegen, ändern, löschen; Drohnenfotos auswerten, Aufmaß zur Freigabe senden |
 | **Nur lesen** | alles ansehen und herunterladen, z. B. für Bauherr oder Prüfer |
 
 Admins legen Zugänge unter **Benutzer** an: Name, erstes Passwort, Rolle. Das erste Passwort am besten persönlich
@@ -23,7 +23,7 @@ API-Tokens.
 ## Passkeys
 
 Mit einem Passkey meldet man sich ohne Passwort an: per Fingerabdruck, Gesicht oder Geräte-PIN, mit einem
-Sicherheitsschlüssel (YubiKey) oder über den Passwortmanager (iCloud-Schlüsselbund, Google, 1Password …).
+Sicherheitsschlüssel oder über den Passwortmanager des Geräts.
 
 1. Unter **Konto → Passkeys** eine Bezeichnung eingeben (z. B. „iPhone“) und **Passkey hinzufügen**.
 2. Beim nächsten Mal auf der Anmeldeseite den Namen eingeben und **Mit Passkey anmelden**.

@@ -4,9 +4,9 @@ description: >-
   Soll-Geländemodell, Zeitreihe über die Bauphase, Export nach GeoTIFF, DXF, LandXML, CSV und OBJ, Orthofoto als GeoTIFF, Passpunkte.
 ---
 
-# Haufwerk, Soll/Ist, Zeitreihe, Export
+# Haufwerk, Soll/Ist, Zeitreihe, Export, Passpunkte
 
-Neben dem [Aushub](aushub.md) rechnet Fixpunkt im Reiter **Massen** unter **Berechnungen** vier weitere Arten. Die Art wählt man oben
+Neben dem [Aushub](aushub.md) rechnet Fixpunkt im Reiter **Massen** unter **Berechnungen** fünf weitere Arten. Die Art wählt man oben
 im Bereich; jede hat ihr eigenes Formular, das Ergebnis öffnet sich aus der Liste darunter.
 
 ## Haufwerk
@@ -61,7 +61,7 @@ Für CAD und Vermessung aus einer Aufnahme, optional nur innerhalb von Bereichen
 |---|---|
 | Höhenmodell (GeoTIFF) | Raster mit EPSG-Code, für QGIS und GIS |
 | Höhenlinien und Grenzen (DXF) | Haupt- und Zwischenlinien im gewählten Abstand, Bereichsgrenzen |
-| Oberfläche als TIN (LandXML) | für Civil-Programme (Civil 3D, Card/1, BricsCAD) |
+| Oberfläche als TIN (LandXML) | für Tiefbau- und CAD-Programme |
 | Rasterpunkte (CSV) | `x;y;z` |
 | Dreiecksnetz (OBJ) | für 3D-Programme, relativ zu einem Bezugspunkt |
 | Orthofoto (GeoTIFF) | das [Orthofoto](ansicht.md#orthofoto) der Aufnahme in voller Auflösung (höchstens 8192 Pixel je Seite), RGBA, auf die gewählten Bereiche zugeschnitten und außerhalb durchsichtig; nur wählbar, wenn die Aufnahme eins hat |
@@ -76,9 +76,9 @@ Liegt eine Punktwolke nicht im Bezugssystem der Baustelle – ein Scan im lokale
 bringen identische Punkte sie dorthin: Punkte, die in der Aufnahme zu sehen sind und deren Sollkoordinaten
 bekannt sind (Passpunktplatten, Kanaldeckel, Bolzen, vom Vermesser eingemessen).
 
-![Passpunkte: vier Punkte mit Koordinaten in der Aufnahme und Soll, Vorschau mit RMS Lage 2,8 cm, Restklaffen je Punkt](screenshot-passpunkte.png){ width="979" height="1223" loading="lazy" }
+![Passpunkte: vier Punkte mit Koordinaten in der Aufnahme und Soll, Vorschau mit RMS Lage 2,8 cm, Restklaffen je Punkt](screenshot-passpunkte.pngNone){ width="978" height="1288" loading="lazy" }
 
-1. **Berechnungen → Passpunkte** und die Aufnahme wählen.
+1. Im Reiter **Massen** unter **Berechnungen → Passpunkte** die Aufnahme wählen.
 2. Je Punkt die Koordinate in der Aufnahme (in der [Ansicht](ansicht.md) mit **Punkt** messen) und die
    Sollkoordinate eintragen – oder unter **Liste einfügen** aus einer Tabelle kopieren: eine Zeile je Punkt mit
    Name, x, y, z in der Aufnahme, Ost, Nord, Höhe (wie `fixpunkt georef --gcp`).

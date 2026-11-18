@@ -1,7 +1,8 @@
 ---
 description: >-
   Alle Einstellungen von Fixpunkt über Umgebungsvariablen: Datenverzeichnis, Port, erster Admin, gleichzeitige
-  Berechnungen, Upload-Grenze, Cookies hinter HTTPS. Reverse-Proxy mit Caddy.
+  Berechnungen, Upload-Grenze, Cookies hinter HTTPS, öffentliche Adresse für Passkeys, NodeODM, Kartenkacheln.
+  Reverse-Proxy mit Caddy.
 ---
 
 # Konfiguration
@@ -11,7 +12,7 @@ Container in `/etc/fixpunkt/fixpunkt.env`.
 
 | Variable | Standard | Bedeutung |
 |---|---|---|
-| `FIXPUNKT_DATA_DIR` | `/data` | Datenbank (`fixpunkt.db`), Aufnahmen (`captures/`), Ergebnisse (`jobs/`) |
+| `FIXPUNKT_DATA_DIR` | `/data` | Datenbank (`fixpunkt.db`), Aufnahmen (`captures/`), Ergebnisse (`jobs/`), Dokumentation, Pläne und angefangene Uploads – siehe [Backup](backup.md#was-gesichert-werden-muss) |
 | `FIXPUNKT_LISTEN` | `0.0.0.0:8080` | Adresse und Port |
 | `FIXPUNKT_USER`, `FIXPUNKT_PASSWORD` | – | Erster Admin, falls es noch keinen Benutzer gibt |
 | `FIXPUNKT_MAX_JOBS` | `1` | Berechnungen gleichzeitig; jede braucht für große Flüge einige GB RAM |

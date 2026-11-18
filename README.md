@@ -2,12 +2,13 @@
 
 <img src="docs/assets/icon.svg" alt="Fixpunkt-Logo" width="72">
 
-<h1>Fixpunkt: Aushub und Haufwerke aus Drohnenflügen berechnen</h1>
+<h1>Fixpunkt: Aufmaß und Baustellendokumentation aus Drohnenflügen</h1>
 
 **Deutsch** · [English](README.en.md)
 
-**Selbst gehostete Massenermittlung für Baustellen: Punktwolke oder Höhenmodell hochladen, Abrechnungsgrenze setzen, Mengenbericht in m³.**<br>
-Vergleicht Urgelände und Aushub je Abrechnungsbereich, rechnet Bagger und Bewuchs heraus und gibt den Bericht als PDF, CSV oder GeoTIFF weiter.<br>
+**Selbst gehostet für Erd- und Tiefbau: vom Drohnenflug zur abrechenbaren Menge.**<br>
+Massen je Abrechnungsbereich mit Bagger und Bewuchs herausgerechnet, Soll/Ist der Sohle, Fortschritt über alle Befliegungen.<br>
+Aufmaß mit Preisen, Lieferscheinen, GAEB X31 und Freigabe durch den Auftraggeber; Fotos, Zwangspunkte, Leitungen und DXF-Pläne am richtigen Ort.<br>
 Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf deinem Server.
 
 [![CI](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml/badge.svg)](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml)
@@ -45,7 +46,9 @@ was fehlt, ist der Schritt von der Punktwolke zur abrechenbaren Menge.
 
 - **Massen am Tag des Flugs:** Aufnahme hochladen, zwei Stände vergleichen, Abtrag und Auftrag je Abrechnungsbereich.
 - **Der Bagger zählt nicht mit:** ein Bodenfilter entfernt Maschinen, Container und Bewuchs und ergänzt das Gelände darunter.
-- **Deine Daten bleiben bei dir:** eine Programmdatei mit SQLite, kein Cloud-Abo, kein fremder Dienst.
+- **Abrechnen, was gemessen ist:** Aufmaß je Zeitraum mit LV-Position und Preis, gegen Lieferscheine gerechnet, als PDF oder GAEB X31 – der Auftraggeber gibt es per Link frei.
+- **Dokumentiert, wo es passiert ist:** Fotos, Zwangspunkte, Leitungen und Notizen liegen an ihrer Stelle im Gelände, als PDF für die Akte.
+- **Deine Daten bleiben bei dir:** eine Programmdatei mit SQLite, kein Cloud-Abo; nur die Hintergrundkarte kommt von OpenStreetMap und lässt sich abschalten.
 - **Amtliche Koordinaten:** ETRS89/UTM32 (EPSG:25832), Höhen in DHHN2016 über das Quasigeoid GCG2016.
 
 Läuft auf jedem Linux-Server, NAS oder Mini-PC – mit Docker, Podman oder als systemd-Dienst. Die Fotos der Drohne
@@ -62,24 +65,35 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Haufwerke gegen Basisfläche, Zeitreihe über die Bauphase
 - Soll/Ist gegen Sohlhöhe, geneigte Ebene oder Soll-DGM
 - Bodenfilter für Bagger, Container und Bewuchs
-- Bericht als PDF mit Karte, als CSV oder GeoTIFF; Dokumentation, Plan/Ist und eigener Baustellenbericht als PDF
-- Abrechnung: Aufmaß je Zeitraum mit LV-Position und Preis, in m³ fest und lose, Tonnen und LKW-Fahrten, nach Schichten (Homogenbereichen); Lieferscheine als CSV gegengerechnet; GAEB X31; Freigabe durch den Auftraggeber per Link
-- Überblick je Baustelle, von jedem selbst zusammengestellt: Aushub je Befliegung, Massenziele, Lagerbestand und Verlauf je Material, Soll/Ist, Zwangspunkte
+- Mengenbericht als PDF mit Karte, als CSV oder GeoTIFF
+- Überblick je Baustelle, von jedem selbst zusammengestellt: Aushub je Befliegung, Massenziele, Lagerbestand und Verlauf je Material, Soll/Ist, Zwangspunkte – auch als eigener Baustellenbericht (PDF)
 
 </td>
 <td width="50%" valign="top">
 
+### 💶 Abrechnung
+- Aufmaß je Zeitraum mit LV-Position und Einheitspreis
+- In m³ fest und lose, Tonnen und LKW-Fahrten, nach Schichten (Homogenbereichen)
+- Lieferscheine von Hand oder als CSV, gegen das Aufmaß gerechnet
+- Aufmaß als PDF und GAEB DA XML X31 für die Abrechnungssoftware
+- Freigabe durch den Auftraggeber per Link, ohne eigenes Konto
+- [Abrechnung](https://speicherstadt.github.io/fixpunkt/abrechnung.html) · [Abrechnung und Recht](https://speicherstadt.github.io/fixpunkt/recht.html)
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
 ### 🛰️ Daten
-- Punktwolken: LAS, LAZ, E57 (Laserscanner wie Leica BLK2GO), XYZ, CSV
+- Punktwolken: LAS, LAZ, E57 (Laserscanner), XYZ, CSV, PTS
 - Höhenmodelle: GeoTIFF (OpenDroneMap), ASC
 - Flugplanung: Kartierflug als KMZ für DJI Pilot 2
 - Drohnenfotos direkt auswerten über NodeODM
 - Abrechnungsgrenzen als GeoJSON aus QGIS, mehrere Bereiche je Datei
 - Grenzen in Länge/Breite werden nach UTM32 umgerechnet
+- Flugdatum je Aufnahme, auch für nachträglich hochgeladene Flüge
 
 </td>
-</tr>
-<tr>
 <td width="50%" valign="top">
 
 ### 🗺️ Ansicht und Messen
@@ -88,9 +102,19 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 - Messen: Punkt, Strecke, Gefälle, Fläche, Profil
 - Abrechnungsbereiche direkt im Browser zeichnen
 - Karte aller Baustellen
-- Zwangspunkte mit Soll/Ist, Leitungen nachzeichnen, Fotos mit GPS-Position und Blickrichtung, Notizen – als PDF und DXF
-- DXF-Pläne als Hintergrund, Höhen aus dem Plan gegen das Gelände
 - Bedienbar mit Maus und Tastatur
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 📷 Dokumentation
+- Fotos mit GPS-Position und Blickrichtung an ihrer Stelle im Gelände
+- Zwangspunkte mit Soll- und Isthöhe, Notizen
+- Leitungen nachzeichnen, mit Höhen aus der Aufnahme
+- DXF-Pläne als Hintergrund, Höhen aus dem Plan gegen das Gelände (Plan/Ist)
+- Als PDF für die Akte und als DXF fürs CAD
 
 </td>
 <td width="50%" valign="top">
@@ -108,7 +132,7 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 <td width="50%" valign="top">
 
 ### 🧮 Exporte und Kommandozeile
-- GeoTIFF, DXF mit Höhenlinien, LandXML, CSV, OBJ – aus der Web-UI
+- GeoTIFF, DXF mit Höhenlinien, LandXML, CSV, OBJ, Orthofoto als GeoTIFF – aus der Web-UI
 - Passpunkte (Helmert) mit Restklaffen in der Web-UI, Koordinaten und Höhen umrechnen
 - Bodenfilter, Ausreißer, Profile auf der Kommandozeile
 - [Alle Befehle](https://speicherstadt.github.io/fixpunkt/kommandozeile.html)
@@ -127,8 +151,14 @@ wertet [OpenDroneMap](https://opendronemap.org/) aus, auf Wunsch direkt aus Fixp
 </table>
 
 <p align="center">
-  <img src="docs/screenshot-ansicht.png" alt="Ansicht einer Baugrube in Fixpunkt: Höhenbild, Soll/Ist-Abweichung der Sohle, Abrechnungsbereiche und ein Profil quer durch die Grube" width="49%">
-  <img src="docs/screenshot-baustelle.png" alt="Reiter Massen einer Baustelle in Fixpunkt: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub" width="49%">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-ansicht-dunkel.png">
+    <img src="docs/screenshot-ansicht.png" alt="Reiter Ansicht einer Baustelle in Fixpunkt: Höhenbild, Soll/Ist-Abweichung der Sohle, Abrechnungsbereiche und ein Profil quer durch die Grube" width="49%">
+  </picture>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-baustelle-dunkel.png">
+    <img src="docs/screenshot-baustelle.png" alt="Reiter Massen einer Baustelle in Fixpunkt: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub" width="49%">
+  </picture>
 </p>
 
 ## 🚀 Installation
@@ -158,7 +188,7 @@ Bilanz; mehr unter [Methode und Genauigkeit](https://speicherstadt.github.io/fix
 
 **Brauche ich eine bestimmte Drohne?**<br>
 Nein. Fixpunkt rechnet mit Punktwolken und Höhenmodellen, egal woher. Für Ergebnisse ohne Passpunkte braucht die
-Drohne RTK (z. B. DJI Matrice 4E mit SAPOS). Auch Laserscanner (LAS/LAZ) und iPhone-LiDAR-Scans passen.
+Drohne RTK (z. B. DJI Matrice 4E mit SAPOS). Auch Laserscans (LAS/LAZ, E57) passen.
 
 **Rechnet Fixpunkt die Drohnenfotos selbst?**<br>
 Über [NodeODM](https://github.com/OpenDroneMap/NodeODM): Fotos in Fixpunkt hochladen, NodeODM rechnet die

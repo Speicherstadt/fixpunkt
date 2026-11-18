@@ -1,16 +1,16 @@
 ---
 description: >-
-  Baustelle dokumentieren in Fixpunkt: Zwangspunkte mit Sollhöhe gegen das aktuelle Gelände prüfen, Fotos mit
-  GPS-Position an ihrer Stelle zeigen, Notizen mit Koordinaten, alles als PDF-Bericht.
+  Baustelle dokumentieren in Fixpunkt: Zwangspunkte mit Sollhöhe gegen das aktuelle Gelände prüfen, Leitungen
+  nachzeichnen, Fotos mit GPS-Position an ihrer Stelle zeigen, Notizen mit Koordinaten – als PDF-Bericht und DXF.
 ---
 
 # Dokumentation
 
-Im Reiter **Dokumentation** einer Baustelle sammelt Fixpunkt, was neben den Massen festgehalten werden
-muss: Zwangspunkte, Leitungen, Fotos und Notizen. Alles mit Lage erscheint auch in der [Ansicht](ansicht.md) –
+Im Reiter **Dokumentation** einer Baustelle stehen die [Pläne](plaene.md) und darunter, was neben den Massen
+festgehalten werden muss: Zwangspunkte, Leitungen, Fotos und Notizen. Alles mit Lage erscheint auch in der [Ansicht](ansicht.md) –
 Zwangspunkte als Raute, Fotos und Notizen als Punkt, Leitungen als Linie.
 
-![Dokumentation einer Baugrube: Notiz zur Bodenprobe, Zwangspunkt am Kanal mit Soll- und Isthöhe, Foto mit GPS-Position](screenshot-dokumentation.png){ width="1024" height="528" loading="lazy" }
+![Dokumentation einer Baugrube: Notiz zur Bodenprobe, Zwangspunkt am Kanal mit Soll- und Isthöhe, Foto mit GPS-Position](screenshot-dokumentation.pngNone){ width="1024" height="529" loading="lazy" }
 
 ## Zwangspunkte
 
@@ -55,14 +55,14 @@ sind freiwillig; mit Lage stehen sie in der Ansicht.
 Sollhöhe, Gelände der letzten Aufnahme, Abweichung und Status (eingehalten bis ± 3 cm), die Notizen als Tabelle
 und jedes Foto mit Aufnahmezeit, Lage und Notiz. Lesern steht der Bericht genauso zur Verfügung.
 
-[![Seite 1 der Dokumentation als PDF: Zwangspunkt, Notiz und Foto](screenshot-pdf-dokumentation.png){ width="910" height="1263" loading="lazy" }](beispiel-dokumentation.pdf)
+[![Seite 1 der Dokumentation als PDF: Zwangspunkt, Notiz und Foto](screenshot-pdf-dokumentation.pngNone){ width="910" height="1287" loading="lazy" }](beispiel-dokumentation.pdf)
 
 [Beispiel herunterladen (PDF)](beispiel-dokumentation.pdf)
 
 ## DXF für CAD
 
-**DXF für CAD** lädt die ganze Dokumentation als Zeichnung (DXF R12) herunter, zum Weiterzeichnen in AutoCAD,
-BricsCAD oder QGIS – etwa als Grundlage für den Bestandsplan. Jede Art liegt auf einer eigenen Ebene:
+**DXF für CAD** lädt die ganze Dokumentation als Zeichnung (DXF R12) herunter, zum Weiterzeichnen im CAD
+oder in QGIS – etwa als Grundlage für den Bestandsplan. Jede Art liegt auf einer eigenen Ebene:
 
 | Ebene | Inhalt |
 |---|---|

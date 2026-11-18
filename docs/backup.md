@@ -30,7 +30,7 @@ docker run --rm -v fixpunkt:/data -v "$PWD":/backup debian:bookworm-slim \
 docker start fixpunkt
 ```
 
-Für regelmäßige Sicherungen auf einen zweiten Speicher (z. B. netcup Storage Space) eignet sich
+Für regelmäßige Sicherungen auf einen zweiten Speicher (z. B. Speicher beim Hoster oder ein NAS) eignet sich
 [restic](https://restic.net/) – große, selten geänderte Punktwolken werden dabei nur einmal übertragen.
 
 > [!TIP]

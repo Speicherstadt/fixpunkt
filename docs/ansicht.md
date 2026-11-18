@@ -10,7 +10,8 @@ description: >-
 Im Reiter **Ansicht** einer Baustelle zeigt Fixpunkt das Höhenbild einer Aufnahme: Farben von tief
 (blau) nach hoch (braun, hell), mit Schummerung aus Nordwesten, damit Böschungen und Kanten plastisch wirken.
 
-![Ansicht der Baugrube: Höhenbild, Soll/Ist-Abweichung der Sohle darübergelegt, Bereiche und ein Profil quer durch die Grube](screenshot-ansicht.png){ width="1024" height="1216" }
+![Reiter „Ansicht“: Höhenbild der Baugrube, Soll/Ist-Abweichung der Sohle darübergelegt, Bereiche und ein Profil quer durch die Grube](screenshot-ansicht.png#only-light){ width="1440" height="900" }
+![Reiter „Ansicht“: Höhenbild der Baugrube, Soll/Ist-Abweichung der Sohle darübergelegt, Bereiche und ein Profil quer durch die Grube](screenshot-ansicht-dunkel.png#only-dark){ width="1440" height="900" }
 
 ## Bedienen
 
@@ -29,10 +30,10 @@ Hat die Aufnahme ein **Orthofoto** – das entzerrte Luftbild aus derselben Befl
 Hintergrund; unter **Hintergrund** lässt sich auf das Höhenbild umschalten. Differenz, Bereiche, Pläne und
 Markierungen liegen darüber wie gewohnt.
 
-![Ansicht mit Orthofoto: Baugrube, Bagger und Fahrspuren, darüber Bereiche und Markierungen](screenshot-orthofoto.png){ width="982" height="563" loading="lazy" }
+![Ansicht mit Orthofoto: Baugrube, Bagger und Fahrspuren, darüber Bereiche und Markierungen](screenshot-orthofoto.pngNone){ width="982" height="563" loading="lazy" }
 
-Aus [Drohnenfotos](drohnenfotos.md) übernimmt Fixpunkt das Orthofoto von NodeODM selbst. Sonst in der Liste der
-Aufnahmen über das Bildsymbol ein GeoTIFF anhängen (RGB oder RGBA, z. B. `odm_orthophoto.tif` aus WebODM). Fixpunkt
+Aus [Drohnenfotos](drohnenfotos.md) übernimmt Fixpunkt das Orthofoto von NodeODM selbst. Sonst im Reiter
+**Aufnahmen** in der Liste über das Bildsymbol ein GeoTIFF anhängen (RGB oder RGBA, z. B. `odm_orthophoto.tif` aus WebODM). Fixpunkt
 verkleinert es für die Ansicht auf höchstens 4096 Pixel je Seite – bei einer 100-m-Baustelle rund 2,5 cm je Pixel –
 und legt es auch dann richtig, wenn es in einer anderen UTM-Zone gerechnet wurde.
 
@@ -61,7 +62,7 @@ Liste unter dem Bild und werden von Screenreadern vorgelesen.
 ## Bereiche zeichnen
 
 Mit **Bereich zeichnen** die Ecken einer Abrechnungsgrenze nacheinander anklicken (mindestens drei, die Fläche
-schließt sich selbst), einen Namen eingeben und **Bereich speichern**. Der Bereich steht danach unter **Bereiche**
+schließt sich selbst), einen Namen eingeben und **Bereich speichern**. Der Bereich steht danach im Reiter **Massen** unter **Bereiche**
 und in allen Berechnungen zur Auswahl – ganz ohne QGIS. Für genaue Grenzen aus Plänen bleibt der Import als
 [GeoJSON](daten.md#abrechnungsgrenzen-aus-qgis).
 
@@ -79,7 +80,7 @@ Geländes der gezeigten Aufnahme.
 einen Blick, wo an der Sohle noch zu viel steht oder ob Böschungen sauber laufen. **Überhöhung** streckt die Höhen
 (1×, 2×, 5×), damit flache Mulden und Zentimeter-Abweichungen sichtbar werden.
 
-![3D-Ansicht der Baugrube: Gelände zweifach überhöht, Soll/Ist-Abweichung der Sohle farbig, der Bagger als Block](screenshot-3d.png){ width="1024" height="913" loading="lazy" }
+![3D-Ansicht der Baugrube: Gelände zweifach überhöht, Soll/Ist-Abweichung der Sohle farbig, der Bagger als Block](screenshot-3d.pngNone){ width="1024" height="913" loading="lazy" }
 
 | Bedienung | Maus | Tastatur |
 |---|---|---|
@@ -96,7 +97,7 @@ Farbe, Intensität (grau, die hellsten und dunkelsten 2 % abgeschnitten) und Hö
 zeigt die Intensität Markierungen, Kanten und Material oft besser als die Höhe. So sieht man, was der Bodenfilter herausrechnet: Bagger, Container, Bewuchs stehen als Punkte
 über dem Gelände. Große Wolken zeigt die Ansicht gleichmäßig ausgedünnt mit höchstens einer Million Punkten.
 
-![Punktwolke der Baugrube in Farbe: Schotter, dunklere Grubensohle, der Bagger gelb über dem Gelände](screenshot-punktwolke.png){ width="982" height="591" loading="lazy" }
+![Punktwolke der Baugrube in Farbe: Schotter, dunklere Grubensohle, der Bagger gelb über dem Gelände](screenshot-punktwolke.pngNone){ width="982" height="591" loading="lazy" }
 
 Messen und Zeichnen bleiben in 2D, wo Strecken und Flächen sich genau setzen lassen. Große Raster werden für 3D
 ausgedünnt (höchstens 400 Stützpunkte je Seite); die 3D-Bibliothek (three.js) lädt erst beim Umschalten.

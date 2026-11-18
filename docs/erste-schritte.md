@@ -11,7 +11,7 @@ description: >-
 Beim allerersten Aufruf legt man den Admin-Zugang an. Danach meldet sich jeder mit Name und Passwort an; die
 Sitzung hält 30 Tage.
 
-![Anmeldung bei Fixpunkt mit Name und Passwort](screenshot-anmeldung.png){ width="1024" height="700" }
+![Anmeldung bei Fixpunkt mit Name und Passwort](screenshot-anmeldung.pngNone){ width="1024" height="700" }
 
 ## Baustelle anlegen
 
@@ -35,7 +35,7 @@ direkt dorthin):
 | Reiter | Was dort steht |
 |---|---|
 | **Überblick** | Kennzahlen, Fortschritt, Massenziele, Lagerbestand, was Aufmerksamkeit braucht |
-| **Aufnahmen** | Aufnahmen hochladen und prüfen; aufklappbar: [Drohnenfotos auswerten](drohnenfotos.md) und [Flugplanung](flugplanung.md) |
+| **Aufnahmen** | Aufnahmen hochladen und prüfen, Flugdatum eintragen; aufklappbar: [Drohnenfotos auswerten](drohnenfotos.md) und [Flugplanung](flugplanung.md) |
 | **Ansicht** | Höhenbild, Orthofoto, 3D, Messen, Bereiche zeichnen ([Ansicht](ansicht.md)) |
 | **Massen** | Abrechnungsbereiche und Berechnungen: Aushub, Haufwerk, Soll/Ist, Zeitreihe, Export, Passpunkte ([Aushub berechnen](aushub.md)) |
 | **Abrechnung** | Aufmaß je Zeitraum, Schichten, Kennwerte, Lieferscheine, Freigaben ([Abrechnung](abrechnung.md)) |
@@ -83,7 +83,7 @@ Herunterladen; die Auswahl merkt sich der Browser für das nächste Mal.
 
 ![Bericht zusammenstellen: Titel, Firma, Bausteine mit Häkchen und Pfeilen](screenshot-bericht-zusammenstellen.png)
 
-[![Seite 1 eines eigenen Berichts: Kennzahlen, Aushub je Befliegung, Massenziele, Soll/Ist, Zwangspunkte, Notizen](screenshot-pdf-baustellenbericht.png){ width="910" height="1287" loading="lazy" }](beispiel-baustellenbericht.pdf)
+[![Seite 1 eines eigenen Berichts: Kennzahlen, Aushub je Befliegung, Massenziele, Soll/Ist, Zwangspunkte, Notizen](screenshot-pdf-baustellenbericht.pngNone){ width="910" height="1287" loading="lazy" }](beispiel-baustellenbericht.pdf)
 
 [Beispiel herunterladen (PDF)](beispiel-baustellenbericht.pdf)
 

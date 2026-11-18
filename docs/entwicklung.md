@@ -25,6 +25,14 @@ cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 bun run lint && bun run typecheck && bun run test && bun run build
 bun run e2e
+zensical build --strict   # wenn docs/ oder mkdocs.yml geändert
+```
+
+Der GAEB-Export wird gegen das offizielle Schema geprüft, sobald `GAEB_X31_XSD` darauf zeigt (braucht `xmllint`;
+die CI lädt das Schema von gaeb.de, lokal wird die Prüfung sonst übersprungen):
+
+```bash
+GAEB_X31_XSD=/pfad/GAEB_DA_XML_31_3.3_2023-01.xsd cargo test -p fixpunkt-server gaeb
 ```
 
 ## Testschichten
@@ -40,14 +48,14 @@ bun run e2e
 ## Screenshots und Doku
 
 ```bash
-bun run docs:screenshots          # docs/screenshot-*.png, social-preview.png und beispiel-mengenbericht.pdf neu
+bun run docs:screenshots          # docs/screenshot-*.png, social-preview.png und die Beispiel-PDFs neu
 pip install -r requirements-docs.txt
 zensical serve                    # Doku unter http://localhost:8000
 ```
 
 In GitHub: **Actions → Update screenshots → Run workflow** nimmt die Bilder auf und committet, was sich geändert
 hat. Das Vorschaubild des PDF-Berichts (`screenshot-pdf.png`) rendert `pdftoppm` aus poppler-utils; fehlt es
-lokal, bleibt das alte Bild. Die Doku baut [Zensical](https://zensical.org/) bei jedem Push auf `main` nach GitHub Pages.
+lokal, bleibt das alte Bild. Ohne passenden Playwright-Browser: `PW_CHROMIUM_PATH=/pfad/zu/chrome bun run docs:screenshots`. Die Doku baut [Zensical](https://zensical.org/) bei jedem Push auf `main` nach GitHub Pages.
 
 ## Release
 

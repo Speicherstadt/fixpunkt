@@ -127,7 +127,9 @@ Auf Drohnenfotos können Personen, Kennzeichen und Nachbargrundstücke zu sehen 
   per Aushang an der Baustelle; Flugzeit möglichst so legen, dass wenige Personen in der Grube sind.
 - **Datensparsam:** Fixpunkt rechnet mit Geländemodellen; die Fotos braucht man nur für die Auswertung und das
   Orthofoto. Rohfotos nach der Auswertung löschen, wenn sie nicht mehr gebraucht werden.
-- **Eigener Server:** Fixpunkt läuft selbst gehostet, die Daten gehen an keinen fremden Dienst. Läuft der Server
+- **Eigener Server:** Fixpunkt läuft selbst gehostet, die Daten gehen an keinen fremden Dienst. Nur die
+  Hintergrundkarte lädt der Browser von OpenStreetMap; abschalten mit `FIXPUNKT_MAP_TILES=none`
+  ([Konfiguration](konfiguration.md)). Läuft der Server
   bei einem Hoster, mit diesem einen **Vertrag zur Auftragsverarbeitung (Art. 28 DSGVO)** schließen – die
   großen Hoster bieten ihn als Standard an.
 - **Zugriff:** Benutzer und Rollen in Fixpunkt begrenzen, wer Aufnahmen sieht ([Benutzer und Rollen](benutzer.md)).
@@ -190,6 +192,7 @@ Den Text an den Vertrag anpassen, etwa wenn nach Tonnen oder LKW-Ladungen abgere
 | Anforderung | In Fixpunkt |
 |---|---|
 | prüfbare Mengenberechnung (§ 650g BGB, § 14 VOB/B) | Mengenbericht als PDF mit Karte, Bereichen, Mengen und Berechnungsgrundlagen ([Aushub berechnen](aushub.md#4-mengenbericht)); Aufmaßblatt je Zeitraum mit LV-Position, Preis und Betrag ([Abrechnung](abrechnung.md)) |
+| Vorgaben des Auftraggebers zum Datenaustausch (GAEB) | Aufmaß als GAEB DA XML X31 je LV-Position ([Abrechnung](abrechnung.md#4a-gaeb-x31-für-die-abrechnungssoftware)) |
 | Plausibilisierung | Lieferscheine und Wiegescheine einlesen, Abweichung zur gemessenen Menge je Material ([Abrechnung](abrechnung.md#abgleich)) |
 | gemeinsame Feststellung (§ 14 Abs. 2 VOB/B) | jede Aufnahme bleibt unverändert gespeichert, mit Datum; Freigabe-Link, über den der Auftraggeber das eingefrorene Aufmaß anerkennt oder Einwand erhebt, mit Name und Zeit im PDF ([Freigabe](abrechnung.md#5-freigabe-durch-den-auftraggeber)) |
 | nachvollziehbar und wiederholbar | gleiche Daten und Einstellungen ergeben dieselbe Menge; Verfahren offen beschrieben ([Methode](methode.md)) |

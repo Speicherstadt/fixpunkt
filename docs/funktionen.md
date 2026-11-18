@@ -1,7 +1,7 @@
 ---
 description: >-
   Funktionsumfang von Fixpunkt: Daten hochladen, Drohnenfotos auswerten, Flug planen, ansehen und messen,
-  Aushub, Haufwerk, Soll/Ist, Massenziele und Lagerbestand, Abrechnung mit Lieferscheinen, Dokumentation,
+  Aushub, Haufwerk, Soll/Ist, Massenziele und Lagerbestand, Abrechnung mit Lieferscheinen und GAEB X31, Dokumentation,
   Berichte, Export und Betrieb.
 ---
 
@@ -19,6 +19,8 @@ steht in der [Roadmap](roadmap.md).
 - **Drohnenfotos direkt auswerten** über NodeODM: Fotos hochladen, Fixpunkt holt Punktwolke und Orthofoto ab und
   rechnet sie in das System der Baustelle um ([Drohnenfotos auswerten](drohnenfotos.md))
 - **Große Dateien:** der Upload setzt nach einem Abbruch an derselben Stelle fort
+- **Flugdatum** je Aufnahme, nachträglich änderbar – Zeitreihe, Überblick und Abrechnung ordnen danach
+  ([Aushub berechnen](aushub.md#1-aufnahmen-hochladen))
 - **Passpunkte:** Aufnahmen im lokalen System über eingemessene Punkte georeferenzieren, mit Restklaffen in der
   Vorschau ([Berechnungen](berechnungen.md#passpunkte))
 - **Abrechnungsgrenzen:** im Browser zeichnen oder als GeoJSON (z. B. aus QGIS) hochladen

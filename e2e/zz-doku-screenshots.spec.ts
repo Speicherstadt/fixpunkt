@@ -406,19 +406,36 @@ test("Orthofoto @screenshots", async () => {
   await view.getByRole("application").screenshot({ path: `${DOCS}/screenshot-orthofoto.png` });
 });
 
+/**
+ * Reiter „Ansicht“ als ganzes Fenster wie „Massen“: gleich groß nebeneinander in der README. Je Farbschema
+ * neu geladen und das Profil neu gezogen, damit Karte und Linien im richtigen Schema gezeichnet sind.
+ */
 test("Ansicht mit Differenz @screenshots", async () => {
-  await go(`/sites/${siteId}`);
-  const view = await section(page, "Ansicht");
-  await view.getByRole("group", { name: "Hintergrund" }).getByText("Höhenbild").click();
-  await view.getByLabel("Darüber anzeigen").selectOption({ index: 1 });
-  await view.getByRole("group", { name: "Werkzeug" }).getByText("Profil", { exact: true }).click();
-  const canvas = view.getByRole("application");
-  const box = (await canvas.boundingBox())!;
-  await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.55 } });
-  await canvas.click({ position: { x: box.width * 0.7, y: box.height * 0.55 } });
-  await expect(view.getByRole("img", { name: /Profil über/ })).toBeVisible();
-  await view.scrollIntoViewIfNeeded();
-  await view.screenshot({ path: `${DOCS}/screenshot-ansicht.png` });
+  for (const mode of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: mode });
+    await go(`/sites/${siteId}/ansicht`);
+    const view = page.getByRole("region", { name: "Ansicht" });
+    await view.getByRole("group", { name: "Hintergrund" }).getByText("Höhenbild").click();
+    await view.getByLabel("Darüber anzeigen").selectOption({ index: 1 });
+    await view
+      .getByRole("group", { name: "Werkzeug" })
+      .getByText("Profil", { exact: true })
+      .click();
+    const canvas = view.getByRole("application");
+    const box = (await canvas.boundingBox())!;
+    await canvas.click({ position: { x: box.width * 0.3, y: box.height * 0.55 } });
+    await canvas.click({ position: { x: box.width * 0.7, y: box.height * 0.55 } });
+    await expect(view.getByRole("img", { name: /Profil über/ })).toBeVisible();
+    await page.waitForTimeout(300);
+    // ab der Werkzeugleiste: Karte und Profil ganz im Bild
+    await view
+      .getByRole("group", { name: "Darstellung" })
+      .evaluate((el) => window.scrollTo(0, el.getBoundingClientRect().top + window.scrollY - 12));
+    await page.screenshot({
+      path: `${DOCS}/screenshot-ansicht${mode === "dark" ? "-dunkel" : ""}.png`,
+    });
+  }
+  await setTheme("light");
 });
 
 test("3D-Ansicht @screenshots", async () => {

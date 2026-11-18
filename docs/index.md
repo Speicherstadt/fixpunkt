@@ -1,8 +1,9 @@
 ---
-title: Aushub und Haufwerke aus Drohnenflügen berechnen
+title: Aufmaß und Baustellendokumentation aus Drohnenflügen
 description: >-
-  Fixpunkt rechnet aus Punktwolken und Höhenmodellen Aushub, Auftrag und Haufwerke je Abrechnungsbereich –
-  selbst gehostet, eine Programmdatei, ETRS89/UTM32. Ein Rundgang in Bildern.
+  Fixpunkt rechnet aus Drohnenflügen Aushub, Auftrag und Haufwerke je Abrechnungsbereich, erstellt das Aufmaß
+  mit Preisen, Lieferscheinen und GAEB X31 und dokumentiert die Baustelle – selbst gehostet, eine Programmdatei,
+  ETRS89/UTM32. Ein Rundgang in Bildern.
 image: social-preview.png
 hide:
   - navigation
@@ -52,15 +53,15 @@ Endzustand. Auf einen Blick, wie viele Flüge es gibt und wann zuletzt geflogen 
 
 <div class="showcase-feature showcase-feature--flip" markdown>
 <div markdown>
-<span class="showcase-kicker">Aufnahmen und Grenzen</span>
+<span class="showcase-kicker">Massen</span>
 
-## Hochladen, was die Drohne liefert
+## Bereiche festlegen, Stände vergleichen
 
-Punktwolken als LAS, LAZ oder XYZ, Höhenmodelle als GeoTIFF – direkt aus OpenDroneMap. Fixpunkt prüft jede
-Datei sofort und zeigt Punktzahl und Höhen. Die Abrechnungsgrenzen kommen als GeoJSON aus QGIS, metrisch oder
-in Länge/Breite.
+Punktwolken als LAS, LAZ, E57 oder XYZ, Höhenmodelle als GeoTIFF – direkt aus OpenDroneMap. Die
+Abrechnungsgrenzen kommen als GeoJSON aus QGIS oder werden im Browser gezeichnet. Im Reiter „Massen“ stehen
+alle Berechnungen der Baustelle: Aushub, Haufwerk, Soll/Ist, Zeitreihe, Export und Passpunkte.
 
-[Daten vorbereiten](daten.md)
+[Aushub berechnen](aushub.md)
 </div>
 <div class="showcase-shot" markdown>
 ![Reiter „Massen“ einer Baustelle: Abrechnungsbereiche und Berechnungen vom Urgelände bis zum fertigen Aushub](screenshot-baustelle.png#only-light){ width="1440" loading="lazy" }
@@ -97,7 +98,41 @@ Flächen und Profile direkt im Bild messen, Abrechnungsbereiche einfach anklicke
 [Ansicht und Messen](ansicht.md)
 </div>
 <div class="showcase-shot" markdown>
-![Ansicht der Baugrube mit Soll/Ist-Abweichung, Bereichen und Profil](screenshot-ansicht.png){ width="1024" height="1216" loading="lazy" }
+![Reiter „Ansicht“: Höhenbild der Baugrube mit Soll/Ist-Abweichung, Bereichen und Profil](screenshot-ansicht.png#only-light){ width="1440" height="900" loading="lazy" }
+![Reiter „Ansicht“: Höhenbild der Baugrube mit Soll/Ist-Abweichung, Bereichen und Profil](screenshot-ansicht-dunkel.png#only-dark){ width="1440" height="900" loading="lazy" }
+</div>
+</div>
+
+<div class="showcase-feature" markdown>
+<div markdown>
+<span class="showcase-kicker">Abrechnung</span>
+
+## Aufmaß je Zeitraum, mit Preis und Lieferscheinen
+
+Die Mengen zwischen zwei Flügen je LV-Position, in m³ fest und lose, Tonnen und LKW-Fahrten, gegen die
+Lieferscheine gerechnet. Das Aufmaß geht als PDF oder GAEB X31 in die Abrechnung; der Auftraggeber gibt es
+per Link frei.
+
+[Abrechnung](abrechnung.md)
+</div>
+<div class="showcase-shot" markdown>
+![Reiter „Abrechnung“: Positionen mit m³ fest, m³ lose, Tonnen, LKW-Fahrten, Einheitspreis und Betrag, darunter der Abgleich mit Lieferscheinen](screenshot-abrechnung.png){ loading="lazy" }
+</div>
+</div>
+
+<div class="showcase-feature showcase-feature--flip" markdown>
+<div markdown>
+<span class="showcase-kicker">Dokumentation</span>
+
+## Fotos, Zwangspunkte und Leitungen am richtigen Ort
+
+Fotos mit GPS-Position, Zwangspunkte mit Soll- und Isthöhe, nachgezeichnete Leitungen und Notizen liegen
+dort, wo sie hingehören – dazu DXF-Pläne als Hintergrund. Für die Akte als PDF, fürs CAD als DXF.
+
+[Dokumentation](dokumentation.md)
+</div>
+<div class="showcase-shot" markdown>
+![Reiter „Dokumentation“: Notiz zur Bodenprobe, Zwangspunkt am Kanal mit Soll- und Isthöhe, Foto mit GPS-Position](screenshot-dokumentation.png){ loading="lazy" }
 </div>
 </div>
 
@@ -113,7 +148,7 @@ lesbar – auch draußen, hell oder dunkel.
 [Benutzer und Rollen](benutzer.md)
 </div>
 <div class="showcase-phone" markdown>
-![Mengenbericht am Handy mit Kennzahlen und einer Karte je Bereich](screenshot-handy.png){ width="390" height="844" loading="lazy" }
+![Mengenbericht am Handy mit Kennzahlen und einer Karte je Bereich](screenshot-handy.pngNone){ width="780" height="1688" loading="lazy" }
 </div>
 </div>
 

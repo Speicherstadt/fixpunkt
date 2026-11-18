@@ -14,7 +14,7 @@ ausgewertet, holt Fixpunkt die Punktwolke ab, bringt sie in das Bezugssystem der
 Den Flug selbst plant Fixpunkt auf Wunsch mit: [Flugplanung](flugplanung.md) erzeugt aus einem Bereich eine
 Mission für DJI Pilot 2.
 
-![Abschnitt „Drohnenfotos auswerten“: 40 Fotos ausgewählt, Name, Flugdatum, Qualität und Höhenversatz](screenshot-drohnenfotos.png){ width="1024" height="451" }
+![Abschnitt „Drohnenfotos auswerten“: 40 Fotos ausgewählt, Name, Flugdatum, Qualität und Höhenversatz](screenshot-drohnenfotos.pngNone){ width="1024" height="454" }
 
 ## NodeODM einrichten
 
@@ -53,9 +53,9 @@ lassen sich weiterhin als Aufnahme hochladen ([Daten vorbereiten](daten.md)).
 1. Im Reiter **Aufnahmen** der Baustelle **Drohnenfotos auswerten** aufklappen und die Fotos des Flugs wählen (JPG, TIFF oder PNG,
    mindestens 3).
 2. **Name** und **Flugdatum** der neuen Aufnahme, **Qualität** und **Höhenversatz** eintragen (siehe unten).
-3. **Hochladen und auswerten**: Fixpunkt lädt die Fotos nacheinander hoch und gibt sie an NodeODM. Unter
-   **Berechnungen** steht der Auftrag mit Fortschritt in Prozent.
-4. Ist NodeODM fertig, erscheint die Punktwolke unter **Aufnahmen** und wird wie jede Aufnahme geprüft. Das
+3. **Hochladen und auswerten**: Fixpunkt lädt die Fotos nacheinander hoch und gibt sie an NodeODM. Im Reiter
+   **Massen** unter **Berechnungen** steht der Auftrag mit Fortschritt in Prozent.
+4. Ist NodeODM fertig, erscheint die Punktwolke im Reiter **Aufnahmen** und wird wie jede Aufnahme geprüft. Das
    Orthofoto des Flugs hängt Fixpunkt gleich mit an; es liegt dann als Hintergrund in der [Ansicht](ansicht.md#orthofoto).
 
 | Qualität | ODM-Einstellung | Wofür |

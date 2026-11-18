@@ -4,9 +4,9 @@
 # Lokal: pip install -r requirements-docs.txt && zensical serve
 site_name: Fixpunkt
 site_description: >-
-  Fixpunkt: Aushub und Haufwerke aus Drohnenflügen berechnen, selbst gehostet. Punktwolken und
-  Höhenmodelle aus OpenDroneMap hochladen, Abrechnungsgrenzen setzen, Mengenbericht in m³ – eine
-  Programmdatei, ETRS89/UTM32, Bodenfilter für Bagger und Bewuchs.
+  Fixpunkt: Aufmaß und Baustellendokumentation aus Drohnenflügen, selbst gehostet. Aushub, Auftrag und
+  Haufwerke je Abrechnungsbereich mit Bodenfilter für Bagger und Bewuchs, Aufmaß mit Preisen, Lieferscheinen
+  und GAEB X31, Fotos, Zwangspunkte und Pläne – eine Programmdatei, ETRS89/UTM32.
 site_url: https://speicherstadt.github.io/fixpunkt/
 repo_url: https://github.com/Speicherstadt/fixpunkt
 repo_name: Speicherstadt/fixpunkt

@@ -36,7 +36,7 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `api.rs` | Routen unter `/api`, Live-Ereignisse `/api/events` |
 | `auth/` | Einrichten, Anmelden, Sitzungen, CSRF, Rollen, Benutzer; API-Tokens als Bearer ohne CSRF (`tokens.rs`); Passkeys mit webauthn-rs, Zeremonien fünf Minuten im Speicher (`passkeys.rs`) |
 | `sites.rs` | Baustellen und Bereiche (GeoJSON) |
-| `captures.rs` | Hochladen (gestreamt), Herunterladen, Löschen |
+| `captures.rs` | Hochladen (gestreamt), Name und Flugdatum ändern, Herunterladen, Löschen |
 | `jobs/` | Warteschlange in SQLite, Worker im Prozess, übersteht Neustarts; `spec.rs`: Auftragsarten mit typisierten Parametern. Zwei Spuren: `FIXPUNKT_MAX_JOBS` Rechen-Worker und ein Photogrammetrie-Worker, der nur auf NodeODM wartet |
 | `odm/` | Drohnenfotos über NodeODM: REST-Client (`client.rs`, reqwest mit rustls/ring), Ablauf mit Fortschritt und Wiederaufnahme nach Neustart (`run.rs`), Umrechnung in die Zone der Baustelle und Höhenversatz (`cloud.rs`) |
 | `compute/` | Brücke zum Rechenkern: prüfen, Aushub, Haufwerk, Zeitreihe (`volume.rs`), Soll/Ist (`compare.rs`), Exporte (`export.rs`), Passpunkte (`georef.rs`, Vorschau unter `/api/georef/fit`) |
@@ -46,12 +46,16 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 | `ortho.rs` | Orthofoto je Aufnahme: GeoTIFF stückweise verkleinert (Rechenkern `ortho.rs`), als PNG mit Ecken in der Zone der Baustelle |
 | `uploads.rs` | Fortsetzbarer Upload nach tus 1.0 (Kern, creation, termination): Stücke nach `uploads/`, fertige Dateien an ihr Ziel (Aufnahme, Drohnenfoto, Orthofoto) |
 | `billing/` | Abrechnung: Umrechnung fest/lose/t/Fahrten (`convert.rs`), Aufmaß je Zeitraum mit Preis und Abgleich (`statement.rs`, reine Funktionen), Lieferscheine mit CSV (`deliveries.rs`), Kennwerte je Material, Schichten (`layers.rs`, Aufteilung im Rechenkern `volume::cut_by_layers`), Positionen je Bereich und Schicht (`positions.rs`), GAEB DA XML X31 (`gaeb.rs`, geprüft gegen das offizielle Schema), Freigabe-Links mit eingefrorenem Aufmaß unter `/api/public/shares` ohne Anmeldung (`shares.rs`); Aufmaßblatt in `report/billing.rs` |
-| `dashboard.rs` | Überblick einer Baustelle: Aushub je Befliegung gegen das Urgelände, Massenziele je Bereich und Material, Lagerbestand aus den Haufwerk-Berechnungen, letzter Soll/Ist, Zwangspunkte gegen die letzte Aufnahme |
+| `dashboard/` | Überblick einer Baustelle: Aushub je Befliegung gegen das Urgelände, Massenziele je Bereich und Material, Lagerbestand aus den Haufwerk-Berechnungen, letzter Soll/Ist, Zwangspunkte gegen die letzte Aufnahme; Bestand und Verlauf je Material (`materials.rs`) |
 | `flightplan.rs` | Flugplanung je Bereich: Vorschau als JSON mit Höhenbereich der letzten Aufnahme, Mission als KMZ (Rechenkern `flightplan.rs`, `wpml.rs`) |
 | `layouts.rs` | eigener Überblick je Benutzer und Baustelle (`/api/me/layouts/{site}`): Reihenfolge und Sichtbarkeit der Abschnitte, unbekannte fallen weg, neue kommen hinten dazu |
 | `points.rs` | Punktwolke für 3D: höchstens 1 Mio. Punkte, Float32 relativ zum Ursprung plus RGB, als `punkte.bin` zwischengespeichert |
 | `location.rs` | Lage der Baustellen für die Karte: Mitte der geprüften Aufnahmen (sonst der Bereiche), UTM → Breite/Länge |
 | `report/` | PDF-Bericht (`/api/jobs/{id}/report`): Inhalt je Auftragsart als reine Funktionen (`build.rs`), Karte (`map.rs`), Layout mit Helvetica und echten Zeichenbreiten (`pdf.rs`, pdf-writer, Fotos als JPEG); Dokumentation und Plan/Ist der Baustelle (`site.rs`, Abruf in `site_routes.rs`); eigener Bericht aus Bausteinen (`custom.rs`) aus Überblick (`overview.rs`) und Dokumentation (`entries.rs`) |
+| `events.rs` | Live-Ereignisse je Thema und Baustelle (Server-Sent Events) |
+| `db.rs` | SQLite: Verbindung, Migrationen, gemeinsame Abfragen |
+| `config.rs`, `state.rs` | Einstellungen aus Umgebungsvariablen, gemeinsamer Zustand der Routen |
+| `crypto.rs` | Zufallstokens, SHA-256 für gespeicherte Tokens, Passwörter mit argon2id |
 | `ui.rs` | eingebettete UI mit ETag, Weiterleitung auf Vite in der Entwicklung |
 | `error.rs` | Fehler als Schlüssel; die UI zeigt den Text in der gewählten Sprache |
 
@@ -65,5 +69,6 @@ und einem Ordner und rechnet im selben Prozess. Aufbau wie
 
 ## Datenmodell
 
-Baustelle → Aufnahmen, Bereiche, Aufträge, Pläne, Markierungen (Dokumentation); Benutzer mit Rolle und Sitzungen. Eine Instanz gehört einer Firma;
+Baustelle → Aufnahmen, Bereiche, Aufträge, Pläne, Markierungen (Dokumentation), Lieferscheine, Kennwerte und
+Schichten, Freigaben; Benutzer mit Rolle, Sitzungen, Passkeys, API-Tokens und eigenem Überblick je Baustelle. Eine Instanz gehört einer Firma;
 Mandanten kommen erst, wenn eine Instanz mehrere Firmen bedienen soll.

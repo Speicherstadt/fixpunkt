@@ -12,11 +12,11 @@ zusammen – je Bereich mit Leistungsposition, Menge, Einheitspreis und Betrag �
 **Lieferscheine** desselben Zeitraums. Das Aufmaßblatt gibt es als PDF für die Abschlags- oder Schlussrechnung.
 Was rechtlich dazugehört, steht unter [Abrechnung und Recht](recht.md).
 
-![Abschnitt Abrechnung einer Baustelle: Zeitraum Zwischenstand bis Aushub fertig, Positionen mit m³ fest, m³ lose, Tonnen, LKW-Fahrten, Einheitspreis und Betrag, darunter der Abgleich mit Lieferscheinen](screenshot-abrechnung.png)
+![Reiter „Abrechnung“ einer Baustelle: Zeitraum Zwischenstand bis Aushub fertig, Knöpfe für Freigabe, GAEB X31 und Aufmaß als PDF, Positionen mit m³ fest, m³ lose, Tonnen, LKW-Fahrten, Einheitspreis und Betrag, darunter der Abgleich mit Lieferscheinen](screenshot-abrechnung.png)
 
 ## 1. Preis am Bereich
 
-Das Zielscheiben-Symbol neben einem Bereich ([Material und Massenziel](aushub.md#material-und-massenziel)) hat
+Das Zielscheiben-Symbol neben einem Bereich im Reiter **Massen** ([Material und Massenziel](aushub.md#material-und-massenziel)) hat
 drei weitere Felder:
 
 - **LV-Position:** die Ordnungszahl aus dem Leistungsverzeichnis, z. B. `02.01.0010`. Das Aufmaß ist danach
@@ -144,8 +144,8 @@ bei öffentlichen Auftraggebern üblich.
   Ausgabe 2023-01, Kapitel 7.3). Den Nachweis, wie die Menge entstand, liefert das Aufmaßblatt (PDF).
 - Der Knopf erscheint, sobald es LV-Positionen gibt und sich jede Menge in ihre Preiseinheit umrechnen lässt.
 
-Jede erzeugte Datei entspricht dem offiziellen Schema `GAEB_DA_XML_31_3.3_2023-01.xsd`; die Tests prüfen das
-bei jedem Build gegen das Schema von [gaeb.de](https://www.gaeb.de).
+Jede erzeugte Datei entspricht dem offiziellen Schema `GAEB_DA_XML_31_3.3_2023-01.xsd`; die CI prüft das
+bei jeder Änderung gegen das Schema von [gaeb.de](https://www.gaeb.de).
 
 ## 5. Freigabe durch den Auftraggeber
 

@@ -48,11 +48,10 @@ auf [dipul.de](https://www.dipul.de) prüfen; über Wohngrundstücken braucht es
 
 ### Alternative: Handlaserscanner
 
-Ein Handlaserscanner mit SLAM (z. B. Leica BLK2GO) erzeugt beim Umrunden der Grube eine sehr dichte Punktwolke,
+Ein Handlaserscanner mit SLAM erzeugt beim Umrunden der Grube eine sehr dichte Punktwolke,
 ohne Führerschein und unabhängig vom Wetter, auch in schmalen Gräben und unter Bäumen. Er kennt aber seine Lage
 in Landeskoordinaten nicht: 3–4 Zielmarken am Grubenrand werden einmal mit einem Rover eingemessen, jeder Scan
-darauf ausgerichtet ([Passpunkte](berechnungen.md#passpunkte)). Fixpunkt liest E57 direkt. Lohnt sich vor allem,
-wenn man günstig an ein Gerät kommt; zum Neupreis hat die Drohne für Baugruben das bessere Verhältnis.
+darauf ausgerichtet ([Passpunkte](berechnungen.md#passpunkte)). Fixpunkt liest E57 direkt.
 
 ## Server
 
@@ -83,8 +82,7 @@ durch einen RTK-Rover – für schmale Leitungsgräben und kleine Flächen, wo d
 | Lotstab | Vermessungslotstab 2 m mit Libelle | 50–100 € | für Passpunkte und Kontrollpunkte |
 | Korrekturdaten | SAPOS HEPS | 0 € | in Baden-Württemberg kostenlos; das iPhone holt sie übers Mobilfunknetz und gibt sie an den Rover |
 
-**Kleiner und günstiger:** Rover mit Bluetooth LE (z. B. ArduSimple, u-blox ZED-F9P, ab ca. 300 €) funktionieren
-ebenfalls, sind aber eher Bastlerqualität. Wichtig beim Kauf: Der Rover muss NMEA über **Bluetooth LE** senden
+**Kleiner und günstiger:** Rover mit Bluetooth LE (ab ca. 300 €) funktionieren ebenfalls. Wichtig beim Kauf: Der Rover muss NMEA über **Bluetooth LE** senden
 oder für das iPhone zertifiziert sein (MFi). Rover nur mit klassischem Bluetooth gehen am iPhone nicht.
 
 ### Zum Entwickeln

@@ -13,7 +13,7 @@ Reihenfolge. Welche Geräte dafür nötig sind, steht unter [Geräte](geraete.md
 
 Die Web-Anwendung für Baugruben per Drohne ist vollständig: Daten hochladen oder Drohnenfotos über NodeODM
 auswerten, Flug planen, ansehen und messen, Aushub, Haufwerk, Soll/Ist, Massenziele und Lagerbestand,
-Abrechnung mit Preisen und Lieferscheinen, Dokumentation, Berichte und Export – getestet auf allen Schichten mit synthetischen Testdaten, deren Ergebnis
+Abrechnung mit Preisen, Lieferscheinen, GAEB X31 und Freigabe durch den Auftraggeber, Dokumentation, Berichte und Export – getestet auf allen Schichten mit synthetischen Testdaten, deren Ergebnis
 vorher bekannt ist ([Entwicklung und Tests](entwicklung.md)).
 
 ## Als Nächstes: Erprobung auf der Baustelle
