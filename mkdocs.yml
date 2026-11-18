@@ -1,4 +1,4 @@
-# Dokumentation als Website: https://speicherstadt.github.io/fixpunkt/
+# Dokumentation als Website: https://speicherstadt.app/fixpunkt/
 # Quelle ist docs/, gebaut mit Zensical (.github/workflows/docs.yml) wie firsttris/haben; Zensical liest
 # diese Datei unverändert (https://zensical.org/docs/setup/basics/).
 # Lokal: pip install -r requirements-docs.txt && zensical serve
@@ -7,13 +7,16 @@ site_description: >-
   Fixpunkt: Aufmaß und Baustellendokumentation aus Drohnenflügen, selbst gehostet. Aushub, Auftrag und
   Haufwerke je Abrechnungsbereich mit Bodenfilter für Bagger und Bewuchs, Aufmaß mit Preisen, Lieferscheinen
   und GAEB X31, Fotos, Zwangspunkte und Pläne – eine Programmdatei, ETRS89/UTM32.
-site_url: https://speicherstadt.github.io/fixpunkt/
+site_url: https://speicherstadt.app/fixpunkt/
 repo_url: https://github.com/Speicherstadt/fixpunkt
 repo_name: Speicherstadt/fixpunkt
 edit_uri: edit/main/docs/
+# Impressum und Datenschutzerklärung im Fuß jeder Seite (HTML ist hier erlaubt)
 copyright: >-
   Fixpunkt ersetzt kein amtliches Aufmaß. Ergebnisse vor der Abrechnung mit Lieferscheinen oder
-  einem Aufmaß plausibilisieren.
+  einem Aufmaß plausibilisieren.<br>
+  <a href="https://teufel-it.de/de/impressum/">Impressum</a> ·
+  <a href="https://speicherstadt.app/datenschutz/">Datenschutz</a>
 
 docs_dir: docs
 # Seiten als installation.html statt installation/: so stimmen die relativen Bildpfade
@@ -97,6 +100,12 @@ extra_css:
 
 plugins:
   - search
+  # Schriften (Geist von Google Fonts) und Skripte wie Mermaid lädt der Build herunter und liefert sie selbst aus;
+  # der Browser fragt keine fremden Server (DSGVO). Zwischenspeicher in .cache/ (.gitignore)
+  - privacy:
+      # Videoplayer der Bildergalerie mit Werbe-SDK: in der Doku gibt es keine Videos
+      assets_exclude:
+        - cdn.plyr.io/*
 
 markdown_extensions:
   # Änderungsdatum aus git unter jeder Seite (scripts/doku-aenderungsdatum, über requirements-docs.txt)
