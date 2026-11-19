@@ -238,4 +238,4 @@ bun run dev    # server on :8080, UI with hot reload on http://localhost:5173 (a
 
 ## 🧩 More from us
 
-More open-source apps for your own server, for accounting, email, office documents and more: **[speicherstadt.app](https://speicherstadt.app)**
+More open-source apps for your own server, covering accounting, email, office documents and more: **[speicherstadt.app](https://speicherstadt.app)**
