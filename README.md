@@ -228,3 +228,7 @@ bun run dev    # Server auf :8080, UI mit Hot Reload auf http://localhost:5173 (
 > [!NOTE]
 > Fixpunkt ersetzt kein amtliches Aufmaß. Bis die Genauigkeit auf euren Baustellen belegt ist, Ergebnisse vor der
 > Abrechnung mit Lieferscheinen oder einem Aufmaß plausibilisieren.
+
+## 🧩 Mehr von uns
+
+Weitere Open-Source-Apps für deinen eigenen Server, für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
