@@ -182,7 +182,13 @@ Everything in detail, with search: **https://speicherstadt.github.io/fixpunkt/**
 
 ## Development
 
-[![Rust](https://img.shields.io/badge/Rust-axum%20%7C%20SQLite-b7410e?logo=rust&logoColor=white)](https://speicherstadt.github.io/fixpunkt/architektur.html)
+[![Rust](https://img.shields.io/badge/Rust-axum-b7410e?logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![React](https://img.shields.io/badge/React-149eca?logo=react&logoColor=white)](https://react.dev)
+[![TanStack](https://img.shields.io/badge/TanStack-Router%20%7C%20Query-ff4154?logo=reactquery&logoColor=white)](https://tanstack.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06b6d4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Vite](https://img.shields.io/badge/Vite-646cff?logo=vite&logoColor=white)](https://vite.dev)
+[![SQLite](https://img.shields.io/badge/SQLite-sqlx-003b57?logo=sqlite&logoColor=white)](https://github.com/launchbadge/sqlx)
 
 Rust server (axum, SQLite) with an embedded React UI (Bun, Vite, TanStack, Paraglide) and the processing core as a
 library. Tests on every layer, from results against known formulas to Playwright against the finished binary.
