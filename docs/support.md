@@ -12,8 +12,9 @@ Diese Dokumentation beschreibt, wie man Fixpunkt selbst betreibt. Wer das nicht 
 - **Mit Partner:** IT-Dienstleister und Hoster aus dem Partnerprogramm richten Fixpunkt für ihre Kunden ein und
   betreuen es.
 
-Fragen zur Bedienung gehören in die [Issues auf GitHub](https://github.com/Speicherstadt/fixpunkt/issues).
-Kostenlose Einzelhilfe gibt es nicht; die Einrichtung für ein einzelnes Unternehmen übernimmt ein Partner oder die
-Entwickler als bezahltes Projekt.
+Fragen zur Nutzung beantworten wir öffentlich in den
+[GitHub-Issues](https://github.com/Speicherstadt/fixpunkt/issues), damit alle etwas davon haben. Wer Einrichtung
+oder Betrieb für seine Firma abgeben will, findet einen Partner oder nutzt den gehosteten Betrieb; größere
+Einführungen übernehmen wir auch als bezahltes Projekt.
 
 Mehr zum [Partnerprogramm](https://speicherstadt.app/partner/).
