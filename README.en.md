@@ -235,3 +235,7 @@ bun run dev    # server on :8080, UI with hot reload on http://localhost:5173 (a
 > [!NOTE]
 > Fixpunkt does not replace an official survey. Until the accuracy is proven on your sites, check results against
 > delivery notes or a survey before billing.
+
+## 🧩 More from us
+
+More open-source apps for your own server, covering accounting, email, office documents and more: **[speicherstadt.app](https://speicherstadt.app)**
