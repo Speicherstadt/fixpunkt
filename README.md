@@ -23,6 +23,7 @@ Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf
 [Schnellstart](#schnellstart) •
 [FAQ](#faq) •
 [Dokumentation](https://speicherstadt.github.io/fixpunkt/) •
+[Support und Partnerschaft](#support-und-partnerschaft) •
 [Entwicklung](#entwicklung) •
 [English](README.en.md)
 
@@ -191,6 +192,17 @@ Aufbau und Tests: [Architektur](https://speicherstadt.github.io/fixpunkt/archite
 ## Mehr von uns
 
 Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
+
+## Support und Partnerschaft
+
+Wer Fixpunkt nicht selbst einrichten oder betreiben will, bekommt Hilfe von den Entwicklern:
+
+- **Einrichtung** auf deinem Server
+- **Support** bei Updates, Backups und Fragen im Betrieb
+- **Betrieb** von Fixpunkt als gehosteter Dienst, ohne eigenen Server
+- **Partnerschaft für IT-Dienstleister**, die Fixpunkt bei ihren Kunden einrichten: direkter Draht zur Entwicklung
+
+Mehr auf [speicherstadt.app](https://speicherstadt.app/#support), Anfragen an [info@teufel-it.de](mailto:info@teufel-it.de).
 
 ## Mitwirken
 

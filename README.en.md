@@ -23,6 +23,7 @@ One binary with a web UI, ETRS89/UTM32 and DHHN2016 – no cloud subscription, o
 [Quick start](#quick-start) •
 [FAQ](#faq) •
 [Documentation](https://speicherstadt.github.io/fixpunkt/) •
+[Support](#support-and-partnership) •
 [Development](#development) •
 [Deutsch](README.md)
 
@@ -197,6 +198,17 @@ Structure and tests: [Architecture](https://speicherstadt.github.io/fixpunkt/arc
 ## More from us
 
 More open-source apps for your own server, covering accounting, email, office documents and more: **[speicherstadt.app](https://speicherstadt.app)**
+
+## Support and partnership
+
+If you'd rather not set up or run Fixpunkt yourself, the developers help:
+
+- **Setup** on your server
+- **Support** with updates, backups and questions while it runs
+- **Hosted operation** of Fixpunkt, without a server of your own
+- **Partnership for IT service providers** who set up Fixpunkt for their customers: a direct line to the developers
+
+More on [speicherstadt.app](https://speicherstadt.app/en/#support), enquiries to [info@teufel-it.de](mailto:info@teufel-it.de).
 
 ## Contributing
 
