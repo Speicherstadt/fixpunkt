@@ -7,8 +7,7 @@ Die Doku ist in `docs/` (<https://speicherstadt.github.io/fixpunkt/>), gebaut mi
 lesen: `architektur.md`, `methode.md`, `aushub.md`, `funktionen.md`, `roadmap.md`. Keine Vergleiche mit
 oder Bezüge auf Produkte anderer Anbieter in Repo und Doku (vergleichende Werbung, UWG).
 Rechenkern: `crates/processing/README.md`. Links in README und Doku zeigen auf die Website, nicht auf `docs/*.md`.
-Jede Seite braucht `description:` im Front Matter (docs.yml prüft das). Doku auf Deutsch; Englisch, sobald
-Zensical mehrsprachig kann.
+Jede Seite braucht `description:` im Front Matter (docs.yml prüft das). README und Doku nur auf Deutsch.
 
 ## Reference implementations
 
@@ -26,7 +25,7 @@ ein Detail entscheidet.
 
 - Tests für das Geänderte (Unit-Tests im Modul, End-to-End in `crates/processing/tests/cli.rs`);
   Rechenergebnisse gegen unabhängig bekannte Werte prüfen (Formel, numerische Kontrolle).
-- die Doku in `docs/` und beide READMEs (`README.md` deutsch, `README.en.md` englisch), wenn sich Funktionen,
+- die Doku in `docs/` und die `README.md` (nur deutsch), wenn sich Funktionen,
   Architektur oder Stand ändern;
 - die Screenshots nach einer Änderung am Aussehen: **Actions → Update screenshots → Run workflow**
   (lokal `bun run docs:screenshots`), dann die neuen Bilder ansehen.

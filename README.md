@@ -23,8 +23,7 @@ Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf
 [Schnellstart](#schnellstart) •
 [FAQ](#faq) •
 [Dokumentation](https://speicherstadt.github.io/fixpunkt/) •
-[Entwicklung](#entwicklung) •
-[English](README.en.md)
+[Entwicklung](#entwicklung)
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-ansicht-dunkel.png">
@@ -222,6 +221,6 @@ Fehler und Ideen gern als [Issue](https://github.com/Speicherstadt/fixpunkt/issu
 
 [Fehler melden](https://github.com/Speicherstadt/fixpunkt/issues/new) &nbsp;·&nbsp; [Funktion vorschlagen](https://github.com/Speicherstadt/fixpunkt/issues/new)
 
-<sub>Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.app/partner/">Partnerprogramm</a>.<br><a href="README.en.md">English</a></sub>
+<sub>Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.app/partner/">Partnerprogramm</a>.</sub>
 
 </div>
