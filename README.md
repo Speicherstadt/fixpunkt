@@ -111,6 +111,9 @@ Dann `http://<server>:8080` öffnen und den ersten Zugang anlegen. Compose, Podm
 Reverse-Proxy: [Installation](https://speicherstadt.github.io/fixpunkt/installation.html) ·
 [Konfiguration](https://speicherstadt.github.io/fixpunkt/konfiguration.html).
 
+Keinen eigenen Server oder keine eigene IT? Fixpunkt gibt es gehostet oder über einen IT-Dienstleister aus dem
+[Partnerprogramm](https://speicherstadt.app/partner/).
+
 ## FAQ
 
 <details>
@@ -174,7 +177,13 @@ Alles im Detail, mit Suche: **https://speicherstadt.github.io/fixpunkt/**. Jede 
 
 ## Entwicklung
 
-[![Rust](https://img.shields.io/badge/Rust-axum%20%7C%20SQLite-b7410e?logo=rust&logoColor=white)](https://speicherstadt.github.io/fixpunkt/architektur.html)
+[![Rust](https://img.shields.io/badge/Rust-axum-b7410e?logo=rust&logoColor=white)](https://www.rust-lang.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![React](https://img.shields.io/badge/React-149eca?logo=react&logoColor=white)](https://react.dev)
+[![TanStack](https://img.shields.io/badge/TanStack-Router%20%7C%20Query-ff4154?logo=reactquery&logoColor=white)](https://tanstack.com)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-06b6d4?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Vite](https://img.shields.io/badge/Vite-646cff?logo=vite&logoColor=white)](https://vite.dev)
+[![SQLite](https://img.shields.io/badge/SQLite-sqlx-003b57?logo=sqlite&logoColor=white)](https://github.com/launchbadge/sqlx)
 
 Rust-Server (axum, SQLite) mit eingebetteter React-UI (Bun, Vite, TanStack, Paraglide) und Rechenkern als
 Bibliothek. Tests auf jeder Schicht, von Rechenergebnissen gegen bekannte Formeln bis Playwright gegen die
@@ -213,6 +222,6 @@ Fehler und Ideen gern als [Issue](https://github.com/Speicherstadt/fixpunkt/issu
 
 [Fehler melden](https://github.com/Speicherstadt/fixpunkt/issues/new) &nbsp;·&nbsp; [Funktion vorschlagen](https://github.com/Speicherstadt/fixpunkt/issues/new)
 
-<sub><a href="README.en.md">English</a></sub>
+<sub>Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.app/partner/">Partnerprogramm</a>.<br><a href="README.en.md">English</a></sub>
 
 </div>

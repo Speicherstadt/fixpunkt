@@ -9,6 +9,9 @@ description: >-
 Fixpunkt ist **eine Programmdatei**: Server, Web-UI und Rechenkern zusammen, Daten in SQLite und einem Ordner.
 Es braucht keine Datenbank, keinen Objektspeicher und keinen weiteren Dienst.
 
+Keinen eigenen Server oder keine eigene IT? Fixpunkt gibt es gehostet oder über einen IT-Dienstleister aus dem
+[Partnerprogramm](support.md).
+
 Voraussetzungen: Linux-Server (amd64 oder arm64), ab 4 GB RAM; für große Flüge (mehrere Millionen Punkte) 8–16 GB.
 Plattenplatz je nach Datenmenge: eine Punktwolke aus einer Baugrubenbefliegung hat typisch 50–500 MB.
 
