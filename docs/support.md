@@ -1,18 +1,19 @@
 ---
 description: >-
-  Hilfe von den Entwicklern für Fixpunkt: Einrichtung auf dem eigenen Server, Support im Betrieb, Fixpunkt als
-  gehosteter Dienst und Partnerschaft für IT-Dienstleister.
+  Fixpunkt ohne eigenen Server oder eigene IT: gehosteter Betrieb auf Anfrage oder Einrichtung und Betreuung durch
+  einen IT-Dienstleister aus dem Partnerprogramm.
 ---
 
-# Support und Partnerschaft
+# Gehostet oder mit Partner
 
-Wer Fixpunkt nicht selbst einrichten oder betreiben will, bekommt Hilfe von den Entwicklern:
+Diese Dokumentation beschreibt, wie man Fixpunkt selbst betreibt. Wer das nicht will, hat zwei Wege:
 
-- **Einrichtung:** Wir richten Fixpunkt auf deinem Server ein, mit Reverse-Proxy und Backup.
-- **Support:** Hilfe bei Updates, Backups und Fragen im Betrieb.
-- **Betrieb:** Fixpunkt als gehosteter Dienst, ohne eigenen Server. Updates und Backups gehören dazu.
-- **Partnerschaft für IT-Dienstleister:** Wer Fixpunkt bei seinen Kunden einrichtet, bekommt einen direkten Draht
-  zur Entwicklung.
+- **Gehostet:** Fixpunkt gibt es auf Anfrage als gehosteten Dienst, ohne eigenen Server.
+- **Mit Partner:** IT-Dienstleister und Hoster aus dem Partnerprogramm richten Fixpunkt für ihre Kunden ein und
+  betreuen es.
 
-Mehr auf [speicherstadt.app](https://speicherstadt.app/#support), Anfragen an
-[info@teufel-it.de](mailto:info@teufel-it.de).
+Fragen zur Bedienung gehören in die [Issues auf GitHub](https://github.com/Speicherstadt/fixpunkt/issues).
+Kostenlose Einzelhilfe gibt es nicht; die Einrichtung für ein einzelnes Unternehmen übernimmt ein Partner oder die
+Entwickler als bezahltes Projekt.
+
+Mehr zum [Partnerprogramm](https://speicherstadt.app/partner/).

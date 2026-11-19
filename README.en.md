@@ -23,7 +23,6 @@ One binary with a web UI, ETRS89/UTM32 and DHHN2016 – no cloud subscription, o
 [Quick start](#quick-start) •
 [FAQ](#faq) •
 [Documentation](https://speicherstadt.github.io/fixpunkt/) •
-[Support](#support-and-partnership) •
 [Development](#development) •
 [Deutsch](README.md)
 
@@ -118,6 +117,9 @@ Then open `http://<server>:8080` and create the first account. Compose, Podman Q
 [Installation](https://speicherstadt.github.io/fixpunkt/installation.html) ·
 [Configuration](https://speicherstadt.github.io/fixpunkt/konfiguration.html) (German).
 
+No server or IT of your own? Fixpunkt is available hosted or through an IT service provider from the
+[partner programme](https://speicherstadt.app/en/partner/).
+
 ## FAQ
 
 <details>
@@ -205,17 +207,6 @@ Structure and tests: [Architecture](https://speicherstadt.github.io/fixpunkt/arc
 
 More open-source apps for your own server, covering accounting, email, office documents and more: **[speicherstadt.app](https://speicherstadt.app)**
 
-## Support and partnership
-
-If you'd rather not set up or run Fixpunkt yourself, the developers help:
-
-- **Setup** on your server
-- **Support** with updates, backups and questions while it runs
-- **Hosted operation** of Fixpunkt, without a server of your own
-- **Partnership for IT service providers** who set up Fixpunkt for their customers: a direct line to the developers
-
-More on [speicherstadt.app](https://speicherstadt.app/en/#support), enquiries to [info@teufel-it.de](mailto:info@teufel-it.de).
-
 ## Contributing
 
 Bug reports and ideas are welcome as an [issue](https://github.com/Speicherstadt/fixpunkt/issues/new).
@@ -237,6 +228,6 @@ Bug reports and ideas are welcome as an [issue](https://github.com/Speicherstadt
 
 [Report a bug](https://github.com/Speicherstadt/fixpunkt/issues/new) &nbsp;·&nbsp; [Suggest a feature](https://github.com/Speicherstadt/fixpunkt/issues/new)
 
-<sub><a href="README.md">Deutsch</a></sub>
+<sub>For IT service providers and hosters: <a href="https://speicherstadt.app/en/partner/">partner programme</a>.<br><a href="README.md">Deutsch</a></sub>
 
 </div>

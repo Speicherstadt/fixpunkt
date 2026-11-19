@@ -23,7 +23,6 @@ Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf
 [Schnellstart](#schnellstart) •
 [FAQ](#faq) •
 [Dokumentation](https://speicherstadt.github.io/fixpunkt/) •
-[Support und Partnerschaft](#support-und-partnerschaft) •
 [Entwicklung](#entwicklung) •
 [English](README.en.md)
 
@@ -112,6 +111,9 @@ Dann `http://<server>:8080` öffnen und den ersten Zugang anlegen. Compose, Podm
 Reverse-Proxy: [Installation](https://speicherstadt.github.io/fixpunkt/installation.html) ·
 [Konfiguration](https://speicherstadt.github.io/fixpunkt/konfiguration.html).
 
+Keinen eigenen Server oder keine eigene IT? Fixpunkt gibt es gehostet oder über einen IT-Dienstleister aus dem
+[Partnerprogramm](https://speicherstadt.app/partner/).
+
 ## FAQ
 
 <details>
@@ -199,17 +201,6 @@ Aufbau und Tests: [Architektur](https://speicherstadt.github.io/fixpunkt/archite
 
 Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
 
-## Support und Partnerschaft
-
-Wer Fixpunkt nicht selbst einrichten oder betreiben will, bekommt Hilfe von den Entwicklern:
-
-- **Einrichtung** auf deinem Server
-- **Support** bei Updates, Backups und Fragen im Betrieb
-- **Betrieb** von Fixpunkt als gehosteter Dienst, ohne eigenen Server
-- **Partnerschaft für IT-Dienstleister**, die Fixpunkt bei ihren Kunden einrichten: direkter Draht zur Entwicklung
-
-Mehr auf [speicherstadt.app](https://speicherstadt.app/#support), Anfragen an [info@teufel-it.de](mailto:info@teufel-it.de).
-
 ## Mitwirken
 
 Fehler und Ideen gern als [Issue](https://github.com/Speicherstadt/fixpunkt/issues/new).
@@ -231,6 +222,6 @@ Fehler und Ideen gern als [Issue](https://github.com/Speicherstadt/fixpunkt/issu
 
 [Fehler melden](https://github.com/Speicherstadt/fixpunkt/issues/new) &nbsp;·&nbsp; [Funktion vorschlagen](https://github.com/Speicherstadt/fixpunkt/issues/new)
 
-<sub><a href="README.en.md">English</a></sub>
+<sub>Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.app/partner/">Partnerprogramm</a>.<br><a href="README.en.md">English</a></sub>
 
 </div>
