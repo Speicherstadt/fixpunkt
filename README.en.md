@@ -117,7 +117,7 @@ Then open `http://<server>:8080` and create the first account. Compose, Podman Q
 [Installation](https://speicherstadt.github.io/fixpunkt/installation.html) ·
 [Configuration](https://speicherstadt.github.io/fixpunkt/konfiguration.html) (German).
 
-No server or IT of your own? Fixpunkt is available hosted or through an IT service provider from the
+No server or IT of your own? Fixpunkt is available hosted on request or through an IT service provider from the
 [partner programme](https://speicherstadt.app/en/partner/).
 
 ## FAQ

@@ -111,8 +111,8 @@ Dann `http://<server>:8080` öffnen und den ersten Zugang anlegen. Compose, Podm
 Reverse-Proxy: [Installation](https://speicherstadt.github.io/fixpunkt/installation.html) ·
 [Konfiguration](https://speicherstadt.github.io/fixpunkt/konfiguration.html).
 
-Keinen eigenen Server oder keine eigene IT? Fixpunkt gibt es gehostet oder über einen IT-Dienstleister aus dem
-[Partnerprogramm](https://speicherstadt.app/partner/).
+Keinen eigenen Server oder keine eigene IT? Fixpunkt gibt es auf Anfrage gehostet oder über einen IT-Dienstleister aus
+dem [Partnerprogramm](https://speicherstadt.app/partner/).
 
 ## FAQ
 

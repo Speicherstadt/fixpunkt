@@ -32,7 +32,7 @@ nav:
       - Installation: installation.md
       - Konfiguration: konfiguration.md
       - Backup und Updates: backup.md
-      - Gehostet oder mit Partner: support.md
+      - Gehostet oder mit Partner: gehostet.md
   - Bedienung:
       - Erste Schritte: erste-schritte.md
       - Aushub berechnen: aushub.md
