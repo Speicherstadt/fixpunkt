@@ -111,7 +111,7 @@ Reverse-Proxy: [Installation](https://speicherstadt.github.io/fixpunkt/installat
 [Konfiguration](https://speicherstadt.github.io/fixpunkt/konfiguration.html).
 
 Keinen eigenen Server oder keine eigene IT? Fixpunkt gibt es gehostet oder über einen IT-Dienstleister aus dem
-[Partnerprogramm](https://speicherstadt.app/partner/).
+[Partnerprogramm](https://speicherstadt.org/partner/).
 
 ## FAQ
 
@@ -198,7 +198,7 @@ Aufbau und Tests: [Architektur](https://speicherstadt.github.io/fixpunkt/archite
 
 ## Mehr von uns
 
-Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.app](https://speicherstadt.app)**
+Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail, Office-Dokumente und mehr: **[speicherstadt.org](https://speicherstadt.org)**
 
 ## Mitwirken
 
@@ -221,6 +221,6 @@ Fehler und Ideen gern als [Issue](https://github.com/Speicherstadt/fixpunkt/issu
 
 [Fehler melden](https://github.com/Speicherstadt/fixpunkt/issues/new) &nbsp;·&nbsp; [Funktion vorschlagen](https://github.com/Speicherstadt/fixpunkt/issues/new)
 
-<sub>Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.app/partner/">Partnerprogramm</a>.</sub>
+<sub>Für IT-Dienstleister und Hoster: <a href="https://speicherstadt.org/partner/">Partnerprogramm</a>.</sub>
 
 </div>
