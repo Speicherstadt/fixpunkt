@@ -17,4 +17,4 @@ Fragen zur Nutzung beantworten wir öffentlich in den
 oder Betrieb für seine Firma abgeben will, findet einen Partner oder nutzt den gehosteten Betrieb; größere
 Einführungen übernehmen wir auch als bezahltes Projekt.
 
-Mehr zum [Partnerprogramm](https://speicherstadt.app/partner/).
+Mehr zum [Partnerprogramm](https://speicherstadt.org/partner/).

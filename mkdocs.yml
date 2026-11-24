@@ -1,4 +1,4 @@
-# Dokumentation als Website: https://speicherstadt.app/fixpunkt/
+# Dokumentation als Website: https://speicherstadt.org/fixpunkt/
 # Quelle ist docs/, gebaut mit Zensical (.github/workflows/docs.yml) wie firsttris/haben; Zensical liest
 # diese Datei unverändert (https://zensical.org/docs/setup/basics/).
 # Lokal: pip install -r requirements-docs.txt && zensical serve
@@ -7,7 +7,7 @@ site_description: >-
   Fixpunkt: Aufmaß und Baustellendokumentation aus Drohnenflügen, selbst gehostet. Aushub, Auftrag und
   Haufwerke je Abrechnungsbereich mit Bodenfilter für Bagger und Bewuchs, Aufmaß mit Preisen, Lieferscheinen
   und GAEB X31, Fotos, Zwangspunkte und Pläne – eine Programmdatei, ETRS89/UTM32.
-site_url: https://speicherstadt.app/fixpunkt/
+site_url: https://speicherstadt.org/fixpunkt/
 repo_url: https://github.com/Speicherstadt/fixpunkt
 repo_name: Speicherstadt/fixpunkt
 edit_uri: edit/main/docs/
@@ -16,7 +16,7 @@ copyright: >-
   Fixpunkt ersetzt kein amtliches Aufmaß. Ergebnisse vor der Abrechnung mit Lieferscheinen oder
   einem Aufmaß plausibilisieren.<br>
   <a href="https://teufel-it.de/de/impressum/">Impressum</a> ·
-  <a href="https://speicherstadt.app/datenschutz/">Datenschutz</a>
+  <a href="https://speicherstadt.org/datenschutz/">Datenschutz</a>
 
 docs_dir: docs
 # Seiten als installation.html statt installation/: so stimmen die relativen Bildpfade
