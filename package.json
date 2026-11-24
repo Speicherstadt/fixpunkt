@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "license": "UNLICENSED",
-  "packageManager": "bun@1.4.4",
+  "packageManager": "bun@1.4.5",
   "workspaces": [
     "ui"
   ],
@@ -23,7 +23,7 @@
     "@axe-core/playwright": "^4.14.0",
     "@biomejs/biome": "^2.6.2",
     "@firsttris/checks": "github:firsttris/workflows#v1",
-    "@playwright/test": "1.64.1",
+    "@playwright/test": "1.65.1",
     "@types/node": "^26.0.0",
     "typescript": "^7.0.2"
   }

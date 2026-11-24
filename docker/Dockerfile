@@ -2,7 +2,7 @@
 # Drei Stufen wie firsttris/haul docker/Dockerfile: UI (Bun) → Programmdatei (Rust) → Debian slim.
 
 # ---- 1. Web-UI ---------------------------------------------------------------------------
-FROM oven/bun:1.4.4 AS web
+FROM oven/bun:1.4.5 AS web
 WORKDIR /src
 COPY package.json bun.lock bunfig.toml ./
 COPY ui ui
