@@ -12,6 +12,7 @@ Massen je Abrechnungsbereich mit Bagger und Bewuchs herausgerechnet, Soll/Ist de
 Aufmaß mit Preisen, Lieferscheinen, GAEB X31 und Freigabe durch den Auftraggeber; Fotos, Zwangspunkte, Leitungen und DXF-Pläne am richtigen Ort.
 Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf deinem Server.
 
+![Status: In Entwicklung](https://img.shields.io/badge/Status-In%20Entwicklung-red)
 [![CI](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml/badge.svg)](https://github.com/Speicherstadt/fixpunkt/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Speicherstadt/fixpunkt?logo=github&label=release)](https://github.com/Speicherstadt/fixpunkt/releases/latest)
 [![Doku](https://img.shields.io/badge/Doku-speicherstadt.github.io%2Ffixpunkt-4f46e5?logo=zensical&logoColor=white)](https://speicherstadt.github.io/fixpunkt/)
@@ -31,6 +32,9 @@ Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf
 </picture>
 
 </div>
+
+> [!WARNING]
+> **In Entwicklung:** zum Ausprobieren, noch nicht für den Echtbetrieb.
 
 > [!NOTE]
 > Fixpunkt ersetzt kein amtliches Aufmaß. Bis die Genauigkeit auf euren Baustellen belegt ist, Ergebnisse vor der
