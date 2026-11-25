@@ -99,7 +99,7 @@ jobs:
     timeout-minutes: 20
     # Das offizielle Playwright-Image (tech-stack.md); Version wie @playwright/test in package.json
     container:
-      image: mcr.microsoft.com/playwright:v1.64.1-noble
+      image: mcr.microsoft.com/playwright:v1.65.1-noble
       options: --ipc=host
     steps:
       - uses: actions/checkout@v7
