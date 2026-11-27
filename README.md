@@ -208,7 +208,8 @@ Weitere Open-Source-Apps für deinen eigenen Server, etwa für Buchhaltung, Mail
 
 ## Mitwirken
 
-Fehler und Ideen gern als [Issue](https://github.com/Speicherstadt/fixpunkt/issues/new).
+Fehler und Ideen gern als [Issue](https://github.com/Speicherstadt/fixpunkt/issues/new); Pull Requests sind ebenso
+willkommen. Wie ein Beitrag entsteht, mit Prüfungen und Review: [Mitwirken](https://speicherstadt.github.io/fixpunkt/mitwirken.html).
 
 ## Sterne im Verlauf
 

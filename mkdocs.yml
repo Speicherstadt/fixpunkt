@@ -50,6 +50,7 @@ nav:
       - Kommandozeile: kommandozeile.md
       - Architektur: architektur.md
       - Entwicklung und Tests: entwicklung.md
+      - Mitwirken: mitwirken.md
       - Roadmap: roadmap.md
 
 theme:

@@ -19,7 +19,7 @@ flowchart LR
 **Eine Programmdatei:** der Rust-Server liefert die gebaute Web-UI selbst aus (`rust-embed`), speichert in SQLite
 und einem Ordner und rechnet im selben Prozess. Aufbau wie
 [haul](https://github.com/firsttris/haul); die Technik folgt
-[tech-stack.md](https://github.com/firsttris/workflows/blob/main/tech-stack.md), Abweichungen stehen in `CLAUDE.md`.
+[tech-stack.md](https://github.com/firsttris/workflows/blob/main/tech-stack.md), Abweichungen stehen unter [Konventionen](entwicklung.md#konventionen).
 
 | Bereich | Ort | Technik |
 |---|---|---|

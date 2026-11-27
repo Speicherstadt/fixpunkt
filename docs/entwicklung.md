@@ -1,7 +1,7 @@
 ---
 description: >-
   An Fixpunkt entwickeln: Voraussetzungen, bun run dev, Prüfungen wie in der CI, Testschichten von Rechenkern bis
-  E2E, Screenshots und Doku erneuern, Release.
+  E2E, Konventionen, Screenshots und Doku erneuern, Release.
 ---
 
 # Entwicklung und Tests
@@ -40,15 +40,41 @@ die CI lädt das Schema von gaeb.de, lokal wird die Prüfung sonst übersprungen
 GAEB_X31_XSD=/pfad/GAEB_DA_XML_31_3.3_2023-01.xsd cargo test -p fixpunkt-server gaeb
 ```
 
+## Konventionen
+
+Technik nach [`tech-stack.md`](https://github.com/firsttris/workflows/blob/main/tech-stack.md) in firsttris/workflows.
+Abweichungen und warum:
+
+- **Backend in Rust statt TypeScript:** Punktwolken mit Millionen Punkten, Rasterrechnung, Bodenfilter –
+  Performance zählt. axum/tokio, SQLite/sqlx, `tracing`, `anyhow` im Binary.
+- **SQLite trotz mehrerer Nutzer:** ein Server, eine Programmdatei, keine weiteren Dienste (wie haul). PostgreSQL
+  erst, wenn mehrere Dienste dieselbe Datenbank brauchen.
+- **Single-Page-App statt TanStack Start:** der Rust-Server liefert die gebaute UI per `rust-embed` aus; Start
+  bräuchte einen eigenen JavaScript-Server.
+- **Login im Rust-Server** (argon2id, Sitzungs-Cookie, CSRF, Passkeys über `webauthn-rs`) statt Better Auth, das ein
+  TypeScript-Backend voraussetzt.
+
+Clean Code, funktional: klare Namen, kleine Funktionen, Abhängigkeiten übergeben, keine Duplikate; reine Funktionen,
+Seiteneffekte an den Rändern, Fehler als Werte. Eine Datei macht eine Sache: ab ~400 Zeilen teilen, Funktionen ab
+~80 Zeilen.
+
+**Oberfläche:** Gestaltung wie Kontext und Belegt: Zink-Tokens als CSS-Variablen (`ui/src/styles.css`), Geist,
+eigene Komponenten im shadcn/ui-Stil auf Radix mit `cva` (`ui/src/components/ui`), lucide mit einer Linienstärke,
+WCAG 2.2 AA. Farben nur als Token, Schrift- und Symbolgrößen auf der Skala. Jeder Text der Oberfläche steht in
+`ui/messages/de.json` und `en.json` (Paraglide), keiner im Code.
+
 ## Testschichten
 
 | Schicht | Ort | Was |
 |---|---|---|
 | Rechenkern | `crates/processing` | Unit-Tests je Modul gegen bekannte Werte; `tests/cli.rs` ruft jeden Befehl an einer synthetischen Baustelle auf |
-| Server | `crates/server` | Unit-Tests je Modul; `tests/api.rs` mit echtem Router, SQLite und Rechenkern |
-| UI | `ui/src/**/*.test.ts(x)` | Vitest und Testing Library; Server-Fehlertexte übersetzt, Gestaltungsregeln |
-| E2E | `e2e/` | Playwright gegen die Programmdatei: kompletter Aushub mit Prüfung der m³, Rollen, axe (WCAG 2.2 AA) hell und dunkel, Tastatur, Handy |
+| Server | `crates/server` | Unit-Tests je Modul; `tests/api.rs` mit echtem Router, SQLite und Rechenkern, Aufträge deterministisch mit `jobs::run_pending` |
+| UI | `ui/src/**/*.test.ts(x)` | Vitest und Testing Library; Server-Fehlertexte übersetzt, Gestaltungsregeln (`design-rules.test.ts`) |
+| E2E | `e2e/` | Playwright gegen `target/debug/fixpunkt` mit eingebetteter UI und frischem Datenverzeichnis: kompletter Aushub mit Prüfung der m³, Rollen, axe (WCAG 2.2 AA) hell und dunkel, Tastatur, Handy; Elemente nach Rolle und Name suchen |
 | Docker | CI | Image bauen, als Nicht-root starten, Health, UI, erster Admin |
+
+Rechenergebnisse werden gegen unabhängig bekannte Werte geprüft (Formel, numerische Kontrolle), nicht gegen eine
+zweite Rechnung wie im Code.
 
 ## Screenshots und Doku
 
