@@ -26,6 +26,8 @@ Eine Programmdatei mit Web-UI, ETRS89/UTM32 und DHHN2016 – ohne Cloud-Abo, auf
 [Dokumentation](https://speicherstadt.github.io/fixpunkt/) •
 [Entwicklung](#entwicklung)
 
+<sub>English: self-hosted earthwork volumes and site documentation from drone surveys for civil engineering in Germany: cut and fill per billing area with excavators and vegetation filtered out, as-built vs. design grade, progress across flights, quantity take-off with prices, delivery notes and GAEB X31, plus photos, control points, utilities and DXF plans in place. A single binary with a web UI, using German official coordinates (ETRS89/UTM32, DHHN2016). The app is in German and English; the [documentation](https://speicherstadt.github.io/fixpunkt/) is in German.</sub>
+
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-ansicht-dunkel.png">
   <img src="docs/screenshot-ansicht.png" alt="Reiter Ansicht einer Baustelle in Fixpunkt: Höhenbild, Soll/Ist-Abweichung der Sohle, Abrechnungsbereiche und ein Profil quer durch die Grube" width="900">
