@@ -66,14 +66,11 @@ WCAG 2.2 AA. Farben nur als Token, Schrift- und Symbolgrößen auf der Skala.
 
 | Schicht | Ort | Was |
 |---|---|---|
-| Rechenkern | `crates/processing` | Unit-Tests je Modul gegen bekannte Werte; `tests/cli.rs` ruft jeden Befehl an einer synthetischen Baustelle auf |
+| Rechenkern | `crates/processing` | Unit-Tests je Modul gegen unabhängig bekannte Werte (Formel, numerische Kontrolle); `tests/cli.rs` ruft jeden Befehl an einer synthetischen Baustelle auf |
 | Server | `crates/server` | Unit-Tests je Modul; `tests/api.rs` mit echtem Router, SQLite und Rechenkern, Aufträge deterministisch mit `jobs::run_pending` |
 | UI | `ui/src/**/*.test.ts(x)` | Vitest und Testing Library; Server-Fehlertexte übersetzt, Gestaltungsregeln (`design-rules.test.ts`) |
 | E2E | `e2e/` | Playwright gegen `target/debug/fixpunkt` mit eingebetteter UI und frischem Datenverzeichnis: kompletter Aushub mit Prüfung der m³, Rollen, axe (WCAG 2.2 AA) hell und dunkel, Tastatur, Handy; Elemente nach Rolle und Name suchen |
 | Docker | CI | Image bauen, als Nicht-root starten, Health, UI, erster Admin |
-
-Rechenergebnisse werden gegen unabhängig bekannte Werte geprüft (Formel, numerische Kontrolle), nicht gegen eine
-zweite Rechnung wie im Code.
 
 ## Screenshots und Doku
 
