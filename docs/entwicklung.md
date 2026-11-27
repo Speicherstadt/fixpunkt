@@ -31,7 +31,7 @@ zensical build --strict   # wenn docs/ oder mkdocs.yml geändert
 `bun run lint` führt nach Biome auch [`checks`](https://github.com/firsttris/workflows#checks) aus (Einstellungen in
 `checks.json`): Dateien über 400 Zeilen, Seiten, die `e2e/accessibility.spec.ts` nicht öffnet, und die Texte der
 Oberfläche (beide Sprachen vollständig, alle genutzt, keiner im Code) und Kreise von Importen zwischen Modulen. Was es schon vorher gab, steht in `.checks/`;
-im Pull Request nennt `checks pr` neue oder gewachsene lange Funktionen.
+neue oder gewachsene lange Funktionen meldet im Pull Request [„PR-Regeln“](mitwirken.md#automatische-pruefungen).
 
 Der GAEB-Export wird gegen das offizielle Schema geprüft, sobald `GAEB_X31_XSD` darauf zeigt (braucht `xmllint`;
 die CI lädt das Schema von gaeb.de, lokal wird die Prüfung sonst übersprungen):
