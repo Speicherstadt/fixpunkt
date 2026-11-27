@@ -60,8 +60,7 @@ Seiteneffekte an den Rändern, Fehler als Werte. Eine Datei macht eine Sache: ab
 
 **Oberfläche:** Gestaltung wie Kontext und Belegt: Zink-Tokens als CSS-Variablen (`ui/src/styles.css`), Geist,
 eigene Komponenten im shadcn/ui-Stil auf Radix mit `cva` (`ui/src/components/ui`), lucide mit einer Linienstärke,
-WCAG 2.2 AA. Farben nur als Token, Schrift- und Symbolgrößen auf der Skala. Jeder Text der Oberfläche steht in
-`ui/messages/de.json` und `en.json` (Paraglide), keiner im Code.
+WCAG 2.2 AA. Farben nur als Token, Schrift- und Symbolgrößen auf der Skala.
 
 ## Testschichten
 
