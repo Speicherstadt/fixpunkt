@@ -36,6 +36,7 @@ Technik und Abläufe wie in den anderen Projekten, nicht aus dem Gedächtnis:
 - `firsttris/haul`: Rust-Server mit eingebetteter UI (`crates/haul/src/ui.rs`, `build.rs`, `auth.rs`, `events.rs`,
   `db.rs`), `docker/Dockerfile`, `release.yml` (statische musl-Programmdateien), `scripts/install.sh`.
 - `firsttris/snapraid-ui`: UI mit shadcn/ui, Tailwind 4, Paraglide JS (`apps/web`).
+- `firsttris/haben`: Doku mit Zensical (`mkdocs.yml`, `requirements-docs.txt`, `.github/workflows/docs.yml`).
 
 ## Nie
 
