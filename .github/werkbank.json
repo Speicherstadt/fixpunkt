@@ -1,0 +1,17 @@
+{
+  "$kommentar": "Einstellungen für die Werkbank (https://github.com/Speicherstadt/werkbank); Standards in werkzeug/konfiguration.ts",
+  "board": null,
+  "anleitung": "https://speicherstadt.github.io/fixpunkt/mitwirken.html#wenn-eine-pruefung-anschlaegt",
+  "uebernehmen": "https://speicherstadt.github.io/fixpunkt/mitwirken.html#etwas-uebernehmen",
+  "konventionen": "docs/entwicklung.md, Konventionen",
+  "$code": "wie fileSize.include in checks.json; Funktionslängen zählt die Werkbank nur in JavaScript und TypeScript",
+  "code": ["^crates/[^/]+/src/.*\\.rs$", "^ui/src/.*\\.[cm]?[jt]sx?$"],
+  "funktionen": ["^ui/src/.*\\.[cm]?[jt]sx?$"],
+  "$heikel": "Rechenkern und Mengen (gegen unabhängig bekannte Werte geprüft), Abrechnung mit Preisen und GAEB",
+  "heikel": [
+    "^crates/processing/src/",
+    "^crates/server/src/compute/",
+    "^crates/server/src/billing/"
+  ],
+  "grosseDateien": ".checks/large-files.txt"
+}
